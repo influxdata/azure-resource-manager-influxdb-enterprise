@@ -1,0 +1,57 @@
+{
+    "min_packer_version": "0.12.0",
+    "variables": {
+        "subscription_id": "{{env `AZURE_SUBSCRIPTION_ID`}}",
+        "region": "centralus",
+        "telegraf_version": "1.12.6",
+        "influxdb_version": "1.7.9",
+        "chronograf_version": "1.7.14",
+        "kapacitor_version": "1.5.3"
+    },
+    "builders": [
+        {
+            "name": "azure",
+            "type": "azure-arm",
+            "subscription_id": "{{user `project_id`}}",
+            "capture_container_name": "influxdb-monitor-{{ user `influxdb_version` | clean_image_name}}",
+            "capture_name_prefix": "packer",
+            "resource_group_name": "InfluxDBEnterpriseMarketplace",
+            "storage_account": "virtualmachines",
+            "os_type": "Linux",
+            "image_publisher": "Canonical",
+            "image_offer": "UbuntuServer",
+            "image_sku": "18.04-LTS",
+            "azure_tags": {
+                "purpose": "marketplace-dev"
+            },
+            "location": "centralus",
+            "vm_size": "Standard_A2",
+            "ssh_username": "ubuntu"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "../config",
+            "destination": "/tmp"
+        },
+        {
+            "type": "file",
+            "source": "./scripts",
+            "destination": "/tmp"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum update -y -q",
+                "while [[ `ps -ef | grep 'yum' | grep -v 'grep' | wc` -gt 0 ]]; do sleep 10; done",
+                "sudo /tmp/scripts/setup-influxdb-monitor.sh {{ user `influxdb_version` }}",
+                "sudo /tmp/scripts/setup-telegraf.sh {{ user `telegraf_version` }} monitor",
+                "sudo /tmp/scripts/setup-chronograf.sh {{ user `chronograf_version` }}",
+                "sudo /tmp/scripts/setup-kapacitor.sh {{ user `kapacitor_version` }}",
+                "sudo rm -r /tmp/scripts /tmp/config",
+                "rm .ssh/authorized_keys ; sudo rm /root/.ssh/authorized_keys"
+            ]
+        }
+    ]
+}
