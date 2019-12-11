@@ -1,4 +1,6 @@
-# azure-resource-manager-influxdb-enterprise
+# InfluxDB Enterprise Azure Resource Manager Templates
+
+__Note: These templates are still under active development. They are not recommended for production.__
 
 ## Publishing a new image
 
