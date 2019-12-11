@@ -15,13 +15,13 @@
             "subscription_id": "{{user `subscription_id`}}",
             "client_id": "c2801e14-85e5-4653-aff9-7c5a2989c09c",
             "client_secret": "03b80059-e53e-4ecc-90c4-c753623f6b17",
-            "tenant_id": "06eda7f0-5a03-46fa-91f2-1234dc57a104",
 
-            "managed_image_resource_group_name": "partnerEng",
-            "managed_image_name": "InfluxDBEnterpriseData{{isotime \"200601020304\"}}",
-
-            "managed_image_os_disk_snapshot_name": "OSDiskData{{isotime \"200601020304\"}}",
-            "managed_image_data_disk_snapshot_prefix": "DataDiskData{{isotime \"200601020304\"}}",
+            "capture_container_name": "marketplace",
+            "capture_name_prefix": "Data{{isotime \"200601020304\"}}",
+            "resource_group_name": "partnerEng",
+            "storage_account": "influxdata",
+            "vm_size": "Standard_B2s",
+            "location": "southcentralus",
 
             "os_type": "Linux",
             "image_publisher": "Canonical",
@@ -31,8 +31,6 @@
             "azure_tags": {
                 "purpose": "marketplace-dev"
             },
-            "location": "Central US",
-            "vm_size": "Standard_A2",
             "ssh_username": "ubuntu"
         }
     ],

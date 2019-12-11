@@ -11,19 +11,27 @@
         {
             "name": "azure",
             "type": "azure-arm",
-            "subscription_id": "{{user `project_id`}}",
-            "capture_container_name": "influxdb-enterprise-{{user `listing_type`}}-meta-{{ user `influxdb_version` | clean_image_name}}",
-            "capture_name_prefix": "packer",
-            "resource_group_name": "InfluxDBEnterpriseMarketplace",
-            "storage_account": "virtualmachines",
+
+            "subscription_id": "{{user `subscription_id`}}",
+            "client_id": "c2801e14-85e5-4653-aff9-7c5a2989c09c",
+            "client_secret": "03b80059-e53e-4ecc-90c4-c753623f6b17",
+            "tenant_id": "06eda7f0-5a03-46fa-91f2-1234dc57a104",
+
+            "managed_image_resource_group_name": "partnerEng",
+            "managed_image_name": "InfluxDBEnterpriseMeta{{isotime \"200601020304\"}}",
+
+            "managed_image_os_disk_snapshot_name": "OSDiskMeta{{isotime \"200601020304\"}}",
+            "managed_image_data_disk_snapshot_prefix": "DataDiskMeta{{isotime \"200601020304\"}}",
+
             "os_type": "Linux",
             "image_publisher": "Canonical",
             "image_offer": "UbuntuServer",
             "image_sku": "18.04-LTS",
+
             "azure_tags": {
                 "purpose": "marketplace-dev"
             },
-            "location": "centralus",
+            "location": "Central US",
             "vm_size": "Standard_A2",
             "ssh_username": "ubuntu"
         }
@@ -34,20 +42,7 @@
             "pause_before": "30s",
             "inline": [
                 "sudo DEBIAN_FRONTEND=noninteractive apt-get update -y",
-                "sudo apt-get install -y jq google-cloud-sdk"
-            ]
-        },
-        {
-            "type": "file",
-            "source": "../licenses/licenses.tar.gz",
-            "destination": "/tmp/licenses.tar.gz"
-        },
-        {
-            "type": "shell",
-            "inline": [
-                "sudo mkdir /usr/local/share/licenses",
-                "sudo tar xvzf /tmp/licenses.tar.gz --directory /usr/local/share/licenses/",
-                "rm /tmp/licenses.tar.gz"
+                "sudo apt-get install -y jq"
             ]
         },
         {
@@ -66,7 +61,8 @@
                 "sudo /tmp/scripts/setup-influxdb-meta.sh {{ user `influxdb_version` }}",
                 "sudo /tmp/scripts/setup-telegraf.sh {{ user `telegraf_version` }} data",
                 "sudo rm -r /tmp/scripts /tmp/config",
-                "rm .ssh/authorized_keys ; sudo rm /root/.ssh/authorized_keys"
+                "rm .ssh/authorized_keys ; sudo rm /root/.ssh/authorized_keys",
+                "sudo waagent -deprovision+user"
             ]
         }
     ]
