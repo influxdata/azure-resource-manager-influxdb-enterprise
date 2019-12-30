@@ -1,5 +1,5 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2019-09-01/deploymentTemplate.json#",
+    "$schema": "http://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
@@ -154,10 +154,10 @@
                         }
                     },
                     "imageReference": {
-                        "publisher": "InfluxData",
+                        "publisher": "influxdata",
                         "offer": "influxdb-enterprise-data-test",
                         "sku": "influxdb-enterprise-data-test",
-                        "version": "latest"
+                        "version": "1.7.90"
                     },
                     "copy": [
                         {

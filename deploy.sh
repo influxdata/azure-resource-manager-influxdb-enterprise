@@ -16,7 +16,7 @@ readonly deployment_name="${1}"
 readonly region="${2:-$(az configure --list-defaults --query "[?starts_with(name, 'location')].value" --output tsv)}"
 readonly group="${3:-$(az configure --list-defaults --query "[?starts_with(name, 'group')].value" --output tsv)}"
 
-readonly template="packer/vm-test.json"
+readonly template="arm-templates/vm-test.json"
 
 # az group create --name "${group}" --location "${region}" --output table
 
