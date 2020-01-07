@@ -11,20 +11,20 @@ This repository consists of:
 
 ### Command line deploy
 
-Begin by making sure your logged into your azure account with your subscription ID.
+Begin by making sure you're logged into your azure account with your subscription ID.
 
 ```shell
 $ az login
 ```
 
-You can use the `deploy.sh` script to publish the template. The script will prompt you for a resourceGroup, if the group 
+You can use the `deploy.sh` script to publish the template. The script will prompt you for a resourceGroup, if the group
 does not exit it will be created.
 
 ```shell
 $ ./deploy.sh
 ```
 
-After you're initial deployment, you can continue to publish Incremental deployments using one of the following commands.
+After the initial creation, you can continue to publish *Incremental* deployments using one of the following commands.
 You can published this repo template directly using `--template-uri`
 
 > az group deployment create --template-uri https://raw.githubusercontent.com/chobbs/ARM-Templates/master/src/mainTemplate.json --verbose --resource-group "${group}" --mode Incremental --parameters parameters/password.parameters.json
