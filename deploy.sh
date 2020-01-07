@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
-
 # If this script fails, check whether the current Azure CLI subscription ID the
 # same one used to created the managed disk. The following command will show the
 # current subscription.
@@ -12,19 +10,37 @@ set -euxo pipefail
 #
 # az account set --subscription <subscription-id>
 
-readonly deployment_name="${1}"
-readonly region="${2:-$(az configure --list-defaults --query "[?starts_with(name, 'location')].value" --output tsv)}"
-readonly group="${3:-$(az configure --list-defaults --query "[?starts_with(name, 'group')].value" --output tsv)}"
+# check if resource group exist, if not proceed with creating a resource group for this deployment
 
-readonly template="arm-templates/vm-test.json"
 
-# az group create --name "${group}" --location "${region}" --output table
+echo "Enter the Resource Group name:" &&
+read resourceGroupName &&
+echo "Enter the location [ie centralus, westus]:" &&
+read location &&
+
+rgvar="$((az group show --name $resourceGroupName 2>&1) | grep 'could not be found')"
+
+if [ -n "$rgvar" ]
+then
+      echo -e "\nThe resourceGroup $resourceGroupName does not exist and will be created\n"
+      az group create --name "${resourceGroupName}" --location "${location}" --output table
+
+else
+      echo -e "Confirmed resourceGroup $resourceGroupName exist and will be used\n"
+fi
+
+
+# accept the legal terms for the influxdata offer skus (only needs ti be run once for your sunscritopn ID)
+
+echo -e "\nRuning Azure commands to accepting 'Legal Terms' for InfliuxData offer data-node sku\n" 
+az vm image terms accept --urn influxdata:influxdb-enterprise-vm:influxdb-enterprise-data-byol:1.7.90
+
+echo -e "\nRuning Azure commands to accepting 'Legal Terms' for InfliuxData offer meta-node sku\n" 
+az vm image terms accept --urn influxdata:influxdb-enterprise-vm:influxdb-enterprise-meta-byol:1.7.90
 
 az group deployment create \
-    --name "${deployment_name}" \
-    --resource-group "${group}" \
-    --mode Incremental \
-    --verbose \
-    --template-file "${template}" \
-    --parameters @parameters/parameters.json \
-    --output table
+--template-file src/mainTemplate.json \
+--verbose \
+--resource-group "${resourceGroupName}" \
+--mode Incremental \
+--parameters parameters/password.parameters.json

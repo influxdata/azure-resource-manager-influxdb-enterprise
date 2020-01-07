@@ -1,90 +1,52 @@
-# InfluxDB Enterprise Azure Resource Manager Templates
+# InfluxEnterprise Azure Marketplace offering
 
 __Note: These templates are still under active development. They are not recommended for production.__
 
 ## Publishing a new image
 
-### Generate a SAS
+This repository consists of:
 
-A Shared Access Signature (SAS) URL is required by the Partner Portal to import a VHD ([official guide](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-get-sas-uri)).
-Packer is used to build the images and will only create managed disks.
-In order to create the SAS URL, the underlying VHD of the managed disk needs to be extracted and put in a storage account.
-The  script that handles the steps in [this guide](https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-linux-cli-sample-copy-managed-disks-vhd) provides instructions on how to extract the VHD and create the SAS URL.
+* [src/mainTemplate.json](src/mainTemplate.json) - Entry Azure Resource Management (ARM) template.
+* [src/createUiDefinition](src/createUiDefinition.json) - UI definition file for our market place offering. This file produces an output JSON that the ARM template can accept as input parameters JSON.
 
-## Links
+### Command line deploy
 
-## Video explanation of Azure Application development
-https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/azure-applications/cpp-create-technical-assets
-https://www.youtube.com/watch?time_continue=1&v=GdcmjIiK0Vk
+Begin by making sure your logged into your azure account with your subscription ID.
 
-## Azure portal management
-[partner portal](https://cloudpartner.azure.com/#alloffers)
-[old version](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal-orig/cloud-partner-portal-getting-started-with-the-cloud-partner-portal)
-[current version](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/portal-manage/cpp-portal-management)
+```shell
+$ az login
+```
 
-## VM instructions
-https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-virtual-machine-offer
-https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-create-technical-assets#52-get-the-shared-access-signature-uri-for-your-vm-images
-[SAS URL instructions](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-get-sas-uri)
+You can use the `deploy.sh` script to publish the template. The script will prompt you for a resourceGroup, if the group 
+does not exit it will be created.
 
-## VM Security
-https://docs.microsoft.com/en-us/azure/security/fundamentals/azure-marketplace-images
+```shell
+$ ./deploy.sh
+```
 
-## Ubuntu on Azure
-[Prepare Ubuntu for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-upload-ubuntu)
-[Ubuntu Bionic 18.04 VHDs for Azure](https://cloud-images.ubuntu.com/bionic/current/)
+After you're initial deployment, you can continue to publish Incremental deployments using one of the following commands.
+You can published this repo template directly using `--template-uri`
 
-## Instance metadata
-https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#getting-more-information-about-the-vm-during-support-case
-[issue to add metadata support to go SDK](https://github.com/Azure/azure-sdk-for-go/issues/982)
-[issue to document metadata rest api spec](https://github.com/Azure/azure-rest-api-specs/issues/4408)
+> az group deployment create --template-uri https://raw.githubusercontent.com/chobbs/ARM-Templates/master/src/mainTemplate.json --verbose --resource-group "${group}" --mode Incremental --parameters parameters/password.parameters.json
 
-## Packer docs
-https://www.packer.io/docs/builders/azure-arm.html#storage_account
-https://docs.microsoft.com/en-us/azure/virtual-machines/linux/build-image-with-packer
-[Packer Azure examples](https://github.com/hashicorp/packer/tree/master/examples/azure)
-[Deprecation issue](https://github.com/hashicorp/packer/issues/8217)
-[Issue](https://github.com/hashicorp/packer/issues/6752)
-[Azure docs issue](https://github.com/MicrosoftDocs/azure-docs/issues/37716)
-[Shared Image Gallery](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/shared-image-galleries)
+or if your are executing commands from a clone of this repo using `--template-file`
 
-## Scripts
-[Export/Copy a managed disk to a storage account using the Azure CLI](https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-linux-cli-sample-copy-managed-disks-vhd?toc=%2fcli%2fmodule%2ftoc.json)
-[Deploy a virtual machine from the Azure Marketplace](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-deploy-vm-marketplace)
-[Create a managed disk from a snapshot with PowerShell](https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-windows-powershell-sample-create-managed-disk-from-snapshot)
-[create managed disk from snapshot and attach it to the VM](https://github.com/KacperMucha/random-powershell-scripts/blob/master/New-AzureRmVmFromSnapshot.ps1)
-[Copy a managed disk](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/disks-upload-vhd-to-managed-disk-cli#copy-a-managed-disk)
-[Export/Copy the VHD of a managed disk to a storage account in different region with PowerShell](https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-windows-powershell-sample-copy-managed-disks-vhd)
+> az group deployment create --template-file src/mainTemplate.json --verbose --resource-group "${group}" --mode Incremental --parameters parameters/password.parameters.json
 
-# ARM templates
+`<group>` in these last two examples refers to the resource group created by the deploy.sh script.
 
-## AWS to Azure mappings
-https://docs.microsoft.com/en-us/azure/architecture/aws-professional/services
+**NOTE**
 
-## Azure Applications Solution Template Offer Publishing Guide
-https://docs.microsoft.com/en-us/azure/marketplace/marketplace-solution-templates
+The `--parameters` can specify a different location for the items that get provisioned inside of the resource group. Make sure these are the same prior to deploying if you need them to be. Omitting location from the parameters file is another way to make sure the resources get deployed in the same location as the resource group.
 
-## ARM Quickstarts
-https://github.com/Azure/azure-quickstart-templates
-https://github.com/couchbase-partners/azure-resource-manager-couchbase/tree/master/marketplace
+### Web based deploy
 
-## ARM Template Best Practices
-https://docs.microsoft.com/en-us/azure/azure-resource-manager/template-best-practices
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fchobbs%2FARM-Templates%2Fmaster%2Fsrc%2FmainTemplate.json" target="_blank">
+   <img alt="Deploy to Azure" src="http://azuredeploy.net/deploybutton.png"/>
+</a>
 
-## How to managed disks in ARM
-https://docs.microsoft.com/en-us/azure/virtual-machines/windows/using-managed-disks-template-deployments
+The above button will take you to the autogenerated web based UI based on the parameters from the ARM template.
 
-# Post launch
+It should be pretty self explanatory except for password which only accepts a json object. Luckily the web UI lets you paste json in the text box. Here's an example:
 
-## Customer usage attribution (GUID)
-https://docs.microsoft.com/en-us/azure/marketplace/azure-partner-customer-usage-attribution
-
-## Microsoft Partner portal
-https://partner.microsoft.com/en-US/
-
-## Azure Marketplace forum
-https://www.microsoftpartnercommunity.com/t5/Microsoft-AppSource-and-Azure/bd-p/2222
-
-## Azure Marketplace support
-https://support.microsoft.com/en-us/supportforbusiness/requests
-
+> {"sshPublicKey":null,"authenticationType":"password", "password":"Password1234"}
