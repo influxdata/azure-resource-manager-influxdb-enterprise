@@ -11,7 +11,7 @@ This repository consists of:
 
 ### Command line deploy
 
-Begin by making sure you're logged into your azure account with your subscription ID.
+Begin by making sure you're logged into your azure account subscription.
 
 ```shell
 $ az login
