@@ -1,0 +1,9 @@
+{
+	"loadBalancerType":{"value":"external"},
+	"vmSizeDataNodes":{"value":"Standard_D1"},
+	"vmDataNodeCount":{"value":2},
+	"vmSizeMetaNodes":{"value":"Standard_D1"},
+	"password":{"value":{"password":null,"sshPublicKey":"ssh-rsa <redacted>","authenticationType":"sshPublicKey"}},
+	"adminUsername":{"value":"chobbs"},
+	"location":{"value":"centralus"}
+}
