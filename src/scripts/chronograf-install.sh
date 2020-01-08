@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# License: https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/LICENSE.txt
+# License: https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/LICENSE
 #
 # Craig Hobbs, InfluxData Inc.
 # Initial Version
