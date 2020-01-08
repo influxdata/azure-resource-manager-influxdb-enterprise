@@ -173,9 +173,20 @@
             "diskSizeGB": 32,
             "managedDisk": {
             "storageAccountType": "Standard_LRS"
-          },
-            "osType": "Linux"
           }
+        },
+          "dataDisks": [
+          {
+            "lun": 0,
+            "diskSizeGB": 32,
+            "name": "[concat('metanode-', 'vm', copyindex(), '-datadisk')]",
+            "caching": "None",
+            "createOption": "Empty",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+              }
+            }
+          ]
         },
         "networkProfile": {
           "networkInterfaces": [

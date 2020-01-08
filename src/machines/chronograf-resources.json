@@ -188,7 +188,7 @@
             "version": "latest"
           },
            "osDisk": {
-            "name": "[concat('chronograf-', 'vm', copyindex(), '-osdisk')]",
+            "name": "[concat(variables('vmName'), '-osdisk')]",
             "createOption": "FromImage",
             "diskSizeGB": 32,
             "managedDisk": {
@@ -204,7 +204,19 @@
             }
           ]
         }
-      }
+      },
+        "resources": [
+          {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmName'),'/installchronograf')]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+              ],
+            "properties": "[parameters('osSettings').extentionSettings.chronograf]"
+        }
+      ]
     }
   ],
   "outputs": {}

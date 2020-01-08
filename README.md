@@ -9,6 +9,56 @@ This repository consists of:
 * [src/mainTemplate.json](src/mainTemplate.json) - Entry Azure Resource Management (ARM) template.
 * [src/createUiDefinition](src/createUiDefinition.json) - UI definition file for our market place offering. This file produces an output JSON that the ARM template can accept as input parameters JSON.
 
+
+## ARM template
+
+The output from the market place UI is fed directly to the ARM template. You can use the ARM template on its own without going through the market place.
+
+### Parameters
+
+<table>
+  <tr><th>Parameter</td><th>Type</th><th>Description</th></tr>
+  <tr><td>loadBalancerType</td><td>string</td>
+    <td>Whether the loadbalancer should be <code>internal</code> or <code>external</code>
+    </td></tr>
+  <tr><td>chronograf</td><td>string</td>
+    <td>Either <code>Yes</code> or <code>No</code> provision an extra machine with a public IP that
+    has Chronograf installed on it.
+    </td></tr>
+
+  <tr><td>jumpbox</td><td>string</td>
+    <td>Either <code>Yes</code> or <code>No</code> Optionally add a virtual machine to the deployment which you can use to connect and manage virtual machines on the internal network.
+    </td></tr>
+
+  <tr><td>vmSizeDataNodes</td><td>string</td>
+    <td>Azure VM size of the data nodes see <a href="https://github.com/chobbs/ARM-Templates/blob/master/src/mainTemplate.json#L69">this list for supported sizes</a>
+    </td></tr>
+
+  <tr><td>vmDataNodeCount</td><td>int</td>
+    <td>The number of data nodes you wish to deploy. Should be greater than 0.
+    </td></tr>
+
+  <tr><td>vmDataNodeDiskSize</td><td>string</td>
+    <td>The disk size of each attached disk. Choose <code>1TiB</code>, <code>512GiB</code>, <code>256GiB</code>, <code>128GiB</code>, <code>64GiB</code> or <code>32GiB</code>.
+    For Premium Storage, disk sizes equate to <a href="https://docs.microsoft.com/en-us/azure/storage/storage-premium-storage#premium-storage-disks-limits">P80, P70, P60, P50, P40, P30, P20, P15, P10 and P6</a>
+    storage disk types, respectively.
+    </td>
+
+  <tr><td>adminUsername</td><td>string</td>
+    <td>Admin username used when provisioning virtual machines
+    </td></tr>
+
+  <tr><td>password</td><td>object</td>
+    <td>Password is a complex object parameter, we support both authenticating through username/pass or ssh keys. See the <a href="https://github.com/Mpdreamz/ARM-Templates/tree/master/parameters"> parameters example folder</a> for an example of what to pass for either option.
+    </td></tr>
+
+  <tr><td>location</td><td>string</td>
+    <td>The location where to provision all the items in this template. Defaults to the special <code>ResourceGroup</code> value which means it will inherit the location
+    from the resource group see <a href="https://github.com/Mpdreamz/ARM-Templates/blob/master/src/mainTemplate.json#L197">this list for supported locations</a>.
+    </td></tr>
+
+</table>
+
 ### Command line deploy
 
 Begin by making sure you're logged into your azure account subscription.

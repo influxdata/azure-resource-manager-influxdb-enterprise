@@ -162,7 +162,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[concat('jumpbox-', 'vm', copyindex(), '-osdisk')]",
+            "name": "[concat('jumpbox-', 'vm', '-osdisk')]",
             "createOption": "FromImage",
             "diskSizeGB": 32,
             "managedDisk": {
