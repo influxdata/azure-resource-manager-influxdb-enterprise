@@ -1,0 +1,219 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Base uri of resources"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin username used when provisioning virtual machines"
+      }
+    },
+    "password": {
+      "type": "object",
+      "metadata": {
+        "description": "Admin password used when provisioning virtual machines"
+      }
+    },
+    "storageSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Storage Account Settings"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location where resources will be provisioned"
+      }
+    },
+    "influxTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "influxdata"
+      },
+      "metadata": {
+        "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
+      }
+    },
+    "subnet": {
+      "type": "object",
+      "metadata": {
+        "description": "The name of the subnet to deploy resources into"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A1",
+      "metadata": {
+        "description": "Size of the InfluxEnterprise data nodes"
+      }
+    },
+    "vmCount": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Number of InfluxEnterpirse data nodes"
+      }
+    },
+    "osSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "OS settings to deploy on"
+      }
+    },
+    "namespace": {
+      "type": "string",
+      "metadata": {
+        "description": "The namespace for resources created by this template"
+      }
+    },
+    "lbBackendPools": {
+      "type": "object",
+      "metadata": {
+        "description": "loadBalancerBackendAddressPools config object"
+      }
+    }
+  },
+  "variables": {
+    "subnetRef": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('subnet').vnet), '/subnets/', parameters('subnet').name)]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2019-03-01",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[concat('datanode', '-set')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "platformUpdateDomainCount": 20,
+        "platformFaultDomainCount": 3
+      },
+      "sku": {
+        "name": "Aligned"
+    }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat('dataNodeNic', copyindex())]",
+      "location": "[parameters('location')]",
+      "copy": {
+        "name": "[concat('dataNodeNic','nicLoop')]",
+        "count": "[parameters('vmCount')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "loadBalancerBackendAddressPools": "[parameters('lbBackendPools').backendPools]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[concat('osProfileData', copyindex())]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-05-01",
+      "copy": {
+        "name": "osProfileLoop",
+        "count": "[parameters('vmCount')]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(parameters('_artifactsLocation'), 'partials/osProfile-resources.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "adminUserName": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "password": {
+            "value": "[parameters('password')]"
+          },
+          "computerName": {
+            "value": "[concat(parameters('namespace'), '-vm', copyindex())]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2019-03-01",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('namespace'), 'vm', copyindex())]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "provider": "[toUpper(parameters('influxTags').provider)]"
+      },
+      "plan": {
+        "name": "influxdb-enterprise-data-byol",
+        "product": "influxdb-enterprise-vm",
+        "publisher": "influxdata"
+      },
+      "copy": {
+        "name": "[concat(parameters('namespace'), 'virtualMachineLoop')]",
+        "count": "[parameters('vmCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', 'dataNodeNic', copyindex())]",
+        "[concat('Microsoft.Compute/availabilitySets/', 'datanode-set')]",
+        "[concat('Microsoft.Resources/deployments/', 'osProfileData', copyindex())]"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', 'datanode-set')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileData', copyindex()), '2019-05-01').outputs.osProfile.value]",
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "influxdata",
+            "offer": "influxdb-enterprise-vm",
+            "sku": "influxdb-enterprise-data-byol",
+            "version": "latest"
+          },
+            "osDisk": {
+              "name": "[concat(parameters('namespace'), '-vm', copyindex(), '-osdisk')]",
+              "createOption": "FromImage",
+              "diskSizeGB": 32,
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+            }
+          },
+          "dataDisks": [
+          {
+            "lun": 0,
+            "diskSizeGB": "[parameters('storageSettings').diskSize]",
+            "name": "[concat(parameters('namespace'), '-vm', copyindex(), '-datadisk')]",
+            "caching": "None",
+            "createOption": "Empty",
+            "managedDisk": {
+              "storageAccountType": "[parameters('storageSettings').accountType]"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('dataNodeNic', copyindex()))]"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
