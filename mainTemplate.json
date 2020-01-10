@@ -259,7 +259,7 @@
     "dataLBSettings7": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings8": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings9": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings": "[variables(concat('dataLBSettings', 0))]",
+    "dataLBSettings": "[variables('lbBackEndPoolsAdded')]",
     "dataSkuSettings": {
       "Standard_D1_v2": {
         "storageAccountType": "Standard_LRS"
