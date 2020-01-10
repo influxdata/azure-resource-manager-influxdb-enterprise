@@ -28,19 +28,19 @@ help()
 {
     echo "This script finishes the datanode configuration for the  InfluxEnterprise cluster on Ubuntu"
     echo "Parameters:"
-    echo "-n elasticsearch cluster name"
-    echo "-v elasticsearch version 1.5.0"
+    echo "-n influxenterprise cluster name"
+    echo "-v influxenterprise version 1.5.0"
 
-    echo "-d cluster uses dedicated masters"
+    echo "-d cluster uses dedicated metanodes"
     echo "-Z <number of nodes> hint to the install script how many data nodes we are provisioning"
 
     echo "-A admin password"
     echo "-R read password"
-    echo "-K kibana user password"
-    echo "-S kibana server password"
+    echo "-K chronograf user password"
+    echo "-S chronograf server password"
 
     echo "-x configure as a dedicated master node"
-    echo "-y configure as client only node (no master, no data)"
+    echo "-y configure as client only node (no metanode, no data)"
     echo "-z configure as data node (no master)"
     echo "-l install plugins"
 

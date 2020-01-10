@@ -464,11 +464,11 @@
                 }
               },
               {
-                "name": "vmSizeKibana",
+                "name": "vmSizeChronograf",
                 "type": "Microsoft.Compute.SizeSelector",
                 "label": "Chronograf VM size",
                 "toolTip": "Choose VM SKU, Standard D1, D2, D3",
-                "visible": "[equals(steps('externalAccessStep').kibanaSection.kibana, 'Yes')]",
+                "visible": "[equals(steps('externalAccessStep').chronografSection.chronograf, 'Yes')]",
                 "recommendedSizes": [
                   "Standard_A2_v2",
                   "Standard_A4_v2",
@@ -609,7 +609,7 @@
                 "type": "Microsoft.Common.OptionsGroup",
                 "label": "Use a jump box?",
                 "defaultValue": "No",
-                "toolTip": "A jump box allows you to connect to your cluster from a public access point like SSH. This is usually not necessary if Kibana is installed, since Kibana itself acts as a jump box.",
+                "toolTip": "A jump box allows you to connect to your cluster from a public access point like SSH. This is usually not necessary if Chronograf is installed, since Chronograf itself acts as a jump box.",
                 "constraints": {
                   "allowedValues": [
                     {
@@ -652,7 +652,7 @@
       "loadBalancerInternalSku": "Basic",
       "loadBalancerExternalSku": "Basic",
       "chronograf": "[steps('externalAccessStep').chronografSection.chronograf]",
-      "vmSizeKibana": "[steps('externalAccessStep').kibanaSection.vmSizeKibana]",
+      "vmSizeChronograf": "[steps('externalAccessStep').chronografaSection.vmSizeChronograf]",
       "logstash": "[steps('externalAccessStep').logstashSection.logstash]",
       "vmSizeLogstash": "[steps('externalAccessStep').logstashSection.vmSizeLogstash]",
       "vmLogstashCount": "[steps('externalAccessStep').logstashSection.vmLogstashCount]",

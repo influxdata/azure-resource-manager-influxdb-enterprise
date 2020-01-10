@@ -185,7 +185,7 @@
           {
             "lun": 0,
             "diskSizeGB": 32,
-            "name": "[concat('metanode-', 'vm', copyindex(), '-datadisk')]",
+            "name": "[concat(parameters('namespace'),'-vm', copyindex(), '-datadisk')]",
             "caching": "None",
             "createOption": "Empty",
             "managedDisk": {
@@ -201,7 +201,20 @@
             }
           ]
         }
-      }
+      },
+         "resources": [
+          {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('namespace'),'-vm',copyindex(), '/autopartition')]",
+            "apiVersion": "2019-03-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex())]"
+              ],
+            "properties": "[parameters('osSettings').extentionSettings.meta]"
+        }
+      ]
     }
-  ]
+  ],
+      "outputs": {}
 }

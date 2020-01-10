@@ -4,7 +4,7 @@
 #
 # Install Chronorgaf InfluxEnterprise ARM template cluster
 # Initial Version
-#
+
 
 #########################
 # Logging func

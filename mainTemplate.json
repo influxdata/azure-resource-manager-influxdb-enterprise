@@ -100,13 +100,6 @@
         "description": "Size of the InfluxEnterprise meta nodes, 3 of these will be provisioned"
       }
     },
-    "vmClientNodeCount": {
-      "type": "int",
-      "defaultValue": 0,
-      "metadata": {
-        "description": "Number of IinfluxEnterprise client nodes to provision (Setting this to zero puts the data nodes on the load balancer)"
-      }
-    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -149,7 +142,6 @@
   },
   "variables": {
     "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), 'partials/shared-resources.json')]",
-    "clientPre": "[split(string(parameters('vmClientNodeCount')), '')[0]]",
     "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), 'machines/meta-nodes-resources.json')]",
     "jumpboxTemplates": {
       "No": "empty/empty-resources.json",
@@ -164,7 +156,8 @@
     "commonInstallParams": "[parameters('vmDataNodeCount')]",
     "ubuntuScripts": [
       "[concat(parameters('_artifactsLocation'), 'scripts/datanodes-configure.sh')]",
-      "[concat(parameters('_artifactsLocation'), 'scripts/chronograf-install.sh')]"
+      "[concat(parameters('_artifactsLocation'), 'scripts/chronograf-install.sh')]",
+      "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh')]"
     ],
     "ubuntuSettings": {
       "imageReference": {
@@ -181,7 +174,10 @@
           "typeHandlerVersion": "2.0",
           "autoUpgradeMinorVersion": true,
           "settings": {
-            "fileUris": "[variables('ubuntuScripts')]"
+            "fileUris": [
+              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh')]"
+                    ],
+                "commandToExecute": "bash autopart.sh"
           }
         },
         "data": {
@@ -190,7 +186,10 @@
           "typeHandlerVersion": "2.0",
           "autoUpgradeMinorVersion": true,
           "settings": {
-            "fileUris": "[variables('ubuntuScripts')]"
+            "fileUris": [
+              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh')]"
+                    ],
+                "commandToExecute": "bash autopart.sh"
           }
         },
         "chronograf": {
@@ -260,7 +259,7 @@
     "dataLBSettings7": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings8": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings9": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings": "[variables(concat('dataLBSettings', variables('clientPre')))]",
+    "dataLBSettings": "[variables(concat('dataLBSettings', 0))]",
     "dataSkuSettings": {
       "Standard_D1_v2": {
         "storageAccountType": "Standard_LRS"

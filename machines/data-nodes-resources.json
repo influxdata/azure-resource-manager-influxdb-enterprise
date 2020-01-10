@@ -98,7 +98,7 @@
     }
     },
     {
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2019-04-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat('dataNodeNic', copyindex())]",
       "location": "[parameters('location')]",
@@ -151,7 +151,7 @@
     {
       "apiVersion": "2019-03-01",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('namespace'), 'vm', copyindex())]",
+      "name": "[concat(parameters('namespace'), '-vm', copyindex())]",
       "location": "[parameters('location')]",
       "tags": {
         "provider": "[toUpper(parameters('influxTags').provider)]"
@@ -213,7 +213,20 @@
             }
           ]
         }
+        },
+        "resources": [
+          {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('namespace'),'-vm',copyindex(), '/autopartition')]",
+            "apiVersion": "2019-03-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex())]"
+              ],
+            "properties": "[parameters('osSettings').extentionSettings.meta]"
+          }
+        ]
       }
-    }
-  ]
-}
+    ],
+       "outputs": {}
+  }
