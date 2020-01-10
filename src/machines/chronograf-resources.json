@@ -181,12 +181,7 @@
         },
         "osProfile": "[reference('Microsoft.Resources/deployments/osProfileChronograf', '2015-01-01').outputs.osProfile.value]",
         "storageProfile": {
-          "imageReference": {
-            "publisher": "Canonical",
-            "offer": "UbuntuServer",
-            "sku": "18.04-LTS",
-            "version": "latest"
-          },
+          "imageReference": "[parameters('osSettings').imageReference]",
            "osDisk": {
             "name": "[concat(variables('vmName'), '-osdisk')]",
             "createOption": "FromImage",
@@ -208,8 +203,8 @@
         "resources": [
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'),'/installchronograf')]",
-            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(variables('vmName'),'/installChronograf')]",
+            "apiVersion": "2019-03-01",
             "location": "[parameters('location')]",
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"

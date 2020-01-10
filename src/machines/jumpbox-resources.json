@@ -155,12 +155,7 @@
         },
         "osProfile": "[reference('Microsoft.Resources/deployments/osProfileJumpbox', '2019-05-01').outputs.osProfile.value]",
         "storageProfile": {
-          "imageReference": {
-            "publisher": "Canonical",
-            "offer": "UbuntuServer",
-            "sku": "18.04-LTS",
-            "version": "latest"
-          },
+          "imageReference": "[parameters('osSettings').imageReference]",
           "osDisk": {
             "name": "[concat('jumpbox-', 'vm', '-osdisk')]",
             "createOption": "FromImage",

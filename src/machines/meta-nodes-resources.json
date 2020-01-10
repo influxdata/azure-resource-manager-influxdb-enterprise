@@ -36,6 +36,12 @@
         "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
       }
     },
+    "namespace": {
+      "type": "string",
+      "metadata": {
+        "description": "The namespace for resources created by this template"
+      }
+    },
     "subnet": {
       "type": "object",
       "metadata": {
@@ -125,7 +131,7 @@
             "value": "[parameters('password')]"
           },
           "computerName": {
-            "value": "[concat('metanode-', 'vm', copyindex())]"
+            "value": "[concat(parameters('namespace'), '-vm', copyindex())]"
           }
         }
       }
@@ -133,7 +139,7 @@
     {
       "apiVersion": "2019-03-01",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat('metanode-', 'vm', copyindex())]",
+      "name": "[concat(parameters('namespace'), '-vm', copyindex())]",
       "location": "[parameters('location')]",
       "tags": {
         "provider": "[toUpper(parameters('influxTags').provider)]"
@@ -144,7 +150,7 @@
         "publisher": "influxdata"
       },
       "copy": {
-        "name": "meta-nodeVmLoop",
+        "name": "metanodeVmLoop",
         "count": 3
       },
       "dependsOn": [
@@ -168,7 +174,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[concat('metanode-', 'vm', copyindex(), '-osdisk')]",
+            "name": "[concat(parameters('namespace'), '-vm', copyindex(), '-osdisk')]",
             "createOption": "FromImage",
             "diskSizeGB": 32,
             "managedDisk": {
@@ -179,7 +185,7 @@
           {
             "lun": 0,
             "diskSizeGB": 32,
-            "name": "[concat('metanode-', 'vm', copyindex(), '-datadisk')]",
+            "name": "[concat(parameters('namespace'),'-vm', copyindex(), '-datadisk')]",
             "caching": "None",
             "createOption": "Empty",
             "managedDisk": {
@@ -195,7 +201,20 @@
             }
           ]
         }
-      }
+      },
+         "resources": [
+          {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('namespace'),'-vm',copyindex(), '/autopartition')]",
+            "apiVersion": "2019-03-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex())]"
+              ],
+            "properties": "[parameters('osSettings').extentionSettings.meta]"
+        }
+      ]
     }
-  ]
+  ],
+      "outputs": {}
 }
