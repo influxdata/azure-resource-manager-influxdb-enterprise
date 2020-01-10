@@ -1,9 +1,13 @@
 {
-	"loadBalancerType":{"value":"external"},
-	"vmSizeDataNodes":{"value":"Standard_D1"},
+	"_artifactsLocation":{"value":"https://raw.githubusercontent.com/chobbs/ARM-Templates/master/src/"},
+	"loadBalancerType":{"value":"internal"},
+	"jumpbox":{"value":"Yes"},
+	"chronograf":{"value":"No"},
+	"vmSizeDataNodes":{"value":"Standard_DS2_v2"},
 	"vmDataNodeCount":{"value":2},
-	"vmSizeMetaNodes":{"value":"Standard_D1"},
+	"vmDataDiskSize":{"value":"32GiB"},
+	"vmSizeMetaNodes":{"value":"Standard_D1_v2"},
 	"password":{"value":{"password":null,"sshPublicKey":"ssh-rsa <redacted>","authenticationType":"sshPublicKey"}},
-	"adminUsername":{"value":"chobbs"},
+	"adminUsername":{"value":"influxadmin"},
 	"location":{"value":"centralus"}
 }
