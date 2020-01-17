@@ -3,8 +3,9 @@
 # License: https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/LICENSE
 #
 # Install Chronorgaf InfluxEnterprise ARM template cluster
-# Initial Version
-
+#
+# 01/2020 Initial Version
+#--------------------------
 
 #########################
 # Logging func
@@ -56,7 +57,7 @@ install_chronograf()
     wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
-        log "[install_chronograf] error downloading Chronograf $CHRONOGRAF_VERSION"
+        log "err: downloading Chronograf $CHRONOGRAF_VERSION..."
         exit $EXIT_CODE
     fi
     log "[install_chronograf] downloaded Chronograf $CHRONOGRAF_VERSION"
@@ -81,7 +82,7 @@ start_systemd()
 }
 
 #########################
-# start sequence
+# Primary Install Tasks
 #########################
 
 

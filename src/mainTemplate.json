@@ -142,7 +142,7 @@
   },
   "variables": {
     "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), 'partials/shared-resources.json')]",
-    "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), 'machines/meta-nodes-resources.json')]",
+    "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), 'machines/metanodes-resources.json')]",
     "jumpboxTemplates": {
       "No": "empty/empty-resources.json",
       "Yes": "machines/jumpbox-resources.json"
@@ -153,9 +153,10 @@
       "Yes": "machines/chronograf-resources.json"
     },
     "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), variables('chronografTemplates')[parameters('chronograf')])]",
-    "commonInstallParams": "[parameters('vmDataNodeCount')]",
+    "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'))]",
+
     "ubuntuScripts": [
-      "[concat(parameters('_artifactsLocation'), 'scripts/datanodes-configure.sh')]",
+      "[concat(parameters('_artifactsLocation'), 'scripts/cluster-configure.sh')]",
       "[concat(parameters('_artifactsLocation'), 'scripts/chronograf-install.sh')]",
       "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh')]"
     ],
@@ -175,9 +176,10 @@
           "autoUpgradeMinorVersion": true,
           "settings": {
             "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh')]"
+              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh')]", 
+              "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh')]"
                     ],
-                "commandToExecute": "bash autopart.sh"
+                "commandToExecute": "bash cluster-configure.sh -m 1"
           }
         },
         "data": {
@@ -187,9 +189,23 @@
           "autoUpgradeMinorVersion": true,
           "settings": {
             "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh')]"
+              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh')]",
+              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh')]"
                     ],
-                "commandToExecute": "bash autopart.sh"
+                "commandToExecute": "[concat('bash cluster-configure.sh -d 1', variables('commonInstallParams'))]"
+          }
+        },
+        "master": {
+          "publisher": "Microsoft.Azure.Extensions",
+          "type": "CustomScript",
+          "typeHandlerVersion": "2.0",
+          "autoUpgradeMinorVersion": true,
+          "settings": {
+            "fileUris": [
+              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh')]",
+              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh')]"
+                    ],
+                "commandToExecute": "[concat('bash cluster-configure.sh -m 1 -j 1', variables('commonInstallParams'))]"
           }
         },
         "chronograf": {
@@ -223,6 +239,7 @@
     },
     "location": "[variables('locationMap')[parameters('location')]]",
     "metaNodesIpPrefix": "10.0.0.1",
+    "dataNodesIpPrefix": "10.0.1.1",
     "networkSettings": {
       "virtualNetworkName": "[parameters('virtualNetworkName')]",
       "addressPrefix": "10.0.0.0/16",
@@ -259,6 +276,7 @@
     "dataLBSettings7": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings8": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings9": "[variables('lbBackendPoolsRemoved')]",
+
     "dataLBSettings": "[variables('lbBackEndPoolsAdded')]",
     "dataSkuSettings": {
       "Standard_D1_v2": {
@@ -298,7 +316,7 @@
       "accountType": "[variables('dataSkuSettings')[parameters('vmSizeDataNodes')].storageAccountType]",
       "diskSize": "[variables('dataDiskSizes')[parameters('vmDataDiskSize')]]"
     },
-    "dataTemplateUrl": "[uri(parameters('_artifactsLocation'), 'machines/data-nodes-resources.json')]"
+    "dataTemplateUrl": "[uri(parameters('_artifactsLocation'), 'machines/datanodes-resources.json')]"
   },
   "resources": [
     {
@@ -306,7 +324,8 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2019-05-01",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'shared')]"
+        "[concat('Microsoft.Resources/deployments/', 'shared')]",
+        "[concat('Microsoft.Resources/deployments/', 'datanodes')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -396,6 +415,9 @@
           },
           "_artifactsLocation": {
             "value": "[parameters('_artifactsLocation')]"
+          },
+          "dataNodesIpPrefix": {
+            "value": "[variables('dataNodesIpPrefix')]"
           },
           "location": {
             "value": "[variables('location')]"

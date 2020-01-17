@@ -6,7 +6,7 @@
 # An set of disks to ignore from partitioning and formatting
 BLACKLIST="/dev/sda|/dev/sdb"
 # Base directory to hold the data* files
-DATA_BASE="/var/lib/influxdb"
+DATA_BASE="/influxdb"
 
 usage() {
     echo "Usage: $(basename $0) <new disk>"

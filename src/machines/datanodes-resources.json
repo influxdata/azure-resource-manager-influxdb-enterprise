@@ -47,6 +47,12 @@
         "description": "The name of the subnet to deploy resources into"
       }
     },
+    "dataNodesIpPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "IP Prefix used to append index for static addresses"
+      }
+    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_A1",
@@ -111,7 +117,8 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[concat(parameters('dataNodesIpPrefix'),copyindex())]",
               "subnet": {
                 "id": "[variables('subnetRef')]"
               },
@@ -217,13 +224,13 @@
         "resources": [
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('namespace'),'-vm',copyindex(), '/autopartition')]",
+            "name": "[concat(parameters('namespace'),'-vm',copyindex(), '/configureDatanode',copyindex())]",
             "apiVersion": "2019-03-01",
             "location": "[parameters('location')]",
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex())]"
               ],
-            "properties": "[parameters('osSettings').extentionSettings.meta]"
+            "properties": "[parameters('osSettings').extentionSettings.data]"
           }
         ]
       }

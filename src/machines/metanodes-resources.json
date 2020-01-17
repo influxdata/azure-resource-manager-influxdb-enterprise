@@ -86,7 +86,7 @@
      }
     },
     {
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2019-04-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat('metaNodeNic', copyindex())]",
       "location": "[parameters('location')]",
@@ -139,7 +139,7 @@
     {
       "apiVersion": "2019-03-01",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('namespace'), '-vm', copyindex())]",
+      "name": "[concat(parameters('namespace'), '-vm', copyindex(1))]",
       "location": "[parameters('location')]",
       "tags": {
         "provider": "[toUpper(parameters('influxTags').provider)]"
@@ -151,12 +151,12 @@
       },
       "copy": {
         "name": "metanodeVmLoop",
-        "count": 3
+        "count": 2
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', 'metaNodeNic', copyindex())]",
+        "[concat('Microsoft.Network/networkInterfaces/', 'metaNodeNic', copyindex(1))]",
         "[concat('Microsoft.Compute/availabilitySets/', 'metanode-set')]",
-        "[concat('Microsoft.Resources/deployments/', 'osProfileMeta', copyindex())]"
+        "[concat('Microsoft.Resources/deployments/', 'osProfileMeta', copyindex(1))]"
       ],
       "properties": {
         "availabilitySet": {
@@ -165,7 +165,7 @@
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
         },
-        "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta', copyindex()), '2019-05-01').outputs.osProfile.value]",
+        "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta', copyindex(1)), '2019-05-01').outputs.osProfile.value]",
         "storageProfile": {
           "imageReference": {
             "publisher": "influxdata",
@@ -174,7 +174,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[concat(parameters('namespace'), '-vm', copyindex(), '-osdisk')]",
+            "name": "[concat(parameters('namespace'), '-vm', copyindex(1), '-osdisk')]",
             "createOption": "FromImage",
             "diskSizeGB": 32,
             "managedDisk": {
@@ -185,7 +185,7 @@
           {
             "lun": 0,
             "diskSizeGB": 32,
-            "name": "[concat(parameters('namespace'),'-vm', copyindex(), '-datadisk')]",
+            "name": "[concat(parameters('namespace'),'-vm', copyindex(1), '-datadisk')]",
             "caching": "None",
             "createOption": "Empty",
             "managedDisk": {
@@ -197,21 +197,100 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('metaNodeNic', copyindex()))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('metaNodeNic', copyindex(1)))]"
             }
           ]
         }
       },
-         "resources": [
+      
+       "resources": [
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('namespace'),'-vm',copyindex(), '/autopartition')]",
+            "name": "[concat(parameters('namespace'),'-vm',copyindex(1), '/configureMetanode',copyindex(1))]",
             "apiVersion": "2019-03-01",
             "location": "[parameters('location')]",
             "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex())]"
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex(1))]"
               ],
             "properties": "[parameters('osSettings').extentionSettings.meta]"
+        }
+      ]
+    },
+    {
+      "apiVersion": "2019-03-01",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('namespace'), '-vm0')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "provider": "[toUpper(parameters('influxTags').provider)]"
+      },
+      "plan": {
+        "name": "influxdb-enterprise-meta-byol",
+        "product": "influxdb-enterprise-vm",
+        "publisher": "influxdata"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', 'metaNodeNic0')]",
+        "[concat('Microsoft.Compute/availabilitySets/', 'metanode-set')]",
+        "[concat('Microsoft.Resources/deployments/', 'osProfileMeta0')]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm1','/extensions/', 'configureMetanode1')]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm2','/extensions/', 'configureMetanode2')]"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', 'metanode-set')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta0'), '2019-05-01').outputs.osProfile.value]",
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "influxdata",
+            "offer": "influxdb-enterprise-vm",
+            "sku": "influxdb-enterprise-meta-byol",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat(parameters('namespace'), '-vm0', '-osdisk')]",
+            "createOption": "FromImage",
+            "diskSizeGB": 32,
+            "managedDisk": {
+            "storageAccountType": "Standard_LRS"
+          }
+        },
+          "dataDisks": [
+          {
+            "lun": 0,
+            "diskSizeGB": 32,
+            "name": "[concat(parameters('namespace'),'-vm0', '-datadisk')]",
+            "caching": "None",
+            "createOption": "Empty",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces','metaNodeNic0')]"
+            }
+          ]
+        }
+      },
+      
+       "resources": [
+          {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('namespace'),'-vm0', '/configureMaster0')]",
+            "apiVersion": "2019-03-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm0')]"
+              ],
+            "properties": "[parameters('osSettings').extentionSettings.master]"
         }
       ]
     }
