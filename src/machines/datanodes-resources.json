@@ -20,6 +20,7 @@
         "description": "Admin password used when provisioning virtual machines"
       }
     },
+
     "storageSettings": {
       "type": "object",
       "metadata": {
@@ -91,7 +92,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2019-03-01",
+      "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[concat('datanode', '-set')]",
       "location": "[parameters('location')]",
@@ -104,7 +105,7 @@
     }
     },
     {
-      "apiVersion": "2019-04-01",
+      "apiVersion": "2019-09-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat('dataNodeNic', copyindex())]",
       "location": "[parameters('location')]",
@@ -131,7 +132,7 @@
     {
       "name": "[concat('osProfileData', copyindex())]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-05-01",
+      "apiVersion": "2019-08-01",
       "copy": {
         "name": "osProfileLoop",
         "count": "[parameters('vmCount')]"
@@ -156,7 +157,7 @@
       }
     },
     {
-      "apiVersion": "2019-03-01",
+      "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('namespace'), '-vm', copyindex())]",
       "location": "[parameters('location')]",
@@ -225,7 +226,7 @@
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('namespace'),'-vm',copyindex(), '/configureDatanode',copyindex())]",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2019-07-01",
             "location": "[parameters('location')]",
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex())]"

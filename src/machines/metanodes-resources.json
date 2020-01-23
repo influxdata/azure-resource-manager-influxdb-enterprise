@@ -112,7 +112,7 @@
     {
       "name": "[concat('osProfileMeta', copyindex())]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-05-01",
+      "apiVersion": "2019-08-01",
       "copy": {
         "name": "osProfileLoop",
         "count": 3
@@ -137,7 +137,7 @@
       }
     },
     {
-      "apiVersion": "2019-03-01",
+      "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('namespace'), '-vm', copyindex(1))]",
       "location": "[parameters('location')]",
@@ -207,7 +207,7 @@
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('namespace'),'-vm',copyindex(1), '/configureMetanode',copyindex(1))]",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2019-07-01",
             "location": "[parameters('location')]",
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex(1))]"
@@ -217,7 +217,7 @@
       ]
     },
     {
-      "apiVersion": "2019-03-01",
+      "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('namespace'), '-vm0')]",
       "location": "[parameters('location')]",
@@ -285,7 +285,7 @@
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(parameters('namespace'),'-vm0', '/configureMaster0')]",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2019-07-01",
             "location": "[parameters('location')]",
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm0')]"

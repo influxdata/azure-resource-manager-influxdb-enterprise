@@ -2,11 +2,18 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-  "_artifactsLocation": {
+    "_artifactsLocation": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/src/",
       "metadata": {
         "description": "The base URI where artifacts required by this template are located, including a trailing '/'"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation. When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
       }
     },
     "loadBalancerType": { 
@@ -141,25 +148,19 @@
     }
   },
   "variables": {
-    "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), 'partials/shared-resources.json')]",
-    "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), 'machines/metanodes-resources.json')]",
+    "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
+    "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
     "jumpboxTemplates": {
       "No": "empty/empty-resources.json",
       "Yes": "machines/jumpbox-resources.json"
     },
-    "jumpboxTemplateUrl": "[uri(parameters('_artifactsLocation'), variables('jumpboxTemplates')[parameters('jumpbox')])]",
+    "jumpboxTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('jumpboxTemplates')[parameters('jumpbox')], parameters('_artifactsLocationSasToken')))]",
     "chronografTemplates": {
       "No": "empty/empty-resources.json",
       "Yes": "machines/chronograf-resources.json"
     },
-    "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), variables('chronografTemplates')[parameters('chronograf')])]",
+    "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
     "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'))]",
-
-    "ubuntuScripts": [
-      "[concat(parameters('_artifactsLocation'), 'scripts/cluster-configure.sh')]",
-      "[concat(parameters('_artifactsLocation'), 'scripts/chronograf-install.sh')]",
-      "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh')]"
-    ],
     "ubuntuSettings": {
       "imageReference": {
         "publisher": "Canonical",
@@ -176,8 +177,8 @@
           "autoUpgradeMinorVersion": true,
           "settings": {
             "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh')]", 
-              "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh')]"
+              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]", 
+              "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
                     ],
                 "commandToExecute": "bash cluster-configure.sh -m 1"
           }
@@ -189,8 +190,8 @@
           "autoUpgradeMinorVersion": true,
           "settings": {
             "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh')]",
-              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh')]"
+              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
+              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                     ],
                 "commandToExecute": "[concat('bash cluster-configure.sh -d 1', variables('commonInstallParams'))]"
           }
@@ -202,8 +203,8 @@
           "autoUpgradeMinorVersion": true,
           "settings": {
             "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh')]",
-              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh')]"
+              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
+              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                     ],
                 "commandToExecute": "[concat('bash cluster-configure.sh -m 1 -j 1', variables('commonInstallParams'))]"
           }
@@ -215,7 +216,7 @@
           "autoUpgradeMinorVersion": true,
           "settings": {
             "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/chronograf-install.sh')]"
+              "[concat(parameters('_artifactsLocation'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
                     ],
                 "commandToExecute": "bash chronograf-install.sh"
           }
@@ -316,13 +317,26 @@
       "accountType": "[variables('dataSkuSettings')[parameters('vmSizeDataNodes')].storageAccountType]",
       "diskSize": "[variables('dataDiskSizes')[parameters('vmDataDiskSize')]]"
     },
-    "dataTemplateUrl": "[uri(parameters('_artifactsLocation'), 'machines/datanodes-resources.json')]"
+    "dataTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/datanodes-resources.json', parameters('_artifactsLocationSasToken')))]"
   },
   "resources": [
     {
+      "name": "[parameters('influxTags').tracking]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-08-01",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
+    {
       "name": "metanodes",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-05-01",
+      "apiVersion": "2019-08-01",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'shared')]",
         "[concat('Microsoft.Resources/deployments/', 'datanodes')]"
@@ -370,7 +384,7 @@
     {
       "name": "shared",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-05-01",
+      "apiVersion": "2019-08-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -396,7 +410,7 @@
     {
       "name": "datanodes",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-05-01",
+      "apiVersion": "2019-08-01",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'shared')]"
       ],
@@ -452,7 +466,7 @@
     {
       "name": "jumpbox",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-05-01",
+      "apiVersion": "2019-08-01",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'shared')]"
       ],
@@ -487,9 +501,9 @@
      {
       "name": "chronograf",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-05-01",
+      "apiVersion": "2019-08-01",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'datanodes')]"
+        "[concat('Microsoft.Resources/deployments/', 'shared')]"
       ],
       "properties": {
         "mode": "Incremental",
