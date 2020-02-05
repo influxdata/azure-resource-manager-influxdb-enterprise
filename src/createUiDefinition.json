@@ -451,25 +451,6 @@
             "label": "External Access",
             "elements": [
               {
-                "name": "jumpbox",
-                "type": "Microsoft.Common.OptionsGroup",
-                "label": "Use a jump box?",
-                "defaultValue": "No",
-                "toolTip": "A jump box allows you to connect to your cluster from a public access point like SSH. This is usually not necessary if Chronograf is installed, since Chronograf itself acts as a jump box.",
-                "constraints": {
-                  "allowedValues": [
-                    {
-                      "label": "Yes",
-                      "value": "Yes"
-                    },
-                    {
-                      "label": "No",
-                      "value": "No"
-                    }
-                  ]
-                }
-              },
-              {
                 "name": "loadBalancerType",
                 "type": "Microsoft.Common.OptionsGroup",
                 "label": "Load balancer type",
@@ -496,7 +477,6 @@
     "outputs": {
       "loadBalancerType": "[steps('externalAccessStep').externalAccessSection.loadBalancerType]",
       "chronograf": "[steps('externalAccessStep').chronografSection.chronograf]",
-      "jumpbox": "[steps('externalAccessStep').externalAccessSection.jumpbox]",
       "vmSizeDataNodes": "[steps('nodesStep').dataNodes.vmSizeDataNodes]",
       "vmDataDiskSize": "[steps('nodesStep').dataNodesDisks.vmDataDiskSize]",
       "vmDataNodeCount": "[steps('nodesStep').dataNodes.vmDataNodeCount]",

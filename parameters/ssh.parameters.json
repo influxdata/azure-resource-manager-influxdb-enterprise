@@ -1,7 +1,6 @@
 {
 	"_artifactsLocation":{"value":"https://raw.githubusercontent.com/chobbs/ARM-Templates/master/src/"},
 	"loadBalancerType":{"value":"internal"},
-	"jumpbox":{"value":"Yes"},
 	"chronograf":{"value":"No"},
 	"vmSizeDataNodes":{"value":"Standard_DS2_v2"},
 	"vmDataNodeCount":{"value":2},

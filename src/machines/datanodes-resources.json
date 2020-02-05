@@ -190,7 +190,7 @@
           "imageReference": {
             "publisher": "influxdata",
             "offer": "influxdb-enterprise-vm",
-            "sku": "influxdb-enterprise-data-byol",
+            "sku": "data",
             "version": "latest"
           },
             "osDisk": {

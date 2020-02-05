@@ -48,17 +48,6 @@
         "description": "Provision a machine with Chronograf on it"
       }
     },
-    "jumpbox": {
-      "type": "string",
-      "defaultValue": "No",
-      "allowedValues": [
-        "Yes",
-        "No"
-      ],
-      "metadata": {
-        "description": "Optionally add a virtual machine to the deployment which you can use to connect and manage virtual machines on the internal network"
-      }
-    },
     "vmDataDiskSize": {
       "type": "string",
       "defaultValue": "32GiB",
@@ -150,11 +139,6 @@
   "variables": {
     "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
     "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
-    "jumpboxTemplates": {
-      "No": "empty/empty-resources.json",
-      "Yes": "machines/jumpbox-resources.json"
-    },
-    "jumpboxTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('jumpboxTemplates')[parameters('jumpbox')], parameters('_artifactsLocationSasToken')))]",
     "chronografTemplates": {
       "No": "empty/empty-resources.json",
       "Yes": "machines/chronograf-resources.json"
@@ -459,41 +443,6 @@
           },
           "lbBackendPools": {
             "value": "[variables('dataLBSettings')]"
-          }
-        }
-      }
-    },
-    {
-      "name": "jumpbox",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-08-01",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'shared')]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('jumpboxTemplateUrl')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "adminUsername": {
-            "value": "[parameters('adminUsername')]"
-          },
-          "password": {
-            "value": "[parameters('password')]"
-          },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
-          },
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "subnet": {
-            "value": "[variables('networkSettings').subnet.data]"
-          },
-          "osSettings": {
-            "value": "[variables('osSettings')]"
           }
         }
       }
