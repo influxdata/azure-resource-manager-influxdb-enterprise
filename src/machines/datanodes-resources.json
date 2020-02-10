@@ -165,7 +165,7 @@
         "provider": "[toUpper(parameters('influxTags').provider)]"
       },
       "plan": {
-        "name": "influxdb-enterprise-data-byol",
+        "name": "data",
         "product": "influxdb-enterprise-vm",
         "publisher": "influxdata"
       },

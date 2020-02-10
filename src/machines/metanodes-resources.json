@@ -145,7 +145,7 @@
         "provider": "[toUpper(parameters('influxTags').provider)]"
       },
       "plan": {
-        "name": "influxdb-enterprise-meta-byol",
+        "name": "meta",
         "product": "influxdb-enterprise-vm",
         "publisher": "influxdata"
       },
@@ -225,7 +225,7 @@
         "provider": "[toUpper(parameters('influxTags').provider)]"
       },
       "plan": {
-        "name": "influxdb-enterprise-meta-byol",
+        "name": "meta",
         "product": "influxdb-enterprise-vm",
         "publisher": "influxdata"
       },
@@ -248,7 +248,7 @@
           "imageReference": {
             "publisher": "influxdata",
             "offer": "influxdb-enterprise-vm",
-            "sku": "influxdb-enterprise-meta-byol",
+            "sku": "meta",
             "version": "latest"
           },
           "osDisk": {

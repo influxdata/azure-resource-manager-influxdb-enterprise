@@ -27,10 +27,10 @@ else
       echo -e "Confirmed resourceGroup $resourceGroupName exist and will be used\n"
 fi
 # accept the legal terms for the influxdata offer skus (only needs ti be run once for your sunscritopn ID)
-echo -e "\nRuning Azure commands to accepting 'Legal Terms' for InfliuxData offer data-node sku\n" 
-az vm image terms accept --urn influxdata:influxdb-enterprise-vm:data:1.7.90
-echo -e "\nRuning Azure commands to accepting 'Legal Terms' for InfliuxData offer meta-node sku\n" 
-az vm image terms accept --urn influxdata:influxdb-enterprise-vm:meta:1.7.90
+echo -e "\nRuning Azure commands to accepting 'Legal Terms' for InfluxData offer datanode sku\n" 
+az vm image terms accept --urn influxdata:influxdb-enterprise-vm:data:1.7.10
+echo -e "\nRuning Azure commands to accepting 'Legal Terms' for InfluxData offer metanode sku\n" 
+az vm image terms accept --urn influxdata:influxdb-enterprise-vm:meta:1.7.10
 
 az group deployment create \
 --template-file src/mainTemplate.json \
