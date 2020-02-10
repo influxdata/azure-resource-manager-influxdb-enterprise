@@ -26,10 +26,6 @@ The output from the market place UI is fed directly to the ARM template. You can
     has Chronograf installed on it.
     </td></tr>
 
-  <tr><td>jumpbox</td><td>string</td>
-    <td>Either <code>Yes</code> or <code>No</code> Optionally add a virtual machine to the deployment which you can use to connect and manage virtual machines on the internal network.
-    </td></tr>
-
   <tr><td>vmSizeDataNodes</td><td>string</td>
     <td>Azure VM size of the data nodes see <a href="https://github.com/chobbs/ARM-Templates/blob/master/src/mainTemplate.json#L69">this list for supported sizes</a>
     </td></tr>
