@@ -108,6 +108,13 @@
         "description": ""
       }
     },
+    "influxdbPassword": {
+      "type": "securestring",
+      "defaultValue": "changeME",
+      "metadata": {
+        "description": "Database password for admin user with ALL PRIVILEGES"
+      }
+    },
     "location": {
       "type": "string",
       "allowedValues": [
@@ -144,7 +151,7 @@
       "Yes": "machines/chronograf-resources.json"
     },
     "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
-    "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'))]",
+    "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'),' -a ', parameters('influxdbPassword'))]",
     "ubuntuSettings": {
       "imageReference": {
         "publisher": "Canonical",
@@ -164,7 +171,7 @@
               "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]", 
               "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
                     ],
-                "commandToExecute": "bash cluster-configure.sh -m 1"
+                "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
           }
         },
         "data": {
@@ -177,7 +184,7 @@
               "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
               "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                     ],
-                "commandToExecute": "[concat('bash cluster-configure.sh -d 1', variables('commonInstallParams'))]"
+                "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
           }
         },
         "master": {
@@ -190,7 +197,7 @@
               "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
               "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                     ],
-                "commandToExecute": "[concat('bash cluster-configure.sh -m 1 -j 1', variables('commonInstallParams'))]"
+                "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
           }
         },
         "chronograf": {

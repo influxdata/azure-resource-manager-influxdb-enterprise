@@ -1,12 +1,13 @@
 {
 	"_artifactsLocation":{"value":"https://raw.githubusercontent.com/chobbs/ARM-Templates/master/src/"},
-	"loadBalancerType":{"value":"internal"},
-	"chronograf":{"value":"No"},
+	"loadBalancerType":{"value":"external"},
+	"chronograf":{"value":"Yes"},
 	"vmSizeDataNodes":{"value":"Standard_DS2_v2"},
 	"vmDataNodeCount":{"value":2},
 	"vmDataDiskSize":{"value":"32GiB"},
 	"vmSizeMetaNodes":{"value":"Standard_D1_v2"},
-	"password":{"value":{"password":null,"sshPublicKey":"ssh-rsa <redacted>","authenticationType":"sshPublicKey"}},
+	"password":{"value":{"password":"Password1234","sshPublicKey":null,"authenticationType":"password"}},
 	"adminUsername":{"value":"influxadmin"},
+	"influxdbPassword":{"value":"changeME"},
 	"location":{"value":"centralus"}
 }

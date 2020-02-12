@@ -13,10 +13,9 @@ help()
     echo " "
     echo "This script configures a new InfluxEnterpise cluster deployed with Azure ARM templates."
     echo "Parameters:"
-    echo "-m  Metanode configuration"
-    echo "-d  Datanode configuration [requires -c parameter]"
-    echo "-j  Join cluster nodes [requires -m:-c parameters]"
-    echo "-c  Number of datanodes to configure"
+    echo "-n  Configure specific node_type [meta || data || master]"
+    echo "-a  Supply influxdb admin password  cluster nodes - used in case of [master] node only"
+    echo "-c  Number of datanodes to configure - used in case of [data||master] node configurations"
     echo "-h  view this help content"
 }
 
@@ -58,20 +57,17 @@ ETC_HOSTS="/etc/hosts"
 
 
 #Loop through options passed
-while getopts :m:d:c:j:h optname; do
+while getopts :n:c:a:h optname; do
   log "Option $optname set"
   case $optname in
-    m)  #configure metanodes
-      METANODE="${OPTARG}"
+    n)  #configure [meta||data||master] nodes
+      NODE_TYPE="${OPTARG}"
       ;;
-    d) #configure datanodes 
-      DATANODE="${OPTARG}"
-      ;;
-    c) #number os datanodes (need for datanode configure and cluster join)
+    c) #number os datanodes - used in case of [data||master] nodes configurations
       COUNT="${OPTARG}"
       ;;
-    j) #join cluster
-      JOIN="${OPTARG}"
+    a) #influxdb admin password - used in case of [master] node configurations only
+      INFLUXDB_PWD="${OPTARG}"
       ;;
     h) #show help
       help
@@ -170,6 +166,8 @@ configure_metanodes()
     sed -i "s/\(hostname *= *\).*/\1\"$HOSTNAME\"/" "${META_CONFIG_FILE}"
     sed -i "s/\(license-key *= *\).*/\1\"$TEMP_LICENSE\"/" "${META_CONFIG_FILE}"
     sed -i "s/\(dir *= *\).*/\1\"\/influxdb\/meta\"/" "${META_CONFIG_FILE}"
+    #sed -i "s/\(marketplace-env *= *\).*/\1\"azure\"/" "${META_CONFIG_FILE}"
+
 
 
     #create working dir for meatanode service
@@ -195,7 +193,7 @@ configure_datanodes()
     cp -p  "${DATA_GEN_FILE}" "${DATA_CONFIG_FILE}"
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
-       log "err: could not copy new "${DATA_GEN_FILE}" file to file to /etc/influxdb"
+       log "err: could not copy new "${DATA_GEN_FILE}" file to /etc/influxdb"
       exit $EXIT_CODE
     fi
 
@@ -206,6 +204,8 @@ configure_datanodes()
     sed -i "s/\(hostname *= *\).*/\1\"$HOSTNAME\"/" "${DATA_CONFIG_FILE}"
     sed -i "s/\(license-key *= *\).*/\1\"$TEMP_LICENSE\"/" "${DATA_CONFIG_FILE}"
     sed -i "s/\(auth-enabled *= *\).*/\1false/" "${DATA_CONFIG_FILE}"
+    #sed -i "s/\(marketplace-env *= *\).*/\1\"azure\"/" "${DATA_CONFIG_FILE}"
+
 
     #create working dirs and file for datanode service
     log "[mkdir_cmd] creating datanode directory structure"
@@ -235,15 +235,29 @@ datanode_count()
 
 start_systemd()
 {
-  if [ "${METANODE}" == 1 ]; then
+  if [[ ${NODE_TYPE} == "meta" ]] || [[ ${NODE_TYPE} == "master" ]]; then
     log "[start_systemd] starting metanode"
     systemctl start influxdb-meta
-  elif [ "${DATANODE}" == 1 ]; then
+    sleep 5
+  elif [[ ${NODE_TYPE} == "data" ]]; then
     log "[start_systemd] starting datanode"
     systemctl start influxdb
+    sleep 5
   fi
 }
 
+create_user()
+{
+#check service status
+log "[create_user] create influxdb admin user"
+
+payload="q=CREATE USER admin WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
+
+curl -s -k -X POST \
+    -d "${payload}" \
+    "http://datanode-vm0:8086/query"
+    
+}
 process_check()
 {
   #check service status
@@ -252,7 +266,7 @@ process_check()
   PROC_CHECK=`ps aux | grep -v grep | grep influxdb`
   EXIT_CODE=$?
   if [[ $EXIT_CODE -ne 0 ]]; then
-    log "err: could not copy new "${DATA_GEN_FILE}" file to file to /etc/influxdb"
+    log "err: could not start influxdb service, try starting manually."
     exit $EXIT_CODE
   fi
 }
@@ -287,14 +301,14 @@ log "[autopart] running auto partitioning & mounting"
 bash autopart.sh
 
 
-if [ "${METANODE}" == 1 ]; then
+if [[ ${NODE_TYPE} == "meta" ]] || [[ ${NODE_TYPE} == "master" ]]; then
     log "[metanode_funcs] executing metanode configuration functions"
 
     setup_metanodes
 
     configure_metanodes
 
-elif [ "${DATANODE}" == 1 ]; then
+elif [[ ${NODE_TYPE} == "data" ]]; then
     log "[datanode_funcs] executing datanode configuration functions"
     
     datanode_count
@@ -303,10 +317,10 @@ elif [ "${DATANODE}" == 1 ]; then
 
     configure_datanodes
 else 
+    log "err: node_type unknown, please set a valid node_type"
 
-  help
-
-  exit 2
+    help
+    exit 2
 fi
 
 
@@ -319,14 +333,16 @@ process_check
 
 #master metanode funcs to join all nodes to cluster 
 #------------------------
-if [ "${JOIN}" == 1 ];then
-  log "[join_funcs] executing cluster join commands on master metanode"
+if [[ ${NODE_TYPE} == "master" ]];then
+  log "[master_metanode] executing cluster join commands on master metanode"
 
   datanode_count
 
   join_metanodes
 
   join_datanodes
+
+  create_user
 fi
 
 ELAPSED_TIME=$(($SECONDS - $START_TIME))
