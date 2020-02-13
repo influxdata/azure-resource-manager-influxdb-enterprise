@@ -27,11 +27,11 @@ The output from the market place UI is fed directly to the ARM template. You can
     </td></tr>
 
   <tr><td>vmSizeDataNodes</td><td>string</td>
-    <td>Azure VM size of the data nodes see <a href="https://github.com/chobbs/ARM-Templates/blob/master/src/mainTemplate.json#L69">this list for supported sizes</a>
+    <td>Azure VM size of the data nodes see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L69">this list for supported sizes</a>
     </td></tr>
 
   <tr><td>vmDataNodeCount</td><td>int</td>
-    <td>The number of data nodes you wish to deploy. Should be greater than 0.
+    <td>The number of data nodes you wish to deploy. (Min: 2 | Max: 6).
     </td></tr>
 
   <tr><td>vmDataNodeDiskSize</td><td>string</td>
@@ -45,12 +45,16 @@ The output from the market place UI is fed directly to the ARM template. You can
     </td></tr>
 
   <tr><td>password</td><td>object</td>
-    <td>Password is a complex object parameter, we support both authenticating through username/pass or ssh keys. See the <a href="https://github.com/Mpdreamz/ARM-Templates/tree/master/parameters"> parameters example folder</a> for an example of what to pass for either option.
+    <td>Password is a complex object parameter, we support both authenticating through username/pass or ssh keys. See the <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/tree/master/parameters"> parameters example folder</a> for an example of what to pass for either option.
+    </td></tr>
+
+  <tr><td>influxdbPassword</td><td>securestring</td>
+    <td>InfluxDB password for the <code>admin</code> user with all privs, must be &gt; 6 characters 
     </td></tr>
 
   <tr><td>location</td><td>string</td>
     <td>The location where to provision all the items in this template. Defaults to the special <code>ResourceGroup</code> value which means it will inherit the location
-    from the resource group see <a href="https://github.com/Mpdreamz/ARM-Templates/blob/master/src/mainTemplate.json#L197">this list for supported locations</a>.
+    from the resource group see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L197">this list for supported locations</a>.
     </td></tr>
 
 </table>
@@ -73,7 +77,7 @@ $ ./deploy.sh
 After the initial creation, you can continue to publish *Incremental* deployments using one of the following commands.
 You can published this repo template directly using `--template-uri`
 
-> az group deployment create --template-uri https://raw.githubusercontent.com/chobbs/ARM-Templates/master/src/mainTemplate.json --verbose --resource-group "${group}" --mode Incremental --parameters parameters/password.parameters.json
+> az group deployment create --template-uri https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/master/src/mainTemplate.json --verbose --resource-group "${group}" --mode Incremental --parameters parameters/password.parameters.json
 
 or if your are executing commands from a clone of this repo using `--template-file`
 
@@ -87,7 +91,7 @@ The `--parameters` can specify a different location for the items that get provi
 
 ### Web based deploy
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fchobbs%2FARM-Templates%2Fmaster%2Fsrc%2FmainTemplate.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Finfluxdata%2Fazure-resource-manager-influxdb-enterprise%2Fmaster%2Fsrc%2FmainTemplate.json" target="_blank">
    <img alt="Deploy to Azure" src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
