@@ -1,90 +1,102 @@
-# InfluxDB Enterprise Azure Resource Manager Templates
+# InfluxEnterprise Azure Marketplace offering
 
 __Note: These templates are still under active development. They are not recommended for production.__
 
 ## Publishing a new image
 
-### Generate a SAS
+This repository consists of:
 
-A Shared Access Signature (SAS) URL is required by the Partner Portal to import a VHD ([official guide](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-get-sas-uri)).
-Packer is used to build the images and will only create managed disks.
-In order to create the SAS URL, the underlying VHD of the managed disk needs to be extracted and put in a storage account.
-The  script that handles the steps in [this guide](https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-linux-cli-sample-copy-managed-disks-vhd) provides instructions on how to extract the VHD and create the SAS URL.
+* [src/mainTemplate.json](src/mainTemplate.json) - Entry Azure Resource Management (ARM) template.
+* [src/createUiDefinition](src/createUiDefinition.json) - UI definition file for our market place offering. This file produces an output JSON that the ARM template can accept as input parameters JSON.
 
-## Links
 
-## Video explanation of Azure Application development
-https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/azure-applications/cpp-create-technical-assets
-https://www.youtube.com/watch?time_continue=1&v=GdcmjIiK0Vk
+## ARM template
 
-## Azure portal management
-[partner portal](https://cloudpartner.azure.com/#alloffers)
-[old version](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal-orig/cloud-partner-portal-getting-started-with-the-cloud-partner-portal)
-[current version](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/portal-manage/cpp-portal-management)
+The output from the market place UI is fed directly to the ARM template. You can use the ARM template on its own without going through the market place.
 
-## VM instructions
-https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-virtual-machine-offer
-https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-create-technical-assets#52-get-the-shared-access-signature-uri-for-your-vm-images
-[SAS URL instructions](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-get-sas-uri)
+### Parameters
 
-## VM Security
-https://docs.microsoft.com/en-us/azure/security/fundamentals/azure-marketplace-images
+<table>
+  <tr><th>Parameter</td><th>Type</th><th>Description</th></tr>
+  <tr><td>loadBalancerType</td><td>string</td>
+    <td>Whether the loadbalancer should be <code>internal</code> or <code>external</code>
+    </td></tr>
+  <tr><td>chronograf</td><td>string</td>
+    <td>Either <code>Yes</code> or <code>No</code> provision an extra machine with a public IP that
+    has Chronograf installed on it.
+    </td></tr>
 
-## Ubuntu on Azure
-[Prepare Ubuntu for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/create-upload-ubuntu)
-[Ubuntu Bionic 18.04 VHDs for Azure](https://cloud-images.ubuntu.com/bionic/current/)
+  <tr><td>vmSizeDataNodes</td><td>string</td>
+    <td>Azure VM size of the data nodes see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L69">this list for supported sizes</a>
+    </td></tr>
 
-## Instance metadata
-https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#getting-more-information-about-the-vm-during-support-case
-[issue to add metadata support to go SDK](https://github.com/Azure/azure-sdk-for-go/issues/982)
-[issue to document metadata rest api spec](https://github.com/Azure/azure-rest-api-specs/issues/4408)
+  <tr><td>vmDataNodeCount</td><td>int</td>
+    <td>The number of data nodes you wish to deploy. (Min: 2 | Max: 6).
+    </td></tr>
 
-## Packer docs
-https://www.packer.io/docs/builders/azure-arm.html#storage_account
-https://docs.microsoft.com/en-us/azure/virtual-machines/linux/build-image-with-packer
-[Packer Azure examples](https://github.com/hashicorp/packer/tree/master/examples/azure)
-[Deprecation issue](https://github.com/hashicorp/packer/issues/8217)
-[Issue](https://github.com/hashicorp/packer/issues/6752)
-[Azure docs issue](https://github.com/MicrosoftDocs/azure-docs/issues/37716)
-[Shared Image Gallery](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/shared-image-galleries)
+  <tr><td>vmDataNodeDiskSize</td><td>string</td>
+    <td>The disk size of each attached disk. Choose <code>1TiB</code>, <code>512GiB</code>, <code>256GiB</code>, <code>128GiB</code>, <code>64GiB</code> or <code>32GiB</code>.
+    For Premium Storage, disk sizes equate to <a href="https://docs.microsoft.com/en-us/azure/storage/storage-premium-storage#premium-storage-disks-limits">P80, P70, P60, P50, P40, P30, P20, P15, P10 and P6</a>
+    storage disk types, respectively.
+    </td>
 
-## Scripts
-[Export/Copy a managed disk to a storage account using the Azure CLI](https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-linux-cli-sample-copy-managed-disks-vhd?toc=%2fcli%2fmodule%2ftoc.json)
-[Deploy a virtual machine from the Azure Marketplace](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/virtual-machine/cpp-deploy-vm-marketplace)
-[Create a managed disk from a snapshot with PowerShell](https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-windows-powershell-sample-create-managed-disk-from-snapshot)
-[create managed disk from snapshot and attach it to the VM](https://github.com/KacperMucha/random-powershell-scripts/blob/master/New-AzureRmVmFromSnapshot.ps1)
-[Copy a managed disk](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/disks-upload-vhd-to-managed-disk-cli#copy-a-managed-disk)
-[Export/Copy the VHD of a managed disk to a storage account in different region with PowerShell](https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-windows-powershell-sample-copy-managed-disks-vhd)
+  <tr><td>adminUsername</td><td>string</td>
+    <td>Admin username used when provisioning virtual machines
+    </td></tr>
 
-# ARM templates
+  <tr><td>password</td><td>object</td>
+    <td>Password is a complex object parameter, we support both authenticating through username/pass or ssh keys. See the <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/tree/master/parameters"> parameters example folder</a> for an example of what to pass for either option.
+    </td></tr>
 
-## AWS to Azure mappings
-https://docs.microsoft.com/en-us/azure/architecture/aws-professional/services
+  <tr><td>influxdbPassword</td><td>securestring</td>
+    <td>InfluxDB password for the <code>admin</code> user with all privs, must be &gt; 6 characters 
+    </td></tr>
 
-## Azure Applications Solution Template Offer Publishing Guide
-https://docs.microsoft.com/en-us/azure/marketplace/marketplace-solution-templates
+  <tr><td>location</td><td>string</td>
+    <td>The location where to provision all the items in this template. Defaults to the special <code>ResourceGroup</code> value which means it will inherit the location
+    from the resource group see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L197">this list for supported locations</a>.
+    </td></tr>
 
-## ARM Quickstarts
-https://github.com/Azure/azure-quickstart-templates
-https://github.com/couchbase-partners/azure-resource-manager-couchbase/tree/master/marketplace
+</table>
 
-## ARM Template Best Practices
-https://docs.microsoft.com/en-us/azure/azure-resource-manager/template-best-practices
+### Command line deploy
 
-## How to managed disks in ARM
-https://docs.microsoft.com/en-us/azure/virtual-machines/windows/using-managed-disks-template-deployments
+Begin by making sure you're logged into your azure account subscription.
 
-# Post launch
+```shell
+$ az login
+```
 
-## Customer usage attribution (GUID)
-https://docs.microsoft.com/en-us/azure/marketplace/azure-partner-customer-usage-attribution
+You can use the `deploy.sh` script to publish the template. The script will prompt you for a resourceGroup, if the group
+does not exit it will be created.
 
-## Microsoft Partner portal
-https://partner.microsoft.com/en-US/
+```shell
+$ ./deploy.sh
+```
 
-## Azure Marketplace forum
-https://www.microsoftpartnercommunity.com/t5/Microsoft-AppSource-and-Azure/bd-p/2222
+After the initial creation, you can continue to publish *Incremental* deployments using one of the following commands.
+You can published this repo template directly using `--template-uri`
 
-## Azure Marketplace support
-https://support.microsoft.com/en-us/supportforbusiness/requests
+> az group deployment create --template-uri https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/master/src/mainTemplate.json --verbose --resource-group "${group}" --mode Incremental --parameters parameters/password.parameters.json
 
+or if your are executing commands from a clone of this repo using `--template-file`
+
+> az group deployment create --template-file src/mainTemplate.json --verbose --resource-group "${group}" --mode Incremental --parameters parameters/password.parameters.json
+
+`<group>` in these last two examples refers to the resource group created by the deploy.sh script.
+
+**NOTE**
+
+The `--parameters` can specify a different location for the items that get provisioned inside of the resource group. Make sure these are the same prior to deploying if you need them to be. Omitting location from the parameters file is another way to make sure the resources get deployed in the same location as the resource group.
+
+### Web based deploy
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Finfluxdata%2Fazure-resource-manager-influxdb-enterprise%2Fmaster%2Fsrc%2FmainTemplate.json" target="_blank">
+   <img alt="Deploy to Azure" src="http://azuredeploy.net/deploybutton.png"/>
+</a>
+
+The above button will take you to the autogenerated web based UI based on the parameters from the ARM template.
+
+It should be pretty self explanatory except for password which only accepts a json object. Luckily the web UI lets you paste json in the text box. Here's an example:
+
+> {"sshPublicKey":null,"authenticationType":"password", "password":"Password1234"}

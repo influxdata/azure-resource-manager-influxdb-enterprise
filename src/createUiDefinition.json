@@ -1,0 +1,490 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "adminUsername",
+        "type": "Microsoft.Compute.UserNameTextBox",
+        "label": "User name",
+        "defaultValue": "",
+        "toolTip": "Specify a user for accessing the virtual machines within your cluster. Must be a valid Ubuntu username",
+        "constraints": {
+          "required": true,
+          "regex": "^(?!(?:adm|admin|audio|backup|bin|cdrom|crontab|daemon|dialout|dip|disk|fax|floppy|fuse|games|gnats|irc|kmem|landscape|libuuid|list|lp|mail|man|messagebus|mlocate|netdev|news|nobody|nogroup|operator|plugdev|proxy|root|sasl|shadow|src|ssh|sshd|staff|sudo|sync|sys|syslog|tape|tty|users|utmp|uucp|video|voice|whoopsie|www\\-data)$)\\w+$",
+          "validationMessage": "Username must not be a reserved Ubuntu username"
+        },
+        "osPlatform": "Linux"
+      },
+      {
+        "name": "password",
+        "type": "Microsoft.Compute.CredentialsCombo",
+        "label": {
+          "authenticationType": "Authentication type",
+          "password": "Password",
+          "confirmPassword": "Confirm password",
+          "sshPublicKey": "SSH public key"
+        },
+        "toolTip": {
+          "authenticationType": "Choose Authentication type Password or PublicKey(SSH).",
+          "password": "Enter the password for the specified user name.",
+          "sshPublicKey": "Copy Public key into field."
+        },
+        "constraints": {
+          "required": true
+        },
+        "options": {
+          "hideConfirmation": false
+        },
+        "osPlatform": "Linux"
+      }
+    ],
+    "steps": [
+      {
+        "name": "nodesStep",
+        "label": "Cluster Configuration",
+        "subLabel": {
+          "preValidation": "Required",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Cluster Configuration",
+        "elements": [
+          {
+            "name": "dataNodes",
+            "type": "Microsoft.Common.Section",
+            "label": "Datanodes",
+            "elements": [
+              {
+                "name": "vmDataNodeCount",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Number of data nodes",
+                "defaultValue": "2",
+                "toolTip": "Specify the number of data nodes for this cluster.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "2",
+                      "value": 2
+                    },
+                    {
+                      "label": "4",
+                      "value": 4
+                    },
+                    {
+                      "label": "6",
+                      "value": 6
+                    },
+                    {
+                      "label": "8",
+                      "value": 8
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "vmSizeDataNodes",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Data node VM size",
+                "toolTip": "Choose VM SKU size for data nodes",
+                "recommendedSizes": [
+                  "Standard_DS1_v2",
+                  "Standard_DS2_v2",
+                  "Standard_DS3_v2",
+                  "Standard_D2s_v3",
+                  "Standard_D4s_v3",
+                  "Standard_D8s_v3"
+                ],
+                "constraints": {
+                  "allowedSizes": [
+                    "Standard_A1_v2",
+                    "Standard_A2_v2",
+                    "Standard_A4_v2",
+                    "Standard_A8_v2",
+                    "Standard_A2m_v2",
+                    "Standard_A4m_v2",
+                    "Standard_A8m_v2",
+                    "Standard_D1_v2",
+                    "Standard_D2_v2",
+                    "Standard_D3_v2",
+                    "Standard_D4_v2",
+                    "Standard_D5_v2",
+                    "Standard_D11_v2",
+                    "Standard_D12_v2",
+                    "Standard_D13_v2",
+                    "Standard_D14_v2",
+                    "Standard_D15_v2",
+                    "Standard_D2as_v4",
+                    "Standard_D4as_v4",
+                    "Standard_D8as_v4",
+                    "Standard_D16as_v4",
+                    "Standard_D32as_v4",
+                    "Standard_D2_v3",
+                    "Standard_D4_v3",
+                    "Standard_D8_v3",
+                    "Standard_D16_v3",
+                    "Standard_D32_v3",
+                    "Standard_D48_v3",
+                    "Standard_D64_v3",
+                    "Standard_DS1_v2",
+                    "Standard_DS2_v2",
+                    "Standard_DS3_v2",
+                    "Standard_DS4_v2",
+                    "Standard_DS5_v2",
+                    "Standard_DS11_v2",
+                    "Standard_DS12_v2",
+                    "Standard_DS13_v2",
+                    "Standard_DS14_v2",
+                    "Standard_DS15_v2",
+                    "Standard_D2s_v3",
+                    "Standard_D4s_v3",
+                    "Standard_D8s_v3",
+                    "Standard_D16s_v3",
+                    "Standard_D32s_v3",
+                    "Standard_D48s_v3",
+                    "Standard_D64s_v3",
+                    "Standard_E2_v3",
+                    "Standard_E4_v3",
+                    "Standard_E8_v3",
+                    "Standard_E16_v3",
+                    "Standard_E32_v3",
+                    "Standard_E64_v3",
+                    "Standard_E64i_v3",
+                    "Standard_E2s_v3",
+                    "Standard_E4s_v3",
+                    "Standard_E8s_v3",
+                    "Standard_E16s_v3",
+                    "Standard_E32s_v3",
+                    "Standard_E64s_v3",
+                    "Standard_E64is_v3",
+                    "Standard_E2as_v4",
+                    "Standard_E4as_v4",
+                    "Standard_E8as_v4",
+                    "Standard_E16as_v4",
+                    "Standard_E20as_v4",
+                    "Standard_E32as_v4",
+                    "Standard_F1",
+                    "Standard_F2",
+                    "Standard_F4",
+                    "Standard_F8",
+                    "Standard_F16",
+                    "Standard_F1s",
+                    "Standard_F2s",
+                    "Standard_F4s",
+                    "Standard_F8s",
+                    "Standard_F16s",
+                    "Standard_F2s_v2",
+                    "Standard_F4s_v2",
+                    "Standard_F8s_v2",
+                    "Standard_F16s_v2",
+                    "Standard_F32s_v2",
+                    "Standard_F64s_v2",
+                    "Standard_F72s_v2",
+                    "Standard_G1",
+                    "Standard_G2",
+                    "Standard_G3",
+                    "Standard_G4",
+                    "Standard_G5",
+                    "Standard_GS1",
+                    "Standard_GS2",
+                    "Standard_GS3",
+                    "Standard_GS4",
+                    "Standard_GS5",
+                    "Standard_L4s",
+                    "Standard_L8s",
+                    "Standard_L16s",
+                    "Standard_L32s",
+                    "Standard_L8s_v2",
+                    "Standard_L16s_v2",
+                    "Standard_L32s_v2",
+                    "Standard_L48s_v2",
+                    "Standard_L64s_v2",
+                    "Standard_L80s_v2",
+                    "Standard_M8ms",
+                    "Standard_M16ms",
+                    "Standard_M32ts",
+                    "Standard_M32ls",
+                    "Standard_M32ms",
+                    "Standard_M64s",
+                    "Standard_M64ls",
+                    "Standard_M64ms",
+                    "Standard_M128s",
+                    "Standard_M128ms",
+                    "Standard_M64",
+                    "Standard_M64m",
+                    "Standard_M128",
+                    "Standard_M128m"
+                  ]
+                },
+                "osPlatform": "Linux",
+                "count": "[steps('nodesStep').dataNodes.vmDataNodeCount]"
+              }
+            ]
+          },
+          {
+            "name": "dataNodesDisks",
+            "type": "Microsoft.Common.Section",
+            "label": "Data node disks",
+            "elements": [
+              {
+                "name": "vmDataDiskSize",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Size of the managed disk:",
+                "visible": "[greater(steps('nodesStep').dataNodesDisks.vmDataDiskCount, 0)]",
+                "defaultValue": "1TiB",
+                "toolTip": "A single (1) datadisk will be added. This will be rhe size of the data disk to attach to each datanode",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "32GiB",
+                      "value": "32GiB"
+                    },
+                    {
+                      "label": "64GiB",
+                      "value": "64GiB"
+                    },
+                    {
+                      "label": "128GiB",
+                      "value": "128GiB"
+                    },
+                    {
+                      "label": "256GiB",
+                      "value": "256GiB"
+                    },
+                    {
+                      "label": "512GiB",
+                      "value": "512GiB"
+                    },
+                    {
+                      "label": "1TiB",
+                      "value": "1TiB"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "metaNodes",
+            "type": "Microsoft.Common.Section",
+            "label": "Metanodes",
+            "elements": [
+              {
+                "name": "vmSizeMetarNodes",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Metanode VM size",
+                "toolTip": "Choose VM SKU size for master nodes",
+                "recommendedSizes": [
+                  "Standard_DS1_v2",
+                  "Standard_DS2_v2",
+                  "Standard_DS3_v2",
+                  "Standard_D2s_v3",
+                  "Standard_D4s_v3",
+                  "Standard_D8s_v3"
+                ],
+                "constraints": {
+                  "allowedSizes": [
+                    "Standard_A1_v2",
+                    "Standard_A2_v2",
+                    "Standard_A4_v2",
+                    "Standard_A8_v2",
+                    "Standard_A2m_v2",
+                    "Standard_A4m_v2",
+                    "Standard_A8m_v2",
+                    "Standard_D1_v2",
+                    "Standard_D2_v2",
+                    "Standard_D3_v2",
+                    "Standard_D4_v2",
+                    "Standard_D5_v2",
+                    "Standard_D11_v2",
+                    "Standard_D12_v2",
+                    "Standard_D13_v2",
+                    "Standard_D14_v2",
+                    "Standard_D15_v2",
+                    "Standard_D2as_v4",
+                    "Standard_D4as_v4",
+                    "Standard_D8as_v4",
+                    "Standard_D16as_v4",
+                    "Standard_D32as_v4",
+                    "Standard_D2_v3",
+                    "Standard_D4_v3",
+                    "Standard_D8_v3",
+                    "Standard_D16_v3",
+                    "Standard_D32_v3",
+                    "Standard_D48_v3",
+                    "Standard_D64_v3",
+                    "Standard_DS1_v2",
+                    "Standard_DS2_v2",
+                    "Standard_DS3_v2",
+                    "Standard_DS4_v2",
+                    "Standard_DS5_v2",
+                    "Standard_DS11_v2",
+                    "Standard_DS12_v2",
+                    "Standard_DS13_v2",
+                    "Standard_DS14_v2",
+                    "Standard_DS15_v2",
+                    "Standard_D2s_v3",
+                    "Standard_D4s_v3",
+                    "Standard_D8s_v3",
+                    "Standard_D16s_v3",
+                    "Standard_D32s_v3",
+                    "Standard_D48s_v3",
+                    "Standard_D64s_v3",
+                    "Standard_E2_v3",
+                    "Standard_E4_v3",
+                    "Standard_E8_v3",
+                    "Standard_E16_v3",
+                    "Standard_E32_v3",
+                    "Standard_E64_v3",
+                    "Standard_E64i_v3",
+                    "Standard_E2s_v3",
+                    "Standard_E4s_v3",
+                    "Standard_E8s_v3",
+                    "Standard_E16s_v3",
+                    "Standard_E32s_v3",
+                    "Standard_E64s_v3",
+                    "Standard_E64is_v3",
+                    "Standard_E2as_v4",
+                    "Standard_E4as_v4",
+                    "Standard_E8as_v4",
+                    "Standard_E16as_v4",
+                    "Standard_E20as_v4",
+                    "Standard_E32as_v4",
+                    "Standard_F1",
+                    "Standard_F2",
+                    "Standard_F4",
+                    "Standard_F8",
+                    "Standard_F16",
+                    "Standard_F1s",
+                    "Standard_F2s",
+                    "Standard_F4s",
+                    "Standard_F8s",
+                    "Standard_F16s",
+                    "Standard_F2s_v2",
+                    "Standard_F4s_v2",
+                    "Standard_F8s_v2",
+                    "Standard_F16s_v2",
+                    "Standard_F32s_v2",
+                    "Standard_F64s_v2",
+                    "Standard_F72s_v2",
+                    "Standard_G1",
+                    "Standard_G2",
+                    "Standard_G3",
+                    "Standard_G4",
+                    "Standard_G5",
+                    "Standard_GS1",
+                    "Standard_GS2",
+                    "Standard_GS3",
+                    "Standard_GS4",
+                    "Standard_GS5",
+                    "Standard_L4s",
+                    "Standard_L8s",
+                    "Standard_L16s",
+                    "Standard_L32s",
+                    "Standard_L8s_v2",
+                    "Standard_L16s_v2",
+                    "Standard_L32s_v2",
+                    "Standard_L48s_v2",
+                    "Standard_L64s_v2",
+                    "Standard_L80s_v2",
+                    "Standard_M8ms",
+                    "Standard_M16ms",
+                    "Standard_M32ts",
+                    "Standard_M32ls",
+                    "Standard_M32ms",
+                    "Standard_M64s",
+                    "Standard_M64ls",
+                    "Standard_M64ms",
+                    "Standard_M128s",
+                    "Standard_M128ms",
+                    "Standard_M64",
+                    "Standard_M64m",
+                    "Standard_M128",
+                    "Standard_M128m"
+                  ]
+                },
+                "osPlatform": "Linux",
+                "count": "3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "externalAccessStep",
+        "label": "External Access & Chronograf",
+        "subLabel": {
+          "preValidation": "Required",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "External Access & Chronograf",
+        "elements": [
+          {
+            "name": "chronografSection",
+            "type": "Microsoft.Common.Section",
+            "label": "Chronograf",
+            "elements": [
+              {
+                "name": "chronograf",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Install Chronograf?",
+                "defaultValue": "No",
+                "toolTip": "Yes, to provision a single Chronograf instance.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Yes",
+                      "value": "Yes"
+                    },
+                    {
+                      "label": "No",
+                      "value": "No"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "externalAccessSection",
+            "type": "Microsoft.Common.Section",
+            "label": "External Access",
+            "elements": [
+              {
+                "name": "loadBalancerType",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Load balancer type",
+                "defaultValue": "Internal",
+                "toolTip": "Choose whether the load balancer should be public facing (external) or internal.",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Internal",
+                      "value": "internal"
+                    },
+                    {
+                      "label": "External",
+                      "value": "external"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "loadBalancerType": "[steps('externalAccessStep').externalAccessSection.loadBalancerType]",
+      "chronograf": "[steps('externalAccessStep').chronografSection.chronograf]",
+      "vmSizeDataNodes": "[steps('nodesStep').dataNodes.vmSizeDataNodes]",
+      "vmDataDiskSize": "[steps('nodesStep').dataNodesDisks.vmDataDiskSize]",
+      "vmDataNodeCount": "[steps('nodesStep').dataNodes.vmDataNodeCount]",
+      "adminUsername": "[basics('adminUsername')]",
+      "authenticationType": "[basics('password').authenticationType]",
+      "adminPassword": "[basics('password').password]",
+      "sshPublicKey": "[basics('password').sshPublicKey]",
+      "location": "[location()]"
+    }
+  }
+}
