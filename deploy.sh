@@ -16,8 +16,8 @@ set -euxo pipefail
 
 readonly resource_group="${1}-$(date +%s)"
 readonly location="${2:-$(az configure --list-defaults --output tsv --query "[?starts_with(name, 'location')].value")}"
-readonly influxdb_username="${4:-admin}"
-readonly influxdb_password="${5:-admin}"
+# readonly influxdb_username="${4:-admin}"
+# readonly influxdb_password="${5:-admin}"
 # readonly license_key="${LICENSE_KEY}"
 
 if ! (az group show --name "${resource_group}"); then
@@ -36,4 +36,4 @@ az group deployment create \
       --verbose \
       --resource-group "${resource_group}" \
       --mode Complete \
-      --parameters parameters/password.parameters.json
+      --parameters parameters/parameters.json
