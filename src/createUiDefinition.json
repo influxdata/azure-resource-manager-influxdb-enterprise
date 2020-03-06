@@ -50,6 +50,28 @@
         },
         "bladeTitle": "Cluster Configuration",
         "elements": [
+		{
+            "name": "influxdb_admin",
+            "type": "Microsoft.Common.Section",
+            "label": "Influxdb admin user",
+            "elements": [
+              {
+                "name": "influxdbPassword",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Database admin password",
+                  "confirmPassword": "Confirm password"
+                },
+                "toolTip": "Initial password for admin user.",
+                "constraints": {
+                  "required": true
+                },
+                "options": {
+                  "hideConfirmation": false
+                }
+              }
+            ]
+          },
           {
             "name": "dataNodes",
             "type": "Microsoft.Common.Section",
@@ -88,8 +110,8 @@
                 "label": "Data node VM size",
                 "toolTip": "Choose VM SKU size for data nodes",
                 "recommendedSizes": [
-                  "Standard_DS1_v2",
                   "Standard_DS2_v2",
+                  "Standard_DS1_v2",
                   "Standard_DS3_v2",
                   "Standard_D2s_v3",
                   "Standard_D4s_v3",
@@ -230,9 +252,8 @@
                 "name": "vmDataDiskSize",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Size of the managed disk:",
-                "visible": "[greater(steps('nodesStep').dataNodesDisks.vmDataDiskCount, 0)]",
-                "defaultValue": "1TiB",
-                "toolTip": "A single (1) datadisk will be added. This will be rhe size of the data disk to attach to each datanode",
+                "defaultValue": "128GiB",
+                "toolTip": "This will be the size of the data disk to attach to each datanode",
                 "constraints": {
                   "allowedValues": [
                     {
@@ -484,6 +505,7 @@
       "authenticationType": "[basics('password').authenticationType]",
       "adminPassword": "[basics('password').password]",
       "sshPublicKey": "[basics('password').sshPublicKey]",
+	    "influxdbPassword" :"[steps('nodesStep').influxdb_admin.influxdbPassword]",
       "location": "[location()]"
     }
   }
