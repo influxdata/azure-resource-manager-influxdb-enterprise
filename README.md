@@ -31,13 +31,11 @@ The output from the market place UI is fed directly to the ARM template. You can
     </td></tr>
 
   <tr><td>vmDataNodeCount</td><td>int</td>
-    <td>The number of data nodes you wish to deploy. (Min: 2 | Max: 6).
+    <td>The number of datanodes you wish to deploy. (Min: 2 | Max: 8).
     </td></tr>
 
   <tr><td>vmDataNodeDiskSize</td><td>string</td>
-    <td>The disk size of each attached disk. Choose <code>1TiB</code>, <code>512GiB</code>, <code>256GiB</code>, <code>128GiB</code>, <code>64GiB</code> or <code>32GiB</code>.
-    For Premium Storage, disk sizes equate to <a href="https://docs.microsoft.com/en-us/azure/storage/storage-premium-storage#premium-storage-disks-limits">P80, P70, P60, P50, P40, P30, P20, P15, P10 and P6</a>
-    storage disk types, respectively.
+    <td>The disk size of the attached data disk. Choose <code>1TiB</code>, <code>512GiB</code>, <code>256GiB</code>, <code>128GiB</code>, <code>64GiB</code> or <code>32GiB</code>.
     </td>
 
   <tr><td>adminUsername</td><td>string</td>
@@ -49,7 +47,7 @@ The output from the market place UI is fed directly to the ARM template. You can
     </td></tr>
 
   <tr><td>influxdbPassword</td><td>securestring</td>
-    <td>InfluxDB password for the <code>admin</code> user with all privs, must be &gt; 6 characters 
+    <td>InfluxDB password for the <code>admin</code> user with all privs, must be &gt; 6 characters
     </td></tr>
 
   <tr><td>location</td><td>string</td>
