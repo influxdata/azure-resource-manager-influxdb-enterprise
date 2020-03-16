@@ -75,7 +75,7 @@
     {
       "apiVersion": "2019-03-01",
       "type": "Microsoft.Compute/availabilitySets",
-      "name": "[concat('metanode', '-set')]",
+      "name": "[concat('avail-', parameters('namespace'))]",
       "location": "[parameters('location')]",
       "properties": {
         "platformUpdateDomainCount": 3,
@@ -88,7 +88,7 @@
     {
       "apiVersion": "2019-04-01",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat('metaNodeNic', copyindex())]",
+      "name": "[concat('nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
       "location": "[parameters('location')]",
       "copy": {
         "name": "metaNodesNicLoop",
@@ -100,7 +100,7 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[concat(parameters('metaNodesIpPrefix'),copyindex())]",
+              "privateIPAddress": "[concat(parameters('metaNodesIpPrefix'), copyindex())]",
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
@@ -110,9 +110,9 @@
       }
     },
     {
-      "name": "[concat('osProfileMeta', copyindex())]",
-      "type": "Microsoft.Resources/deployments",
       "apiVersion": "2019-08-01",
+      "type": "Microsoft.Resources/deployments",
+      "name": "[concat('osProfileMeta', copyindex())]",
       "copy": {
         "name": "osProfileLoop",
         "count": 3
@@ -131,7 +131,7 @@
             "value": "[parameters('password')]"
           },
           "computerName": {
-            "value": "[concat(parameters('namespace'), '-vm', copyindex())]"
+            "value": "[concat('vm', parameters('namespace'), '-', copyindex())]"
           }
         }
       }
@@ -139,7 +139,7 @@
     {
       "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('namespace'), '-vm', copyindex(1))]",
+      "name": "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
       "location": "[parameters('location')]",
       "tags": {
         "provider": "[toUpper(parameters('influxTags').provider)]"
@@ -154,13 +154,13 @@
         "count": 2
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', 'metaNodeNic', copyindex(1))]",
-        "[concat('Microsoft.Compute/availabilitySets/', 'metanode-set')]",
+        "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1))]",
+        "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
         "[concat('Microsoft.Resources/deployments/', 'osProfileMeta', copyindex(1))]"
       ],
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', 'metanode-set')]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -174,7 +174,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[concat(parameters('namespace'), '-vm', copyindex(1), '-osdisk')]",
+            "name": "[concat('vm', parameters('namespace'), '-', copyindex(1), '-osdisk')]",
             "createOption": "FromImage",
             "diskSizeGB": 32,
             "managedDisk": {
@@ -185,7 +185,7 @@
           {
             "lun": 0,
             "diskSizeGB": 32,
-            "name": "[concat(parameters('namespace'),'-vm', copyindex(1), '-datadisk')]",
+            "name": "[concat('vm', parameters('namespace'),'-', copyindex(1), '-datadisk')]",
             "caching": "None",
             "createOption": "Empty",
             "managedDisk": {
@@ -197,7 +197,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('metaNodeNic', copyindex(1)))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1)))]"
             }
           ]
         }
@@ -206,20 +206,20 @@
        "resources": [
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('namespace'),'-vm',copyindex(1), '/configureMetanode',copyindex(1))]",
+            "name": "[concat('vm', parameters('namespace'),'-', copyindex(1), '/configureMetanode',copyindex(1))]",
             "apiVersion": "2019-07-01",
             "location": "[parameters('location')]",
             "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex(1))]"
+              "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-', copyindex(1))]"
               ],
-            "properties": "[parameters('osSettings').extentionSettings.meta]"
+            "properties": "[parameters('osSettings').extensionSettings.meta]"
         }
       ]
     },
     {
       "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('namespace'), '-vm0')]",
+      "name": "[concat('vm', parameters('namespace'), '-0')]",
       "location": "[parameters('location')]",
       "tags": {
         "provider": "[toUpper(parameters('influxTags').provider)]"
@@ -230,15 +230,15 @@
         "publisher": "influxdata"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', 'metaNodeNic0')]",
-        "[concat('Microsoft.Compute/availabilitySets/', 'metanode-set')]",
+        "[concat('Microsoft.Network/networkInterfaces/', 'nic-0-vm', parameters('namespace'), '-0')]",
+        "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
         "[concat('Microsoft.Resources/deployments/', 'osProfileMeta0')]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm1','/extensions/', 'configureMetanode1')]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm2','/extensions/', 'configureMetanode2')]"
+        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-1','/extensions/', 'configureMetanode1')]",
+        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-2','/extensions/', 'configureMetanode2')]"
       ],
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', 'metanode-set')]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -252,7 +252,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "[concat(parameters('namespace'), '-vm0', '-osdisk')]",
+            "name": "[concat('vm', parameters('namespace'), '-0', '-osdisk')]",
             "createOption": "FromImage",
             "diskSizeGB": 32,
             "managedDisk": {
@@ -263,7 +263,7 @@
           {
             "lun": 0,
             "diskSizeGB": 32,
-            "name": "[concat(parameters('namespace'),'-vm0', '-datadisk')]",
+            "name": "[concat('vm', parameters('namespace'),'-0', '-datadisk')]",
             "caching": "None",
             "createOption": "Empty",
             "managedDisk": {
@@ -275,7 +275,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces','metaNodeNic0')]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-0-vm', parameters('namespace'), '-0'))]"
             }
           ]
         }
@@ -284,13 +284,13 @@
        "resources": [
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('namespace'),'-vm0', '/configureMaster0')]",
+            "name": "[concat('vm', parameters('namespace'),'-0', '/configureMaster0')]",
             "apiVersion": "2019-07-01",
             "location": "[parameters('location')]",
             "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm0')]"
+              "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-0')]"
               ],
-            "properties": "[parameters('osSettings').extentionSettings.master]"
+            "properties": "[parameters('osSettings').extensionSettings.master]"
         }
       ]
     }

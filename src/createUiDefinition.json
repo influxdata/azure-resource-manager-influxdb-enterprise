@@ -291,10 +291,10 @@
             "label": "Metanodes",
             "elements": [
               {
-                "name": "vmSizeMetarNodes",
+                "name": "vmSizeMetaNodes",
                 "type": "Microsoft.Compute.SizeSelector",
                 "label": "Metanode VM size",
-                "toolTip": "Choose VM SKU size for master nodes",
+                "toolTip": "Choose VM SKU size for meta nodes",
                 "recommendedSizes": [
                   "Standard_DS1_v2",
                   "Standard_DS2_v2",

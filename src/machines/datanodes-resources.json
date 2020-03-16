@@ -94,7 +94,7 @@
     {
       "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/availabilitySets",
-      "name": "[concat('datanode', '-set')]",
+      "name": "[concat('avail-', parameters('namespace'))]",
       "location": "[parameters('location')]",
       "properties": {
         "platformUpdateDomainCount": 20,
@@ -107,7 +107,7 @@
     {
       "apiVersion": "2019-09-01",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat('dataNodeNic', copyindex())]",
+      "name": "[concat('nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
       "location": "[parameters('location')]",
       "copy": {
         "name": "[concat('dataNodeNic','nicLoop')]",
@@ -159,7 +159,7 @@
     {
       "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('namespace'), '-vm', copyindex())]",
+      "name": "[concat('vm', parameters('namespace'), '-', copyindex())]",
       "location": "[parameters('location')]",
       "tags": {
         "provider": "[toUpper(parameters('influxTags').provider)]"
@@ -174,13 +174,13 @@
         "count": "[parameters('vmCount')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', 'dataNodeNic', copyindex())]",
-        "[concat('Microsoft.Compute/availabilitySets/', 'datanode-set')]",
+        "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
+        "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
         "[concat('Microsoft.Resources/deployments/', 'osProfileData', copyindex())]"
       ],
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', 'datanode-set')]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -194,7 +194,7 @@
             "version": "latest"
           },
             "osDisk": {
-              "name": "[concat(parameters('namespace'), '-vm', copyindex(), '-osdisk')]",
+              "name": "[concat('vm', parameters('namespace'), '-', copyindex(), '-osdisk')]",
               "createOption": "FromImage",
               "diskSizeGB": 32,
               "managedDisk": {
@@ -205,7 +205,7 @@
           {
             "lun": 0,
             "diskSizeGB": "[parameters('storageSettings').diskSize]",
-            "name": "[concat(parameters('namespace'), '-vm', copyindex(), '-datadisk')]",
+            "name": "[concat('vm', parameters('namespace'), '-', copyindex(), '-datadisk')]",
             "caching": "None",
             "createOption": "Empty",
             "managedDisk": {
@@ -217,7 +217,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('dataNodeNic', copyindex()))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex()))]"
             }
           ]
         }
@@ -225,13 +225,13 @@
         "resources": [
           {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(parameters('namespace'),'-vm',copyindex(), '/configureDatanode',copyindex())]",
+            "name": "[concat('vm', parameters('namespace'), '-', copyindex(), '/configureDatanode', copyindex())]",
             "apiVersion": "2019-07-01",
             "location": "[parameters('location')]",
             "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('namespace'),'-vm',copyindex())]"
+              "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'), '-', copyindex())]"
               ],
-            "properties": "[parameters('osSettings').extentionSettings.data]"
+            "properties": "[parameters('osSettings').extensionSettings.data]"
           }
         ]
       }

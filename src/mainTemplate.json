@@ -160,7 +160,7 @@
         "version": "latest"
       },
       "managementPort": "22",
-      "extentionSettings": {
+      "extensionSettings": {
         "meta": {
           "publisher": "Microsoft.Azure.Extensions",
           "type": "CustomScript",
@@ -268,7 +268,6 @@
     "dataLBSettings7": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings8": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings9": "[variables('lbBackendPoolsRemoved')]",
-
     "dataLBSettings": "[variables('lbBackEndPoolsAdded')]",
     "dataSkuSettings": {
       "Standard_D1_v2": {
@@ -361,7 +360,7 @@
             "value": "[parameters('vmSizeMetaNodes')]"
           },
           "namespace": {
-            "value": "metanode"
+            "value": "meta"
           },
           "subnet": {
             "value": "[variables('networkSettings').subnet.meta]"
@@ -443,7 +442,7 @@
             "value": "[parameters('vmDataNodeCount')]"
           },
           "namespace": {
-            "value": "datanode"
+            "value": "data"
           },
           "osSettings": {
             "value": "[variables('osSettings')]"

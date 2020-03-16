@@ -58,10 +58,10 @@
   "variables": {
     "vmSize": "Standard_DS1_v2",
     "subnetRef": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('subnet').vnet), '/subnets/', parameters('subnet').name)]",
-    "vmName": "[concat(parameters('namespace'), '-vm')]",
-    "publicIpName": "[concat(parameters('namespace'), '-pip')]",
-    "securityGroupName": "[concat(parameters('namespace'), '-nsg')]",
-    "nicName": "[concat(parameters('namespace'), '-nic')]"
+    "vmName": "[concat('vm', parameters('namespace'))]",
+    "publicIpName": "[concat('pip-vm', parameters('namespace'))]",
+    "securityGroupName": "[concat('nsg-', parameters('namespace'))]",
+    "nicName": "[concat('nic-0-vm', parameters('namespace'))]"
   },
   "resources": [
     {
@@ -127,7 +127,7 @@
                     "properties": {
                         "privateIPAllocationMethod": "Dynamic",
                         "publicIPAddress": {
-                            "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpName'))]"
+                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
                         },
                         "subnet": {
                             "id": "[variables('subnetRef')]"
@@ -209,7 +209,7 @@
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
               ],
-            "properties": "[parameters('osSettings').extentionSettings.chronograf]"
+            "properties": "[parameters('osSettings').extensionSettings.chronograf]"
         }
       ]
     }
