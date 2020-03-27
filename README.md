@@ -6,9 +6,11 @@ __Note: These templates are still under active development. They are not recomme
 
 This repository consists of:
 
+* [ARM templates for InfluxDB Enterprise](src/)
+* [Packer templates for Azure images](packer/)
+
 * [src/mainTemplate.json](src/mainTemplate.json) - Entry Azure Resource Management (ARM) template.
 * [src/createUiDefinition](src/createUiDefinition.json) - UI definition file for our market place offering. This file produces an output JSON that the ARM template can accept as input parameters JSON.
-
 
 ## ARM template
 
@@ -21,6 +23,7 @@ The output from the market place UI is fed directly to the ARM template. You can
   <tr><td>loadBalancerType</td><td>string</td>
     <td>Whether the loadbalancer should be <code>internal</code> or <code>external</code>
     </td></tr>
+
   <tr><td>chronograf</td><td>string</td>
     <td>Either <code>Yes</code> or <code>No</code> provision an extra machine with a public IP that
     has Chronograf installed on it.
@@ -46,8 +49,12 @@ The output from the market place UI is fed directly to the ARM template. You can
     <td>Password is a complex object parameter, we support both authenticating through username/pass or ssh keys. See the <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/tree/master/parameters"> parameters example folder</a> for an example of what to pass for either option.
     </td></tr>
 
+  <tr><td>influxdbUsername</td><td>securestring</td>
+    <td>InfluxDB username for the <code>admin</code> user with all privileges
+    </td></tr>
+
   <tr><td>influxdbPassword</td><td>securestring</td>
-    <td>InfluxDB password for the <code>admin</code> user with all privs, must be &gt; 6 characters
+    <td>InfluxDB password for the <code>admin</code> user with all privileges, must be &gt; 6 characters
     </td></tr>
 
   <tr><td>location</td><td>string</td>
@@ -59,17 +66,28 @@ The output from the market place UI is fed directly to the ARM template. You can
 
 ### Command line deploy
 
-Begin by making sure you're logged into your azure account subscription.
+The `deploy.sh` script in the root of this repo can be used to easily deploy an InfluxDB Enterprise cluster via the Azure CLI.
+
+Begin by [installing the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) and logging in.
 
 ```shell
 $ az login
 ```
 
-You can use the `deploy.sh` script to publish the template. The script will prompt you for a resourceGroup, if the group
-does not exit it will be created.
+**Note: The `deploy.sh` script will automatically accept terms for and deploy paid InfluxDB Enterprise images in your Azure Marketplace account.**
+
+Create a new configuration file called `parameters/parameters.json` for your deployment by copying one of the example files provided in the [`parameters/`](parameters/) directory.
 
 ```shell
-$ ./deploy.sh
+$ cp parameters/ssh.parameters.json parameters/parameters.json
+```
+
+Edit the configuration file parameters you'd like to use for your deployment. Don't forget to update the `password` object with a new password or your SSH key.
+
+Now run the `deploy.sh <resource-group-name>` script in the root of this repo to create a cluster in the specified resource group. A new resource group will be created automatically if it doesn't exist.
+
+```shell
+$ ./deploy.sh test-cluster
 ```
 
 After the initial creation, you can continue to publish *Incremental* deployments using one of the following commands.
@@ -86,6 +104,7 @@ or if your are executing commands from a clone of this repo using `--template-fi
 **NOTE**
 
 The `--parameters` can specify a different location for the items that get provisioned inside of the resource group. Make sure these are the same prior to deploying if you need them to be. Omitting location from the parameters file is another way to make sure the resources get deployed in the same location as the resource group.
+
 
 ### Web based deploy
 

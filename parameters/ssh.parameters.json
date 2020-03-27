@@ -30,6 +30,9 @@
     "adminUsername": {
         "value": "influx"
     },
+    "influxdbUsername": {
+        "value": "admin"
+    },
     "influxdbPassword": {
         "value": "admin"
     },

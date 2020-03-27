@@ -108,6 +108,13 @@
         "description": ""
       }
     },
+    "influxdbUsername": {
+      "type": "string",
+      "defaultValue": "admin",
+      "metadata": {
+        "description": "Database username for admin user with ALL PRIVILEGES"
+      }
+    },
     "influxdbPassword": {
       "type": "securestring",
       "defaultValue": "changeME",
@@ -151,7 +158,7 @@
       "Yes": "machines/chronograf-resources.json"
     },
     "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
-    "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'),' -a ', parameters('influxdbPassword'))]",
+    "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
     "ubuntuSettings": {
       "imageReference": {
         "publisher": "Canonical",
@@ -251,7 +258,7 @@
     "lbBackEndPoolsAdded": {
       "backendPools": [
         {
-          "id": "[concat(resourceId('Microsoft.Network/loadBalancers','loadBalancer'),'/backendAddressPools/LBBE')]"
+          "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/backendAddressPools/LBBE')]"
         }
       ]
     },
@@ -491,11 +498,5 @@
         }
       }
     }
-  ],
-  "outputs": {
-    "adminUsername": {
-      "type": "string",
-      "value": "[parameters('adminUsername')]"
-    }
-  }
+  ]
 }

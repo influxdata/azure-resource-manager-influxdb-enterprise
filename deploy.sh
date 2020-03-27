@@ -14,11 +14,8 @@ set -euxo pipefail
 
 # check if resource group exist, if not proceed with creating a resource group for this deployment
 
-readonly resource_group="${1}-$(date +%s)"
+readonly resource_group="${1}"
 readonly location="${2:-$(az configure --list-defaults --output tsv --query "[?starts_with(name, 'location')].value")}"
-# readonly influxdb_username="${4:-admin}"
-# readonly influxdb_password="${5:-admin}"
-# readonly license_key="${LICENSE_KEY}"
 
 if ! (az group show --name "${resource_group}"); then
       echo -e "Creating new resource group: \"${resource_group}\"\n"

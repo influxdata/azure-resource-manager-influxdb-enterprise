@@ -151,7 +151,7 @@
             "value": "[parameters('password')]"
           },
           "computerName": {
-            "value": "[concat(parameters('namespace'), '-vm', copyindex())]"
+            "value": "[concat('vm', parameters('namespace'), '-', copyindex())]"
           }
         }
       }

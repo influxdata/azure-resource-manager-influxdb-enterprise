@@ -59,7 +59,7 @@
     "vmSize": "Standard_DS1_v2",
     "subnetRef": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('subnet').vnet), '/subnets/', parameters('subnet').name)]",
     "vmName": "[concat('vm', parameters('namespace'))]",
-    "publicIpName": "[concat('pip-vm', parameters('namespace'))]",
+    "publicIpName": "[concat('pip-', parameters('namespace'))]",
     "securityGroupName": "[concat('nsg-', parameters('namespace'))]",
     "nicName": "[concat('nic-0-vm', parameters('namespace'))]"
   },
