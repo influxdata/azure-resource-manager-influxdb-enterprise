@@ -167,12 +167,19 @@ configure_metanodes()
     log  "[sed_cmd] updated ${META_CONFIG_FILE} default file values"
 
     chown influxdb:influxdb "${META_CONFIG_FILE}"
-    sed -i "s/\(hostname *= *\).*/\1\"$HOSTNAME\"/" "${META_CONFIG_FILE}"
-    sed -i "s/\(dir *= *\).*/\1\"\/influxdb\/meta\"/" "${META_CONFIG_FILE}"
-    sed -i "s/\(marketplace-env *= *\).*/\1\"azure\"/" "${META_CONFIG_FILE}"
 
+    #create etc/default/influxdb file to over-ride configuration defaults
+    touch "${ENV_FILE}"
+    if [ $? -eq 0 ]; then
+      echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${ENV_FILE}"
+      echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${ENV_FILE}"
+      echo INFLUXDB_META_DIR=\"/influxdb/meta\" >> "${ENV_FILE}"    
+    else
+      log  "err: cannot create /etc/default/influxdb file. you will need to manually configure the metanode"
+      exit 1
+    fi
 
-
+  
     #create working dir for meatanode service
     log "[mkdir_cmd] creating metanode directory structure"
 
@@ -206,14 +213,13 @@ configure_datanodes()
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
 
     #create etc/default/influxdb file to over-ride configuration defaults
-    touch /etc/default/influxdb
+    touch "${ENV_FILE}"
     if [ $? -eq 0 ]; then
       echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${ENV_FILE}"
       echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${ENV_FILE}"
-      echo INFLUXDB_HTTP_AUTH_ENABLED=true >> "${ENV_FILE}"
       echo INFLUXDB_DATA_INDEX_VERSION=\"tsi1\" >> "${ENV_FILE}"    
     else
-      log  "err: cannot create /default/influxdb file. you will need to manually configure the datanode"
+      log  "err: cannot create /etc/default/influxdb file. you will need to manually configure the datanode"
       exit 1
     fi
 
