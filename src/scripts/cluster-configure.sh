@@ -206,8 +206,7 @@ configure_datanodes()
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
 
     #create etc/default/influxdb file to over-ride configuration defaults
-    touch "${ENV_FILE}"/influxdb
-
+    touch /etc/default/influxdb
     if [ $? -eq 0 ]; then
       echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${ENV_FILE}"
       echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${ENV_FILE}"
