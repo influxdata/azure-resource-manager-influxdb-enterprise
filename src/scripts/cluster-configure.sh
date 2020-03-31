@@ -53,6 +53,7 @@ META_GEN_FILE="/etc/influxdb/influxdb-meta-generated.conf"
 DATA_GEN_FILE="/etc/influxdb/influxdb-generated.conf"
 META_CONFIG_FILE="/etc/influxdb/influxdb-meta.conf"
 DATA_CONFIG_FILE="/etc/influxdb/influxdb.conf"
+ENV_FILE="/etc/defaults/influxdb"
 ETC_HOSTS="/etc/hosts"
 
 
@@ -203,10 +204,19 @@ configure_datanodes()
     log  "[sed_cmd] updated ${META_CONFIG_FILE} default file values"
 
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
-    echo \"INFLUXDB_HOSTNAME=${HOSTNAME}\" >> "${DATA_CONFIG_FILE}"
-    echo \"INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=azure\" >> "${DATA_CONFIG_FILE}"
-    echo \"INFLUXDB_HTTP_AUTH_ENABLED=true\" >> "${DATA_CONFIG_FILE}"
-    echo \"INFLUXDB_DATA_INDEX_VERSION=tsi1\" >> "${DATA_CONFIG_FILE}"
+
+    #create etc/defaults/influxdb file to over-ride configuration defaults
+    touch "${ENV_FILE}"/influxdb
+
+    if [ $? -eq 0 ]; then
+      echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${ENV_FILE}"
+      echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${ENV_FILE}"
+      echo INFLUXDB_HTTP_AUTH_ENABLED=true >> "${ENV_FILE}"
+      echo INFLUXDB_DATA_INDEX_VERSION=\"tsi1\" >> "${ENV_FILE}"    
+    else
+      log  "err: cannot create /defaults/influxdb file. you will need to manually configure the datanode"
+      exit 1
+    fi
 
     #create working dirs and file for datanode service
     log "[mkdir_cmd] creating datanode directory structure"
