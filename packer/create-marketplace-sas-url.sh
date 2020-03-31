@@ -42,8 +42,3 @@ az storage blob url \
     --sas-token "${sas}" \
     --name "${source_VHD_file_name}" \
     --output "tsv"
-
-# OSDiskData201912090825.vhd
-# https://influxdata.blob.core.windows.net/vhds/OSDiskData201912090825.vhd
-# --connection-string 'DefaultEndpointsProtocol=https;AccountName=st00009;AccountKey=6L7OWFrlabs7Jn23OaR3rvY5RykpLCNHJhxsbn9ONc+bkCq9z/VNUPNYZRKoEV1FXSrvhqq3aMIDI7N3bSSvPg==;EndpointSuffix=core.windows.net' \
-# https://influxdata.blob.core.windows.net/vhds/OSDiskData201912090825.vhd.vhd?se=2019-12-30T11%3A26%3A20Z&sp=rl&spr=https&sv=2018-11-09&sr=c&sig=Bcnlz1e7ObhXtv4uDp7akpQ2qLom7mAzVNnWsRASSwg%3D

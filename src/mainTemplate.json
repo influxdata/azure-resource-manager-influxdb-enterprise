@@ -108,6 +108,13 @@
         "description": ""
       }
     },
+    "influxdbUsername": {
+      "type": "string",
+      "defaultValue": "admin",
+      "metadata": {
+        "description": "Database username for admin user with ALL PRIVILEGES"
+      }
+    },
     "influxdbPassword": {
       "type": "securestring",
       "defaultValue": "changeME",
@@ -151,7 +158,7 @@
       "Yes": "machines/chronograf-resources.json"
     },
     "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
-    "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'),' -a ', parameters('influxdbPassword'))]",
+    "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
     "ubuntuSettings": {
       "imageReference": {
         "publisher": "Canonical",
@@ -160,7 +167,7 @@
         "version": "latest"
       },
       "managementPort": "22",
-      "extentionSettings": {
+      "extensionSettings": {
         "meta": {
           "publisher": "Microsoft.Azure.Extensions",
           "type": "CustomScript",
@@ -251,7 +258,7 @@
     "lbBackEndPoolsAdded": {
       "backendPools": [
         {
-          "id": "[concat(resourceId('Microsoft.Network/loadBalancers','loadBalancer'),'/backendAddressPools/LBBE')]"
+          "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/backendAddressPools/LBBE')]"
         }
       ]
     },
@@ -268,7 +275,6 @@
     "dataLBSettings7": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings8": "[variables('lbBackendPoolsRemoved')]",
     "dataLBSettings9": "[variables('lbBackendPoolsRemoved')]",
-
     "dataLBSettings": "[variables('lbBackEndPoolsAdded')]",
     "dataSkuSettings": {
       "Standard_D1_v2": {
@@ -361,7 +367,7 @@
             "value": "[parameters('vmSizeMetaNodes')]"
           },
           "namespace": {
-            "value": "metanode"
+            "value": "meta"
           },
           "subnet": {
             "value": "[variables('networkSettings').subnet.meta]"
@@ -443,7 +449,7 @@
             "value": "[parameters('vmDataNodeCount')]"
           },
           "namespace": {
-            "value": "datanode"
+            "value": "data"
           },
           "osSettings": {
             "value": "[variables('osSettings')]"

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euxo pipefail
+
 # If this script fails, check whether the current Azure CLI subscription ID the
 # same one used to created the managed disk. The following command will show the
 # current subscription.
@@ -12,29 +14,23 @@
 
 # check if resource group exist, if not proceed with creating a resource group for this deployment
 
+readonly resource_group="${1}"
+readonly location="${2:-$(az configure --list-defaults --output tsv --query "[?starts_with(name, 'location')].value")}"
 
-echo "Enter the Resource Group name:" &&
-read resourceGroupName &&
-echo "Enter the location [ie centralus, westus]:" &&
-read location &&
-
-rgvar="$((az group show --name $resourceGroupName 2>&1) | grep 'could not be found')"
-if [ -n "$rgvar" ]
-then
-      echo -e "\nThe resourceGroup $resourceGroupName does not exist and will be created\n"
-      az group create --name "${resourceGroupName}" --location "${location}" --output table
-else
-      echo -e "Confirmed resourceGroup $resourceGroupName exist and will be used\n"
+if ! (az group show --name "${resource_group}"); then
+      echo -e "Creating new resource group: \"${resource_group}\"\n"
+      az group create --name "${resource_group}" --location "${location}" --output table
 fi
-# accept the legal terms for the influxdata offer skus (only needs ti be run once for your sunscritopn ID)
-echo -e "\nRuning Azure commands to accepting 'Legal Terms' for InfluxData offer datanode sku\n" 
-az vm image terms accept --urn influxdata:influxdb-enterprise-vm:data:1.7.10
-echo -e "\nRuning Azure commands to accepting 'Legal Terms' for InfluxData offer metanode sku\n" 
-az vm image terms accept --urn influxdata:influxdb-enterprise-vm:meta:1.7.10
+
+# Accept the legal terms for the influxdata offer skus (only needs ti be run once for your sunscritopn ID)
+if ! (az vm image terms show --urn influxdata:influxdb-enterprise-vm:data:1.7.10 --query "accepted"); then
+      az vm image terms accept --urn influxdata:influxdb-enterprise-vm:data:1.7.10
+      az vm image terms accept --urn influxdata:influxdb-enterprise-vm:meta:1.7.10
+fi
 
 az group deployment create \
---template-file src/mainTemplate.json \
---verbose \
---resource-group "${resourceGroupName}" \
---mode Incremental \
---parameters parameters/password.parameters.json
+      --template-file src/mainTemplate.json \
+      --verbose \
+      --resource-group "${resource_group}" \
+      --mode Complete \
+      --parameters parameters/parameters.json

@@ -14,7 +14,8 @@ help()
     echo "This script configures a new InfluxEnterpise cluster deployed with Azure ARM templates."
     echo "Parameters:"
     echo "-n  Configure specific node_type [meta || data || master]"
-    echo "-a  Supply influxdb admin password  cluster nodes - used in case of [master] node only"
+    echo "-u  Supply influxdb admin username  cluster nodes - used in case of [master] node only"
+    echo "-p  Supply influxdb admin password  cluster nodes - used in case of [master] node only"
     echo "-c  Number of datanodes to configure - used in case of [data||master] node configurations"
     echo "-h  view this help content"
 }
@@ -56,7 +57,7 @@ ETC_HOSTS="/etc/hosts"
 
 
 #Loop through options passed
-while getopts :n:c:a:h optname; do
+while getopts :n:c:u:p:h optname; do
   log "Option $optname set"
   case $optname in
     n)  #configure [meta||data||master] nodes
@@ -65,7 +66,10 @@ while getopts :n:c:a:h optname; do
     c) #number os datanodes - used in case of [data||master] nodes configurations
       COUNT="${OPTARG}"
       ;;
-    a) #influxdb admin password - used in case of [master] node configurations only
+    u) #influxdb admin username - used in case of [master] node configurations only
+      INFLUXDB_USER="${OPTARG}"
+      ;;
+    p) #influxdb admin password - used in case of [master] node configurations only
       INFLUXDB_PWD="${OPTARG}"
       ;;
     h) #show help
@@ -95,7 +99,7 @@ setup_metanodes()
       log "[setup_metanodes] hostname already exists : $(grep $HOSTNAME $ETC_HOSTS)"
     else
         for i in $(seq 0 2); do 
-          echo "10.0.0.1${i} metanode-vm${i}" >> /etc/hosts
+          echo "10.0.0.1${i} vmmeta-${i}" >> /etc/hosts
         done        
   fi
 }
@@ -119,7 +123,7 @@ setup_datanodes()
       log "[setup_datanodes] hostname already exists : $(grep $HOSTNAME $ETC_HOSTS)"
     else
         for i in $(seq 0 "${END}"); do 
-          echo "10.0.1.1${i} datanode-vm${i}" >> /etc/hosts
+          echo "10.0.1.1${i} vmdata-${i}" >> /etc/hosts
         done        
   fi
 }
@@ -129,7 +133,7 @@ join_metanodes()
   #joining meatanodes
   log "[influxd-ctl_add-meta] joining 3 metanodes to cluster"
   for i in $(seq 0 2); do 
-    influxd-ctl add-meta  "metanode-vm${i}:8091"
+    influxd-ctl add-meta  "vmmeta-${i}:8091"
   done
 }
 
@@ -140,7 +144,7 @@ join_datanodes()
 
   END=`expr ${COUNT} - 1`
   for i in $(seq 0 "${END}"); do
-    influxd-ctl add-data  "datanode-vm${i}:8088"
+    influxd-ctl add-data  "vmdata-${i}:8088"
   done
 }
 
@@ -200,7 +204,8 @@ configure_datanodes()
 
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
     sed -i "s/\(hostname *= *\).*/\1\"$HOSTNAME\"/" "${DATA_CONFIG_FILE}"
-    sed -i "s/\(auth-enabled *= *\).*/\1false/" "${DATA_CONFIG_FILE}"
+    sed -i "s/\(auth-enabled *= *\).*/\1true/" "${DATA_CONFIG_FILE}"
+    sed -i "s/\(index-version *= *\).*/\1\"tsi1\"/" "${DATA_CONFIG_FILE}"
     sed -i "s/\(marketplace-env *= *\).*/\1\"azure\"/" "${DATA_CONFIG_FILE}"
 
 
@@ -248,11 +253,11 @@ create_user()
 #check service status
 log "[create_user] create influxdb admin user"
 
-payload="q=CREATE USER admin WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
+payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
 
 curl -s -k -X POST \
     -d "${payload}" \
-    "http://datanode-vm0:8086/query"
+    "http://vmdata-0:8086/query"
     
 }
 process_check()
