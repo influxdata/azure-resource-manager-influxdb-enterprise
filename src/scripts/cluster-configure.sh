@@ -203,11 +203,10 @@ configure_datanodes()
     log  "[sed_cmd] updated ${META_CONFIG_FILE} default file values"
 
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
-    sed -i "s/\(hostname *= *\).*/\1\"$HOSTNAME\"/" "${DATA_CONFIG_FILE}"
-    sed -i "s/\(auth-enabled *= *\).*/\1true/" "${DATA_CONFIG_FILE}"
-    sed -i "s/\(index-version *= *\).*/\1\"tsi1\"/" "${DATA_CONFIG_FILE}"
-    sed -i "s/\(marketplace-env *= *\).*/\1\"azure\"/" "${DATA_CONFIG_FILE}"
-
+    echo \"INFLUXDB_HOSTNAME=${HOSTNAME}\" >> "${DATA_CONFIG_FILE}"
+    echo \"INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=azure\" >> "${DATA_CONFIG_FILE}"
+    echo \"INFLUXDB_HTTP_AUTH_ENABLED=true\" >> "${DATA_CONFIG_FILE}"
+    echo \"INFLUXDB_DATA_INDEX_VERSION=tsi1\" >> "${DATA_CONFIG_FILE}"
 
     #create working dirs and file for datanode service
     log "[mkdir_cmd] creating datanode directory structure"
