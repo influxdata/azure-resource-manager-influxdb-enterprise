@@ -53,7 +53,7 @@ META_GEN_FILE="/etc/influxdb/influxdb-meta-generated.conf"
 DATA_GEN_FILE="/etc/influxdb/influxdb-generated.conf"
 META_CONFIG_FILE="/etc/influxdb/influxdb-meta.conf"
 DATA_CONFIG_FILE="/etc/influxdb/influxdb.conf"
-ENV_FILE="/etc/defaults/influxdb"
+ENV_FILE="/etc/default/influxdb"
 ETC_HOSTS="/etc/hosts"
 
 
@@ -205,7 +205,7 @@ configure_datanodes()
 
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
 
-    #create etc/defaults/influxdb file to over-ride configuration defaults
+    #create etc/default/influxdb file to over-ride configuration defaults
     touch "${ENV_FILE}"/influxdb
 
     if [ $? -eq 0 ]; then
@@ -214,7 +214,7 @@ configure_datanodes()
       echo INFLUXDB_HTTP_AUTH_ENABLED=true >> "${ENV_FILE}"
       echo INFLUXDB_DATA_INDEX_VERSION=\"tsi1\" >> "${ENV_FILE}"    
     else
-      log  "err: cannot create /defaults/influxdb file. you will need to manually configure the datanode"
+      log  "err: cannot create /default/influxdb file. you will need to manually configure the datanode"
       exit 1
     fi
 
