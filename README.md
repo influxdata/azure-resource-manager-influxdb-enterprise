@@ -41,6 +41,10 @@ The output from the market place UI is fed directly to the ARM template. You can
     <td>The disk size of the attached data disk. Choose <code>1TiB</code>, <code>512GiB</code>, <code>256GiB</code>, <code>128GiB</code>, <code>64GiB</code> or <code>32GiB</code>.
     </td>
 
+  <tr><td>vmSizeMetaNodes</td><td>string</td>
+    <td>Azure VM size of the meta nodes. The template will provision (3) nodes by default. see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L91">this list for recommended sizes</a>
+    </td></tr>
+
   <tr><td>adminUsername</td><td>string</td>
     <td>Admin username used when provisioning virtual machines
     </td></tr>
