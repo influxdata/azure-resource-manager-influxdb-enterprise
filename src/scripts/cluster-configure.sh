@@ -53,7 +53,8 @@ META_GEN_FILE="/etc/influxdb/influxdb-meta-generated.conf"
 DATA_GEN_FILE="/etc/influxdb/influxdb-generated.conf"
 META_CONFIG_FILE="/etc/influxdb/influxdb-meta.conf"
 DATA_CONFIG_FILE="/etc/influxdb/influxdb.conf"
-ENV_FILE="/etc/default/influxdb"
+META_ENV_FILE="/etc/default/influxdb-meta"
+DATA_ENV_FILE="/etc/default/influxdb"
 ETC_HOSTS="/etc/hosts"
 
 
@@ -169,17 +170,16 @@ configure_metanodes()
     chown influxdb:influxdb "${META_CONFIG_FILE}"
 
     #create etc/default/influxdb file to over-ride configuration defaults
-    touch "${ENV_FILE}"
+    touch "${META_ENV_FILE}"
     if [ $? -eq 0 ]; then
-      echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${ENV_FILE}"
-      echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${ENV_FILE}"
-      echo INFLUXDB_META_DIR=\"/influxdb/meta\" >> "${ENV_FILE}"    
+      echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${META_ENV_FILE}"
+      echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${META_ENV_FILE}"
+      echo INFLUXDB_META_DIR=\"/influxdb/meta\" >> "${META_ENV_FILE}"    
     else
       log  "err: cannot create /etc/default/influxdb file. you will need to manually configure the metanode"
       exit 1
     fi
 
-  
     #create working dir for meatanode service
     log "[mkdir_cmd] creating metanode directory structure"
 
@@ -187,7 +187,7 @@ configure_metanodes()
     chown -R influxdb:influxdb "/influxdb/"
 
   else
-     log  "err: creating file ${META_GEN_FILE}. you will need to manually configure the metanode..."
+     log  "err: creating file ${META_GEN_FILE}. you will need to manually configure the metanode"
      exit 1
   fi
 }
@@ -213,11 +213,11 @@ configure_datanodes()
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
 
     #create etc/default/influxdb file to over-ride configuration defaults
-    touch "${ENV_FILE}"
+    touch "${DATA_ENV_FILE}"
     if [ $? -eq 0 ]; then
-      echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${ENV_FILE}"
-      echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${ENV_FILE}"
-      echo INFLUXDB_DATA_INDEX_VERSION=\"tsi1\" >> "${ENV_FILE}"    
+      echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${DATA_ENV_FILE}"
+      echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${DATA_ENV_FILE}"
+      echo INFLUXDB_DATA_INDEX_VERSION=\"tsi1\" >> "${DATA_ENV_FILE}"    
     else
       log  "err: cannot create /etc/default/influxdb file. you will need to manually configure the datanode"
       exit 1
@@ -233,7 +233,7 @@ configure_datanodes()
     chown -R influxdb:influxdb "/influxdb/"
 
   else
-     log  "err: creating file ${DATA_GEN_FILE}. you will need to manually configure the metanode..."
+     log  "err: creating file ${DATA_GEN_FILE}. you will need to manually configure the metanode"
      exit 1
   fi
 }
