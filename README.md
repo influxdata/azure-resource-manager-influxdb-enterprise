@@ -42,7 +42,7 @@ The output from the market place UI is fed directly to the ARM template. You can
     </td>
 
   <tr><td>vmSizeMetaNodes</td><td>string</td>
-    <td>Azure VM size of the meta nodes. The template will provision (3) nodes by default. see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L91">this list for recommended sizes</a>
+    <td>Azure VM size of the meta nodes. The template will provision (3) nodes. please see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L91"> for list of recommended sizes</a>
     </td></tr>
 
   <tr><td>adminUsername</td><td>string</td>
