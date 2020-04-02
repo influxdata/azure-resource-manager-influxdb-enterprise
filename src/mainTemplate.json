@@ -318,7 +318,7 @@
     },
     "resources": [
         {
-            "name": "[parameters('influxTags').tracking]",
+            "name": "pid-300e07de-2c76-5904-be70-589ac8f15cf8",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-08-01",
             "properties": {
