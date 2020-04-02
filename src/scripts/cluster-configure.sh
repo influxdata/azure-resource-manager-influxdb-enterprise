@@ -160,7 +160,7 @@ configure_metanodes()
     cp -p  "${META_GEN_FILE}" "${META_CONFIG_FILE}"
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
-       log "err: could not copy new "${META_CONFIG_FILE}" file to /etc/influxdb"
+       log "err: could not copy new ${META_CONFIG_FILE} file to /etc/influxdb"
       exit $EXIT_CODE
     fi
     
@@ -203,7 +203,7 @@ configure_datanodes()
     cp -p  "${DATA_GEN_FILE}" "${DATA_CONFIG_FILE}"
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
-       log "err: could not copy new "${DATA_GEN_FILE}" file to /etc/influxdb"
+       log "err: could not copy new ${DATA_GEN_FILE} file to /etc/influxdb"
       exit $EXIT_CODE
     fi
 
