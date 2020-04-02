@@ -1,148 +1,148 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "location": {
-      "type": "string",
-      "metadata": {
-        "description": "Location where resources will be provisioned"
-      }
-    },
-    "networkSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "Network settings object"
-      }
-    },
-    "loadBalancerType": {
-      "type": "string",
-      "defaultValue": "external",
-      "allowedValues": [
-        "internal",
-        "external"
-      ],
-      "metadata": {
-        "description": "Load balancer setting (internal/external)"
-      }
-    },
-    "ilbIpAddress": {
-      "type": "string",
-      "metadata": {
-        "description": "The static IP address to use with the internal load balancer configuration"
-      }
-    }
-  },
-  "variables": {
-    "externalFELBConfig": [
-      {
-        "name": "LBFE",
-        "properties": {
-          "publicIPAddress": {
-            "id": "[resourceId('Microsoft.Network/publicIPAddresses','pip-influxdb')]"
-          }
-        }
-      }
-    ],
-    "internalFELBConfig": [
-      {
-        "Name": "LBFE",
-        "Properties": {
-          "subnet": {
-            "Id": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('networkSettings').virtualNetworkName), '/subnets/', parameters('networkSettings').subnet.meta.name)]"
-          },
-          "privateIPAddress": "[parameters('ilbIpAddress')]",
-          "privateIPAllocationMethod": "Static"
-        }
-      }
-    ],
-    "feLoadBalancerConfig": "[variables(concat(parameters('loadBalancerType'), 'FELBConfig'))]"
-  },
-  "resources": [
-    {
-      "apiVersion": "2019-04-01",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "pip-influxdb",
-      "location": "[parameters('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic"
-      }
-    },
-    {
-      "apiVersion": "2019-04-01",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[parameters('networkSettings').virtualNetworkName]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('networkSettings').addressPrefix]"
-          ]
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location where resources will be provisioned"
+            }
         },
-        "subnets": [
-          {
-            "name": "[parameters('networkSettings').subnet.meta.name]",
-            "properties": {
-              "addressPrefix": "[parameters('networkSettings').subnet.meta.prefix]"
+        "networkSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "Network settings object"
             }
-          },
-          {
-            "name": "[parameters('networkSettings').subnet.data.name]",
-            "properties": {
-              "addressPrefix": "[parameters('networkSettings').subnet.data.prefix]"
+        },
+        "loadBalancerType": {
+            "type": "string",
+            "defaultValue": "external",
+            "allowedValues": [
+                "internal",
+                "external"
+            ],
+            "metadata": {
+                "description": "Load balancer setting (internal/external)"
             }
-          }
-        ]
-      }
+        },
+        "ilbIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The static IP address to use with the internal load balancer configuration"
+            }
+        }
     },
-    {
-      "apiVersion": "2019-04-01",
-      "name": "lb-influxdb",
-      "type": "Microsoft.Network/loadBalancers",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', 'pip-influxdb')]",
-        "[concat('Microsoft.Network/virtualNetworks/', parameters('networkSettings').virtualNetworkName)]"
-      ],
-      "properties": {
-        "frontendIPConfigurations": "[variables('feLoadBalancerConfig')]",
-        "backendAddressPools": [
-          {
-            "name": "LBBE"
-          }
-        ],
-        "loadBalancingRules": [
-          {
-            "name": "influxDB",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/frontendIPConfigurations/LBFE')]"
-              },
-              "backendAddressPool": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/backendAddressPools/LBBE')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8086,
-              "backendPort": 8086,
-              "enableFloatingIP": false,
-              "idleTimeoutInMinutes": 5,
-              "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/probes/influxProbe')]"
-              }
+    "variables": {
+        "externalFELBConfig": [
+            {
+                "name": "LBFE",
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses','pip-influxdb')]"
+                    }
+                }
             }
-          }
         ],
-        "probes": [
-          {
-            "name": "influxProbe",
-            "properties": {
-              "protocol": "tcp",
-              "port": 8086,
-              "intervalInSeconds": 30,
-              "numberOfProbes": 3
+        "internalFELBConfig": [
+            {
+                "Name": "LBFE",
+                "Properties": {
+                    "subnet": {
+                        "Id": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('networkSettings').virtualNetworkName), '/subnets/', parameters('networkSettings').subnet.meta.name)]"
+                    },
+                    "privateIPAddress": "[parameters('ilbIpAddress')]",
+                    "privateIPAllocationMethod": "Static"
+                }
             }
-          }
-        ]
-      }
-    }
-  ]
+        ],
+        "feLoadBalancerConfig": "[variables(concat(parameters('loadBalancerType'), 'FELBConfig'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-04-01",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "pip-influxdb",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            }
+        },
+        {
+            "apiVersion": "2019-04-01",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('networkSettings').virtualNetworkName]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('networkSettings').addressPrefix]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('networkSettings').subnet.meta.name]",
+                        "properties": {
+                            "addressPrefix": "[parameters('networkSettings').subnet.meta.prefix]"
+                        }
+                    },
+                    {
+                        "name": "[parameters('networkSettings').subnet.data.name]",
+                        "properties": {
+                            "addressPrefix": "[parameters('networkSettings').subnet.data.prefix]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2019-04-01",
+            "name": "lb-influxdb",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', 'pip-influxdb')]",
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('networkSettings').virtualNetworkName)]"
+            ],
+            "properties": {
+                "frontendIPConfigurations": "[variables('feLoadBalancerConfig')]",
+                "backendAddressPools": [
+                    {
+                        "name": "LBBE"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "influxDB",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/frontendIPConfigurations/LBFE')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/backendAddressPools/LBBE')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": 8086,
+                            "backendPort": 8086,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 5,
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/probes/influxProbe')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "influxProbe",
+                        "properties": {
+                            "protocol": "tcp",
+                            "port": 8086,
+                            "intervalInSeconds": 30,
+                            "numberOfProbes": 3
+                        }
+                    }
+                ]
+            }
+        }
+    ]
 }

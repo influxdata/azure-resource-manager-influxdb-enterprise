@@ -1,502 +1,502 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "_artifactsLocation": {
-      "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/src/",
-      "metadata": {
-        "description": "The base URI where artifacts required by this template are located, including a trailing '/'"
-      }
-    },
-    "_artifactsLocationSasToken": {
-      "type": "securestring",
-      "defaultValue": "",
-      "metadata": {
-        "description": "The sasToken required to access _artifactsLocation. When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
-      }
-    },
-    "loadBalancerType": { 
-      "type": "string",
-      "defaultValue": "internal",
-      "allowedValues": [
-        "internal",
-        "external"
-      ],
-      "metadata": {
-        "description": "Setup the load balancer internal or external."
-      }
-    },
-    "influxTags": {
-      "type": "object",
-      "defaultValue": {
-        "provider": "influxdata",
-        "tracking": "pid-300e07de-2c76-5904-be70-589ac8f15cf8"
-      },
-      "metadata": {
-        "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
-      }
-    },
-    "chronograf": {
-      "type": "string",
-      "defaultValue": "No",
-      "allowedValues": [
-        "Yes",
-        "No"
-      ],
-      "metadata": {
-        "description": "Provision a machine with Chronograf on it"
-      }
-    },
-    "vmDataDiskSize": {
-      "type": "string",
-      "defaultValue": "32GiB",
-      "allowedValues": [
-        "32GiB",
-        "64GiB",
-        "128GiB",
-        "256GiB",
-        "512GiB",
-        "1TiB"
-      ],
-      "metadata": {
-        "description": "The disk size of each attached managed disk, 32GiB, 64GiB, 128GiB, 256 GiB, 512GiB, 1TiB, 2TiB, 4TiB, 8TiB, 16TiB and 32TiB. Default is 1TiB. For Premium Storage, this equates to P6, P10, P15, P20, P30, P40, P50, P60, P70 and P80, respectively."
-      }
-    },
-    "vmSizeDataNodes": {
-      "type": "string",
-      "defaultValue": "Standard_DS2_v2",
-      "allowedValues": [
-        "Standard_DS1_v2",
-        "Standard_DS2_v2",
-        "Standard_DS3_v2",
-        "Standard_D2s_v3",
-        "Standard_D4s_v3",
-        "Standard_D8s_v3"
-      ],
-      "metadata": {
-        "description": "Size of the InfluxEnterprise data nodes"
-      }
-    },
-    "vmDataNodeCount": {
-      "type": "int",
-      "defaultValue": 2,
-      "metadata": {
-        "description": "Number of InfluxEnterprise data nodes"
-      }
-    },
-    "vmSizeMetaNodes": {
-      "type": "string",
-      "defaultValue": "Standard_D1_v2",
-      "allowedValues": [
-        "Standard_D1_v2",
-        "Standard_D2_v2"
-      ],
-      "metadata": {
-        "description": "Size of the InfluxEnterprise meta nodes, 3 of these will be provisioned"
-      }
-    },
-    "adminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "Admin username used when provisioning virtual machines"
-      }
-    },
-    "password": {
-      "type": "object",
-      "metadata": {
-        "description": ""
-      }
-    },
-    "influxdbUsername": {
-      "type": "string",
-      "defaultValue": "admin",
-      "metadata": {
-        "description": "Database username for admin user with ALL PRIVILEGES"
-      }
-    },
-    "influxdbPassword": {
-      "type": "securestring",
-      "defaultValue": "changeME",
-      "metadata": {
-        "description": "Database password for admin user with ALL PRIVILEGES"
-      }
-    },
-    "location": {
-      "type": "string",
-      "allowedValues": [
-        "ResourceGroup",
-        "westus",
-        "eastus",
-        "eastus2",
-        "centralus",
-        "southcentralus",
-        "northcentralus",
-        "eastasia",
-        "southeastasia",
-        "westeurope",
-        "northeurope"
-      ],
-      "defaultValue": "ResourceGroup",
-      "metadata": {
-        "description": "Location where resources will be provisioned.  A value of 'ResourceGroup' will deploy the resource to the same location of the resource group the resources are provisioned into"
-      }
-    },
-    "virtualNetworkName": {
-      "type": "string",
-      "defaultValue": "influx-vnet",
-      "metadata": {
-        "description": "Virtual Network"
-      }
-    }
-  },
-  "variables": {
-    "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
-    "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
-    "chronografTemplates": {
-      "No": "empty/empty-resources.json",
-      "Yes": "machines/chronograf-resources.json"
-    },
-    "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
-    "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
-    "ubuntuSettings": {
-      "imageReference": {
-        "publisher": "Canonical",
-        "offer": "UbuntuServer",
-        "sku": "18.04-LTS",
-        "version": "latest"
-      },
-      "managementPort": "22",
-      "extensionSettings": {
-        "meta": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "autoUpgradeMinorVersion": true,
-          "settings": {
-            "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]", 
-              "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
-                    ],
-                "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
-          }
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "defaultValue": "https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/master/src/",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located, including a trailing '/'"
+            }
         },
-        "data": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "autoUpgradeMinorVersion": true,
-          "settings": {
-            "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
-              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
-                    ],
-                "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
-          }
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation. When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            }
         },
-        "master": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "autoUpgradeMinorVersion": true,
-          "settings": {
-            "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
-              "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
-                    ],
-                "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
-          }
+        "loadBalancerType": {
+            "type": "string",
+            "defaultValue": "internal",
+            "allowedValues": [
+                "internal",
+                "external"
+            ],
+            "metadata": {
+                "description": "Setup the load balancer internal or external."
+            }
+        },
+        "influxTags": {
+            "type": "object",
+            "defaultValue": {
+                "provider": "influxdata",
+                "tracking": "pid-300e07de-2c76-5904-be70-589ac8f15cf8"
+            },
+            "metadata": {
+                "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
+            }
         },
         "chronograf": {
-          "publisher": "Microsoft.Azure.Extensions",
-          "type": "CustomScript",
-          "typeHandlerVersion": "2.0",
-          "autoUpgradeMinorVersion": true,
-          "settings": {
-            "fileUris": [
-              "[concat(parameters('_artifactsLocation'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
-                    ],
-                "commandToExecute": "bash chronograf-install.sh"
-          }
-        }
-      }
-    },
-    "OS": "ubuntu",
-    "osSettings": "[variables(concat(variables('OS'), 'Settings'))]",
-    "locationMap": {
-      "ResourceGroup": "[resourceGroup().location]",
-      "westus": "[parameters('location')]",
-      "eastus": "[parameters('location')]",
-      "eastus2": "[parameters('location')]",
-      "centralus": "[parameters('location')]",
-      "southcentralus": "[parameters('location')]",
-      "northcentralus": "[parameters('location')]",
-      "eastasia": "[parameters('location')]",
-      "southeastasia": "[parameters('location')]",
-      "westeurope": "[parameters('location')]",
-      "northeurope": "[parameters('location')]"
-    },
-    "location": "[variables('locationMap')[parameters('location')]]",
-    "metaNodesIpPrefix": "10.0.0.1",
-    "dataNodesIpPrefix": "10.0.1.1",
-    "networkSettings": {
-      "virtualNetworkName": "[parameters('virtualNetworkName')]",
-      "addressPrefix": "10.0.0.0/16",
-      "subnet": {
-        "meta": {
-          "name": "meta",
-          "prefix": "10.0.0.0/24",
-          "vnet": "[parameters('virtualNetworkName')]"
+            "type": "string",
+            "defaultValue": "No",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "metadata": {
+                "description": "Provision a machine with Chronograf on it"
+            }
         },
-        "data": {
-          "name": "data",
-          "prefix": "10.0.1.0/24",
-          "vnet": "[parameters('virtualNetworkName')]"
+        "vmDataDiskSize": {
+            "type": "string",
+            "defaultValue": "32GiB",
+            "allowedValues": [
+                "32GiB",
+                "64GiB",
+                "128GiB",
+                "256GiB",
+                "512GiB",
+                "1TiB"
+            ],
+            "metadata": {
+                "description": "The disk size of each attached managed disk, 32GiB, 64GiB, 128GiB, 256 GiB, 512GiB, 1TiB, 2TiB, 4TiB, 8TiB, 16TiB and 32TiB. Default is 1TiB. For Premium Storage, this equates to P6, P10, P15, P20, P30, P40, P50, P60, P70 and P80, respectively."
+            }
+        },
+        "vmSizeDataNodes": {
+            "type": "string",
+            "defaultValue": "Standard_DS2_v2",
+            "allowedValues": [
+                "Standard_DS1_v2",
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_D2s_v3",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3"
+            ],
+            "metadata": {
+                "description": "Size of the InfluxEnterprise data nodes"
+            }
+        },
+        "vmDataNodeCount": {
+            "type": "int",
+            "defaultValue": 2,
+            "metadata": {
+                "description": "Number of InfluxEnterprise data nodes"
+            }
+        },
+        "vmSizeMetaNodes": {
+            "type": "string",
+            "defaultValue": "Standard_D1_v2",
+            "allowedValues": [
+                "Standard_D1_v2",
+                "Standard_D2_v2"
+            ],
+            "metadata": {
+                "description": "Size of the InfluxEnterprise meta nodes, 3 of these will be provisioned"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin username used when provisioning virtual machines"
+            }
+        },
+        "password": {
+            "type": "object",
+            "metadata": {
+                "description": ""
+            }
+        },
+        "influxdbUsername": {
+            "type": "string",
+            "defaultValue": "admin",
+            "metadata": {
+                "description": "Database username for admin user with ALL PRIVILEGES"
+            }
+        },
+        "influxdbPassword": {
+            "type": "securestring",
+            "defaultValue": "changeME",
+            "metadata": {
+                "description": "Database password for admin user with ALL PRIVILEGES"
+            }
+        },
+        "location": {
+            "type": "string",
+            "allowedValues": [
+                "ResourceGroup",
+                "westus",
+                "eastus",
+                "eastus2",
+                "centralus",
+                "southcentralus",
+                "northcentralus",
+                "eastasia",
+                "southeastasia",
+                "westeurope",
+                "northeurope"
+            ],
+            "defaultValue": "ResourceGroup",
+            "metadata": {
+                "description": "Location where resources will be provisioned.  A value of 'ResourceGroup' will deploy the resource to the same location of the resource group the resources are provisioned into"
+            }
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "influx-vnet",
+            "metadata": {
+                "description": "Virtual Network"
+            }
         }
-      }
     },
-    "lbBackEndPoolsAdded": {
-      "backendPools": [
+    "variables": {
+        "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "chronografTemplates": {
+            "No": "empty/empty-resources.json",
+            "Yes": "machines/chronograf-resources.json"
+        },
+        "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
+        "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
+        "ubuntuSettings": {
+            "imageReference": {
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "18.04-LTS",
+                "version": "latest"
+            },
+            "managementPort": "22",
+            "extensionSettings": {
+                "meta": {
+                    "publisher": "Microsoft.Azure.Extensions",
+                    "type": "CustomScript",
+                    "typeHandlerVersion": "2.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                        "fileUris": [
+                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]",
+                            "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
+                        ],
+                        "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
+                    }
+                },
+                "data": {
+                    "publisher": "Microsoft.Azure.Extensions",
+                    "type": "CustomScript",
+                    "typeHandlerVersion": "2.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                        "fileUris": [
+                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
+                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                        ],
+                        "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
+                    }
+                },
+                "master": {
+                    "publisher": "Microsoft.Azure.Extensions",
+                    "type": "CustomScript",
+                    "typeHandlerVersion": "2.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                        "fileUris": [
+                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
+                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                        ],
+                        "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
+                    }
+                },
+                "chronograf": {
+                    "publisher": "Microsoft.Azure.Extensions",
+                    "type": "CustomScript",
+                    "typeHandlerVersion": "2.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                        "fileUris": [
+                            "[concat(parameters('_artifactsLocation'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
+                        ],
+                        "commandToExecute": "bash chronograf-install.sh"
+                    }
+                }
+            }
+        },
+        "OS": "ubuntu",
+        "osSettings": "[variables(concat(variables('OS'), 'Settings'))]",
+        "locationMap": {
+            "ResourceGroup": "[resourceGroup().location]",
+            "westus": "[parameters('location')]",
+            "eastus": "[parameters('location')]",
+            "eastus2": "[parameters('location')]",
+            "centralus": "[parameters('location')]",
+            "southcentralus": "[parameters('location')]",
+            "northcentralus": "[parameters('location')]",
+            "eastasia": "[parameters('location')]",
+            "southeastasia": "[parameters('location')]",
+            "westeurope": "[parameters('location')]",
+            "northeurope": "[parameters('location')]"
+        },
+        "location": "[variables('locationMap')[parameters('location')]]",
+        "metaNodesIpPrefix": "10.0.0.1",
+        "dataNodesIpPrefix": "10.0.1.1",
+        "networkSettings": {
+            "virtualNetworkName": "[parameters('virtualNetworkName')]",
+            "addressPrefix": "10.0.0.0/16",
+            "subnet": {
+                "meta": {
+                    "name": "meta",
+                    "prefix": "10.0.0.0/24",
+                    "vnet": "[parameters('virtualNetworkName')]"
+                },
+                "data": {
+                    "name": "data",
+                    "prefix": "10.0.1.0/24",
+                    "vnet": "[parameters('virtualNetworkName')]"
+                }
+            }
+        },
+        "lbBackEndPoolsAdded": {
+            "backendPools": [
+                {
+                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/backendAddressPools/LBBE')]"
+                }
+            ]
+        },
+        "lbBackendPoolsRemoved": {
+            "backendPools": []
+        },
+        "dataLBSettings0": "[variables('lbBackEndPoolsAdded')]",
+        "dataLBSettings1": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings2": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings3": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings4": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings5": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings6": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings7": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings8": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings9": "[variables('lbBackendPoolsRemoved')]",
+        "dataLBSettings": "[variables('lbBackEndPoolsAdded')]",
+        "dataSkuSettings": {
+            "Standard_D1_v2": {
+                "storageAccountType": "Standard_LRS"
+            },
+            "Standard_D2_v2": {
+                "storageAccountType": "Standard_LRS"
+            },
+            "Standard_DS1_v2": {
+                "storageAccountType": "Premium_LRS"
+            },
+            "Standard_DS2_v2": {
+                "storageAccountType": "Premium_LRS"
+            },
+            "Standard_DS3_v2": {
+                "storageAccountType": "Premium_LRS"
+            },
+            "Standard_D2s_v3": {
+                "storageAccountType": "Premium_LRS"
+            },
+            "Standard_D4s_v3": {
+                "storageAccountType": "Premium_LRS"
+            },
+            "Standard_D8s_v3": {
+                "storageAccountType": "Premium_LRS"
+            }
+        },
+        "dataDiskSizes": {
+            "32GiB": 32,
+            "64GiB": 64,
+            "128GiB": 128,
+            "256GiB": 256,
+            "512GiB": 512,
+            "1TiB": 1024
+        },
+        "dataNodeStorageSettings": {
+            "accountType": "[variables('dataSkuSettings')[parameters('vmSizeDataNodes')].storageAccountType]",
+            "diskSize": "[variables('dataDiskSizes')[parameters('vmDataDiskSize')]]"
+        },
+        "dataTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/datanodes-resources.json', parameters('_artifactsLocationSasToken')))]"
+    },
+    "resources": [
         {
-          "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/backendAddressPools/LBBE')]"
-        }
-      ]
-    },
-    "lbBackendPoolsRemoved": {
-      "backendPools": []
-    },
-    "dataLBSettings0": "[variables('lbBackEndPoolsAdded')]",
-    "dataLBSettings1": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings2": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings3": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings4": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings5": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings6": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings7": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings8": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings9": "[variables('lbBackendPoolsRemoved')]",
-    "dataLBSettings": "[variables('lbBackEndPoolsAdded')]",
-    "dataSkuSettings": {
-      "Standard_D1_v2": {
-        "storageAccountType": "Standard_LRS"
-      },
-      "Standard_D2_v2": {
-        "storageAccountType": "Standard_LRS"
-      },
-      "Standard_DS1_v2": {
-        "storageAccountType": "Premium_LRS"
-      },
-      "Standard_DS2_v2": {
-        "storageAccountType": "Premium_LRS"
-      },
-      "Standard_DS3_v2": {
-        "storageAccountType": "Premium_LRS"
-      },
-      "Standard_D2s_v3": {
-        "storageAccountType": "Premium_LRS"
-      },
-      "Standard_D4s_v3": {
-        "storageAccountType": "Premium_LRS"
-      },
-      "Standard_D8s_v3": {
-        "storageAccountType": "Premium_LRS"
-      }
-    },
-    "dataDiskSizes": {
-      "32GiB": 32,
-      "64GiB": 64,
-      "128GiB": 128,
-      "256GiB": 256,
-      "512GiB": 512,
-      "1TiB": 1024
-    },
-    "dataNodeStorageSettings": {
-      "accountType": "[variables('dataSkuSettings')[parameters('vmSizeDataNodes')].storageAccountType]",
-      "diskSize": "[variables('dataDiskSizes')[parameters('vmDataDiskSize')]]"
-    },
-    "dataTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/datanodes-resources.json', parameters('_artifactsLocationSasToken')))]"
-  },
-  "resources": [
-    {
-      "name": "[parameters('influxTags').tracking]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-08-01",
-      "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "resources": []
-        }
-      }
-    },
-    {
-      "name": "metanodes",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-08-01",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'shared')]",
-        "[concat('Microsoft.Resources/deployments/', 'datanodes')]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('metaTemplateUrl')]",
-          "contentVersion": "1.0.0.0"
+            "name": "[parameters('influxTags').tracking]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
         },
-        "parameters": {
-          "adminUsername": {
-            "value": "[parameters('adminUsername')]"
-          },
-          "password": {
-            "value": "[parameters('password')]"
-          },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
-          },
-          "metaNodesIpPrefix": {
-            "value": "[variables('metaNodesIpPrefix')]"
-          },
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "influxTags": {
-            "value": "[parameters('influxTags')]"
-          },
-          "vmSize": {
-            "value": "[parameters('vmSizeMetaNodes')]"
-          },
-          "namespace": {
-            "value": "meta"
-          },
-          "subnet": {
-            "value": "[variables('networkSettings').subnet.meta]"
-          },
-          "osSettings": {
-            "value": "[variables('osSettings')]"
-          }
-        }
-      }
-    },
-    {
-      "name": "shared",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-08-01",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('sharedTemplateUrl')]",
-          "contentVersion": "1.0.0.0"
+        {
+            "name": "metanodes",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'shared')]",
+                "[concat('Microsoft.Resources/deployments/', 'datanodes')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('metaTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "password": {
+                        "value": "[parameters('password')]"
+                    },
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "metaNodesIpPrefix": {
+                        "value": "[variables('metaNodesIpPrefix')]"
+                    },
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "influxTags": {
+                        "value": "[parameters('influxTags')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('vmSizeMetaNodes')]"
+                    },
+                    "namespace": {
+                        "value": "meta"
+                    },
+                    "subnet": {
+                        "value": "[variables('networkSettings').subnet.meta]"
+                    },
+                    "osSettings": {
+                        "value": "[variables('osSettings')]"
+                    }
+                }
+            }
         },
-        "parameters": {
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "networkSettings": {
-            "value": "[variables('networkSettings')]"
-          },
-          "loadBalancerType": {
-            "value": "[parameters('loadBalancerType')]"
-          },
-          "ilbIpAddress": {
-            "value": "10.0.0.100"
-          }
-        }
-      }
-    },
-    {
-      "name": "datanodes",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-08-01",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'shared')]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('dataTemplateUrl')]",
-          "contentVersion": "1.0.0.0"
+        {
+            "name": "shared",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('sharedTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
+                    },
+                    "loadBalancerType": {
+                        "value": "[parameters('loadBalancerType')]"
+                    },
+                    "ilbIpAddress": {
+                        "value": "10.0.0.100"
+                    }
+                }
+            }
         },
-        "parameters": {
-          "adminUsername": {
-            "value": "[parameters('adminUsername')]"
-          },
-          "password": {
-            "value": "[parameters('password')]"
-          },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
-          },
-          "dataNodesIpPrefix": {
-            "value": "[variables('dataNodesIpPrefix')]"
-          },
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "influxTags": {
-            "value": "[parameters('influxTags')]"
-          },
-          "storageSettings": {
-            "value": "[variables('dataNodeStorageSettings')]"
-          },
-          "subnet": {
-            "value": "[variables('networkSettings').subnet.data]"
-          },
-          "vmSize": {
-            "value": "[parameters('vmSizeDataNodes')]"
-          },
-          "vmCount": {
-            "value": "[parameters('vmDataNodeCount')]"
-          },
-          "namespace": {
-            "value": "data"
-          },
-          "osSettings": {
-            "value": "[variables('osSettings')]"
-          },
-          "lbBackendPools": {
-            "value": "[variables('dataLBSettings')]"
-          }
-        }
-      }
-    },
-     {
-      "name": "chronograf",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-08-01",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'shared')]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('chronografTemplateUrl')]",
-          "contentVersion": "1.0.0.0"
+        {
+            "name": "datanodes",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'shared')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('dataTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "password": {
+                        "value": "[parameters('password')]"
+                    },
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "dataNodesIpPrefix": {
+                        "value": "[variables('dataNodesIpPrefix')]"
+                    },
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "influxTags": {
+                        "value": "[parameters('influxTags')]"
+                    },
+                    "storageSettings": {
+                        "value": "[variables('dataNodeStorageSettings')]"
+                    },
+                    "subnet": {
+                        "value": "[variables('networkSettings').subnet.data]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('vmSizeDataNodes')]"
+                    },
+                    "vmCount": {
+                        "value": "[parameters('vmDataNodeCount')]"
+                    },
+                    "namespace": {
+                        "value": "data"
+                    },
+                    "osSettings": {
+                        "value": "[variables('osSettings')]"
+                    },
+                    "lbBackendPools": {
+                        "value": "[variables('dataLBSettings')]"
+                    }
+                }
+            }
         },
-        "parameters": {
-          "adminUsername": {
-            "value": "[parameters('adminUsername')]"
-          },
-          "influxTags": {
-            "value": "[parameters('influxTags')]"
-          },
-          "password": {
-            "value": "[parameters('password')]"
-          },
-          "_artifactsLocation": {
-            "value": "[parameters('_artifactsLocation')]"
-          },
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "subnet": {
-            "value": "[variables('networkSettings').subnet.data]"
-          },
-          "osSettings": {
-            "value": "[variables('osSettings')]"
-          }
+        {
+            "name": "chronograf",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'shared')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('chronografTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "influxTags": {
+                        "value": "[parameters('influxTags')]"
+                    },
+                    "password": {
+                        "value": "[parameters('password')]"
+                    },
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "subnet": {
+                        "value": "[variables('networkSettings').subnet.data]"
+                    },
+                    "osSettings": {
+                        "value": "[variables('osSettings')]"
+                    }
+                }
+            }
         }
-      }
-    }
-  ]
+    ]
 }

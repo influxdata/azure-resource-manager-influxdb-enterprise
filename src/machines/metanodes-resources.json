@@ -1,299 +1,297 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "_artifactsLocation": {
-      "type": "string",
-      "metadata": {
-        "description": "Base uri of resources"
-      }
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Base uri of resources"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin username used when provisioning virtual machines"
+            }
+        },
+        "password": {
+            "type": "object",
+            "metadata": {
+                "description": "Admin password used when provisioning virtual machines"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "West US",
+            "metadata": {
+                "description": "Location where resources will be provisioned"
+            }
+        },
+        "influxTags": {
+            "type": "object",
+            "defaultValue": {
+                "provider": "influxdata"
+            },
+            "metadata": {
+                "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
+            }
+        },
+        "namespace": {
+            "type": "string",
+            "metadata": {
+                "description": "The namespace for resources created by this template"
+            }
+        },
+        "subnet": {
+            "type": "object",
+            "metadata": {
+                "description": "The VNET and Subnet to deploy the nodes in to"
+            }
+        },
+        "metaNodesIpPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "IP Prefix used to append index for static addresses"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_A0",
+            "metadata": {
+                "description": "Size of the InfluxEnterprise meta nodes"
+            }
+        },
+        "osSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "InfluxEnterprise deployment platform settings"
+            }
+        }
     },
-    "adminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "Admin username used when provisioning virtual machines"
-      }
+    "variables": {
+        "subnetRef": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('subnet').vnet), '/subnets/', parameters('subnet').name)]"
     },
-    "password": {
-      "type": "object",
-      "metadata": {
-        "description": "Admin password used when provisioning virtual machines"
-      }
-    },
-    "location": {
-      "type": "string",
-      "defaultValue": "West US",
-      "metadata": {
-        "description": "Location where resources will be provisioned"
-      }
-    },
-    "influxTags": {
-      "type": "object",
-      "defaultValue": {
-        "provider": "influxdata"
-      },
-      "metadata": {
-        "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
-      }
-    },
-    "namespace": {
-      "type": "string",
-      "metadata": {
-        "description": "The namespace for resources created by this template"
-      }
-    },
-    "subnet": {
-      "type": "object",
-      "metadata": {
-        "description": "The VNET and Subnet to deploy the nodes in to"
-      }
-    },
-    "metaNodesIpPrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "IP Prefix used to append index for static addresses"
-      }
-    },
-    "vmSize": {
-      "type": "string",
-      "defaultValue": "Standard_A0",
-      "metadata": {
-        "description": "Size of the InfluxEnterprise meta nodes"
-      }
-    },
-    "osSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "InfluxEnterprise deployment platform settings"
-      }
-    }
-  },
-  "variables": {
-    "subnetRef": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('subnet').vnet), '/subnets/', parameters('subnet').name)]"
-  },
-  "resources": [
-    {
-      "apiVersion": "2019-03-01",
-      "type": "Microsoft.Compute/availabilitySets",
-      "name": "[concat('avail-', parameters('namespace'))]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "platformUpdateDomainCount": 3,
-        "platformFaultDomainCount": 3
-      },
-      "sku": {
-        "name": "Aligned"
-     }
-    },
-    {
-      "apiVersion": "2019-04-01",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat('nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
-      "location": "[parameters('location')]",
-      "copy": {
-        "name": "metaNodesNicLoop",
-        "count": 3
-      },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
+    "resources": [
+        {
+            "apiVersion": "2019-03-01",
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[concat('avail-', parameters('namespace'))]",
+            "location": "[parameters('location')]",
             "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[concat(parameters('metaNodesIpPrefix'), copyindex())]",
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
+                "platformUpdateDomainCount": 3,
+                "platformFaultDomainCount": 3
+            },
+            "sku": {
+                "name": "Aligned"
             }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2019-08-01",
-      "type": "Microsoft.Resources/deployments",
-      "name": "[concat('osProfileMeta', copyindex())]",
-      "copy": {
-        "name": "osProfileLoop",
-        "count": 3
-      },
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(parameters('_artifactsLocation'), 'partials/osProfile-resources.json')]",
-          "contentVersion": "1.0.0.0"
         },
-        "parameters": {
-          "adminUserName": {
-            "value": "[parameters('adminUsername')]"
-          },
-          "password": {
-            "value": "[parameters('password')]"
-          },
-          "computerName": {
-            "value": "[concat('vm', parameters('namespace'), '-', copyindex())]"
-          }
-        }
-      }
-    },
-    {
-      "apiVersion": "2019-07-01",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "provider": "[toUpper(parameters('influxTags').provider)]"
-      },
-      "plan": {
-        "name": "meta",
-        "product": "influxdb-enterprise-vm",
-        "publisher": "influxdata"
-      },
-      "copy": {
-        "name": "metanodeVmLoop",
-        "count": 2
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1))]",
-        "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
-        "[concat('Microsoft.Resources/deployments/', 'osProfileMeta', copyindex(1))]"
-      ],
-      "properties": {
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
-        },
-        "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
-        },
-        "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta', copyindex(1)), '2019-05-01').outputs.osProfile.value]",
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "influxdata",
-            "offer": "influxdb-enterprise-vm",
-            "sku": "meta",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "[concat('vm', parameters('namespace'), '-', copyindex(1), '-osdisk')]",
-            "createOption": "FromImage",
-            "diskSizeGB": 32,
-            "managedDisk": {
-            "storageAccountType": "Standard_LRS"
-          }
-        },
-          "dataDisks": [
-          {
-            "lun": 0,
-            "diskSizeGB": 32,
-            "name": "[concat('vm', parameters('namespace'),'-', copyindex(1), '-datadisk')]",
-            "caching": "None",
-            "createOption": "Empty",
-            "managedDisk": {
-              "storageAccountType": "Standard_LRS"
-              }
-            }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1)))]"
-            }
-          ]
-        }
-      },
-      
-       "resources": [
-          {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat('vm', parameters('namespace'),'-', copyindex(1), '/configureMetanode',copyindex(1))]",
-            "apiVersion": "2019-07-01",
+        {
+            "apiVersion": "2019-04-01",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat('nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
             "location": "[parameters('location')]",
-            "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-', copyindex(1))]"
-              ],
-            "properties": "[parameters('osSettings').extensionSettings.meta]"
-        }
-      ]
-    },
-    {
-      "apiVersion": "2019-07-01",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat('vm', parameters('namespace'), '-0')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "provider": "[toUpper(parameters('influxTags').provider)]"
-      },
-      "plan": {
-        "name": "meta",
-        "product": "influxdb-enterprise-vm",
-        "publisher": "influxdata"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', 'nic-0-vm', parameters('namespace'), '-0')]",
-        "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
-        "[concat('Microsoft.Resources/deployments/', 'osProfileMeta0')]",
-        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-1','/extensions/', 'configureMetanode1')]",
-        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-2','/extensions/', 'configureMetanode2')]"
-      ],
-      "properties": {
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
-        },
-        "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
-        },
-        "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta0'), '2019-05-01').outputs.osProfile.value]",
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "influxdata",
-            "offer": "influxdb-enterprise-vm",
-            "sku": "meta",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "[concat('vm', parameters('namespace'), '-0', '-osdisk')]",
-            "createOption": "FromImage",
-            "diskSizeGB": 32,
-            "managedDisk": {
-            "storageAccountType": "Standard_LRS"
-          }
-        },
-          "dataDisks": [
-          {
-            "lun": 0,
-            "diskSizeGB": 32,
-            "name": "[concat('vm', parameters('namespace'),'-0', '-datadisk')]",
-            "caching": "None",
-            "createOption": "Empty",
-            "managedDisk": {
-              "storageAccountType": "Standard_LRS"
-              }
+            "copy": {
+                "name": "metaNodesNicLoop",
+                "count": 3
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[concat(parameters('metaNodesIpPrefix'), copyindex())]",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
             }
-          ]
         },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-0-vm', parameters('namespace'), '-0'))]"
+        {
+            "apiVersion": "2019-08-01",
+            "type": "Microsoft.Resources/deployments",
+            "name": "[concat('osProfileMeta', copyindex())]",
+            "copy": {
+                "name": "osProfileLoop",
+                "count": 3
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), 'partials/osProfile-resources.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUserName": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "password": {
+                        "value": "[parameters('password')]"
+                    },
+                    "computerName": {
+                        "value": "[concat('vm', parameters('namespace'), '-', copyindex())]"
+                    }
+                }
             }
-          ]
-        }
-      },
-      
-       "resources": [
-          {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat('vm', parameters('namespace'),'-0', '/configureMaster0')]",
+        },
+        {
             "apiVersion": "2019-07-01",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
             "location": "[parameters('location')]",
+            "tags": {
+                "provider": "[toUpper(parameters('influxTags').provider)]"
+            },
+            "plan": {
+                "name": "meta",
+                "product": "influxdb-enterprise-vm",
+                "publisher": "influxdata"
+            },
+            "copy": {
+                "name": "metanodeVmLoop",
+                "count": 2
+            },
             "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-0')]"
-              ],
-            "properties": "[parameters('osSettings').extensionSettings.master]"
+                "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1))]",
+                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
+                "[concat('Microsoft.Resources/deployments/', 'osProfileMeta', copyindex(1))]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta', copyindex(1)), '2019-05-01').outputs.osProfile.value]",
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "influxdata",
+                        "offer": "influxdb-enterprise-vm",
+                        "sku": "meta",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat('vm', parameters('namespace'), '-', copyindex(1), '-osdisk')]",
+                        "createOption": "FromImage",
+                        "diskSizeGB": 32,
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "diskSizeGB": 32,
+                            "name": "[concat('vm', parameters('namespace'),'-', copyindex(1), '-datadisk')]",
+                            "caching": "None",
+                            "createOption": "Empty",
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1)))]"
+                        }
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat('vm', parameters('namespace'),'-', copyindex(1), '/configureMetanode',copyindex(1))]",
+                    "apiVersion": "2019-07-01",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-', copyindex(1))]"
+                    ],
+                    "properties": "[parameters('osSettings').extensionSettings.meta]"
+                }
+            ]
+        },
+        {
+            "apiVersion": "2019-07-01",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat('vm', parameters('namespace'), '-0')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "provider": "[toUpper(parameters('influxTags').provider)]"
+            },
+            "plan": {
+                "name": "meta",
+                "product": "influxdb-enterprise-vm",
+                "publisher": "influxdata"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', 'nic-0-vm', parameters('namespace'), '-0')]",
+                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
+                "[concat('Microsoft.Resources/deployments/', 'osProfileMeta0')]",
+                "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-1','/extensions/', 'configureMetanode1')]",
+                "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-2','/extensions/', 'configureMetanode2')]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta0'), '2019-05-01').outputs.osProfile.value]",
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "influxdata",
+                        "offer": "influxdb-enterprise-vm",
+                        "sku": "meta",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat('vm', parameters('namespace'), '-0', '-osdisk')]",
+                        "createOption": "FromImage",
+                        "diskSizeGB": 32,
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "diskSizeGB": 32,
+                            "name": "[concat('vm', parameters('namespace'),'-0', '-datadisk')]",
+                            "caching": "None",
+                            "createOption": "Empty",
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic-0-vm', parameters('namespace'), '-0'))]"
+                        }
+                    ]
+                }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat('vm', parameters('namespace'),'-0', '/configureMaster0')]",
+                    "apiVersion": "2019-07-01",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-0')]"
+                    ],
+                    "properties": "[parameters('osSettings').extensionSettings.master]"
+                }
+            ]
         }
-      ]
-    }
-  ],
-      "outputs": {}
+    ],
+    "outputs": {}
 }
