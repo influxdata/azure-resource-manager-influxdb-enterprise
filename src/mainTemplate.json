@@ -87,7 +87,7 @@
     },
     "vmSizeMetaNodes": {
       "type": "string",
-      "defaultValue": " ",
+      "defaultValue": "Standard_D1_v2",
       "allowedValues": [
         "Standard_D1_v2",
         "Standard_D2_v2"

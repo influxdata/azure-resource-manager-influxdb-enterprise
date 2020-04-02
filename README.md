@@ -25,8 +25,8 @@ The output from the market place UI is fed directly to the ARM template. You can
     </td></tr>
 
   <tr><td>chronograf</td><td>string</td>
-    <td>Either <code>Yes</code> or <code>No</code> provision an extra machine with a public IP that
-    has Chronograf installed on it.
+    <td>Either <code>Yes</code> or <code>No</code> provision an extra machine with a public IP tha thas Chronograf installed on it.
+    This can also be used as a jumpbox to connect and manage other virtual machines on the internal network.
     </td></tr>
 
   <tr><td>vmSizeDataNodes</td><td>string</td>
@@ -40,6 +40,10 @@ The output from the market place UI is fed directly to the ARM template. You can
   <tr><td>vmDataNodeDiskSize</td><td>string</td>
     <td>The disk size of the attached data disk. Choose <code>1TiB</code>, <code>512GiB</code>, <code>256GiB</code>, <code>128GiB</code>, <code>64GiB</code> or <code>32GiB</code>.
     </td>
+
+  <tr><td>vmSizeMetaNodes</td><td>string</td>
+    <td>Azure VM size of the meta nodes. The template will provision (3) nodes, please see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L91"> for list of recommended sizes</a>
+    </td></tr>
 
   <tr><td>adminUsername</td><td>string</td>
     <td>Admin username used when provisioning virtual machines
