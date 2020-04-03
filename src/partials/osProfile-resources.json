@@ -16,7 +16,7 @@
         "password_osProfile": {
             "computername": "[parameters('computerName')]",
             "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('password').password]"
+            "adminPassword": "[if(empty(parameters('password').password]'), json('null'))]"
         },
         "sshPublicKey_osProfile": {
             "computername": "[parameters('computerName')]",
@@ -27,7 +27,7 @@
                     "publicKeys": [
                         {
                             "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-                            "keyData": "[parameters('password').sshPublicKey]"
+                            "keyData": "[if(empty(parameters('password').sshPublicKey]'), json('null'))]"
                         }
                     ]
                 }
