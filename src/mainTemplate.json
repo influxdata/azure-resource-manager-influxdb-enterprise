@@ -330,11 +330,6 @@
         },
         "password": {
             "type": "object",
-            "defaultValue": {
-                "password": "changeMe!4",
-                "sshPublicKey": null,
-                "authenticationType": "password"
-            },
             "metadata": {
                 "description": "Password is a complex object parameter, we support both authenticating through username/pass or ssh keys."
             }
