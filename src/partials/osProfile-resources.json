@@ -9,7 +9,12 @@
             "type": "securestring"
         },
         "password": {
-            "type": "object"
+            "type": "object",
+            "defaultValue": {
+                "password": "changeMe!4",
+                "sshPublicKey": null,
+                "authenticationType": "password"
+            }
         }
     },
     "variables": {
