@@ -382,6 +382,11 @@
         }
     },
     "variables": {
+        "password": {
+            "password": "[if(empty(parameters('password').password), json('null'), parameters('password').password)]",
+            "authenticationType": "[parameters('password').authenticationType]",
+            "sshPublicKey": "[if(empty(parameters('password').sshPublicKey), json('null'), parameters('password').sshPublicKey)]"
+        },
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
         "chronografTemplates": {
@@ -582,7 +587,7 @@
                         "value": "[parameters('adminUsername')]"
                     },
                     "password": {
-                        "value": "[parameters('password')]"
+                        "value": "[variables('password')]"
                     },
                     "_artifactsLocation": {
                         "value": "[parameters('_artifactsLocation')]"
@@ -655,7 +660,7 @@
                         "value": "[parameters('adminUsername')]"
                     },
                     "password": {
-                        "value": "[parameters('password')]"
+                        "value": "[variables('password')]"
                     },
                     "_artifactsLocation": {
                         "value": "[parameters('_artifactsLocation')]"
@@ -714,7 +719,7 @@
                         "value": "[parameters('influxTags')]"
                     },
                     "password": {
-                        "value": "[parameters('password')]"
+                        "value": "[variables('password')]"
                     },
                     "_artifactsLocation": {
                         "value": "[parameters('_artifactsLocation')]"
