@@ -9,19 +9,14 @@
             "type": "securestring"
         },
         "password": {
-            "type": "object",
-            "defaultValue": {
-                "password": "changeMe!4",
-                "sshPublicKey": null,
-                "authenticationType": "password"
-            }
+            "type": "object"
         }
     },
     "variables": {
         "password_osProfile": {
             "computername": "[parameters('computerName')]",
             "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[if(empty(parameters('password').password), json('null'), parameters('password').password)]"
+            "adminPassword": "[parameters('password').password]"
         },
         "sshPublicKey_osProfile": {
             "computername": "[parameters('computerName')]",
@@ -32,7 +27,7 @@
                     "publicKeys": [
                         {
                             "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-                            "keyData": "[if(empty(parameters('password').sshPublicKey), json('null'), parameters('password').sshPublicKey)]"
+                            "keyData": "[parameters('password').sshPublicKey]"
                         }
                     ]
                 }

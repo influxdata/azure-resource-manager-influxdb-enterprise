@@ -328,15 +328,29 @@
                 "description": "Admin username used when provisioning virtual machines"
             }
         },
-        "password": {
-            "type": "object",
-            "defaultValue": {
-                "password": "changeMe!4",
-                "sshPublicKey": null,
-                "authenticationType": "password"
-            },
+        "authenticationType": {
+            "type": "string",
+            "defaultValue": "password",
+            "allowedValues": [
+                "password",
+                "sshPublicKey"
+            ],
             "metadata": {
-                "description": "Password is a complex object parameter, we support both authenticating through username/pass or ssh keys."
+                "description": "Choose a password or ssh public key for the Admin username used to access virtual machines"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Admin password"
+            }
+        },
+        "sshPublicKey": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Admin ssh public key"
             }
         },
         "influxdbUsername": {
@@ -383,9 +397,9 @@
     },
     "variables": {
         "password": {
-            "password": "[if(empty(parameters('password').password), json('null'), parameters('password').password)]",
-            "authenticationType": "[parameters('password').authenticationType]",
-            "sshPublicKey": "[if(empty(parameters('password').sshPublicKey), json('null'), parameters('password').sshPublicKey)]"
+            "password": "[parameters('adminPassword')]",
+            "authenticationType": "[parameters('authenticationType')]",
+            "sshPublicKey": "[parameters('sshPublicKey')]"
         },
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
