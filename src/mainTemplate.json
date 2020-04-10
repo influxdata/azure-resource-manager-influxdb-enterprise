@@ -343,7 +343,6 @@
         },
         "influxdbPassword": {
             "type": "securestring",
-            "defaultValue": "changeME",
             "metadata": {
                 "description": "Database password for admin user with ALL PRIVILEGES"
             }
@@ -351,7 +350,6 @@
         "location": {
             "type": "string",
             "allowedValues": [
-                "ResourceGroup",
                 "westus",
                 "eastus",
                 "eastus2",
@@ -363,7 +361,7 @@
                 "westeurope",
                 "northeurope"
             ],
-            "defaultValue": "ResourceGroup",
+            "defaultValue": "[resourceGroup().location]",
             "metadata": {
                 "description": "Location where resources will be provisioned.  A value of 'ResourceGroup' will deploy the resource to the same location of the resource group the resources are provisioned into"
             }
