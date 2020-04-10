@@ -4,7 +4,7 @@
     "parameters": {
         "_artifactsLocation": {
             "type": "string",
-            "defaultValue": "https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/master/src/",
+            "defaultValue": "[deployment().properties.templateLink.uri]",
             "metadata": {
                 "description": "The base URI where artifacts required by this template are located, including a trailing '/'"
             }
@@ -388,7 +388,7 @@
         },
         "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
         "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
-        "ubuntuSettings": {
+        "osSettings": {
             "imageReference": {
                 "publisher": "Canonical",
                 "offer": "UbuntuServer",
@@ -450,22 +450,7 @@
                 }
             }
         },
-        "OS": "ubuntu",
-        "osSettings": "[variables(concat(variables('OS'), 'Settings'))]",
-        "locationMap": {
-            "ResourceGroup": "[resourceGroup().location]",
-            "westus": "[parameters('location')]",
-            "eastus": "[parameters('location')]",
-            "eastus2": "[parameters('location')]",
-            "centralus": "[parameters('location')]",
-            "southcentralus": "[parameters('location')]",
-            "northcentralus": "[parameters('location')]",
-            "eastasia": "[parameters('location')]",
-            "southeastasia": "[parameters('location')]",
-            "westeurope": "[parameters('location')]",
-            "northeurope": "[parameters('location')]"
-        },
-        "location": "[variables('locationMap')[parameters('location')]]",
+        "location": "[parameters('location')]",
         "metaNodesIpPrefix": "10.0.0.1",
         "dataNodesIpPrefix": "10.0.1.1",
         "networkSettings": {
@@ -487,24 +472,10 @@
         "lbBackEndPoolsAdded": {
             "backendPools": [
                 {
-                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/backendAddressPools/LBBE')]"
+                  "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', concat('lb-influxdb'), 'LBBE')]"
                 }
             ]
         },
-        "lbBackendPoolsRemoved": {
-            "backendPools": [
-            ]
-        },
-        "dataLBSettings0": "[variables('lbBackEndPoolsAdded')]",
-        "dataLBSettings1": "[variables('lbBackendPoolsRemoved')]",
-        "dataLBSettings2": "[variables('lbBackendPoolsRemoved')]",
-        "dataLBSettings3": "[variables('lbBackendPoolsRemoved')]",
-        "dataLBSettings4": "[variables('lbBackendPoolsRemoved')]",
-        "dataLBSettings5": "[variables('lbBackendPoolsRemoved')]",
-        "dataLBSettings6": "[variables('lbBackendPoolsRemoved')]",
-        "dataLBSettings7": "[variables('lbBackendPoolsRemoved')]",
-        "dataLBSettings8": "[variables('lbBackendPoolsRemoved')]",
-        "dataLBSettings9": "[variables('lbBackendPoolsRemoved')]",
         "dataLBSettings": "[variables('lbBackEndPoolsAdded')]",
         "dataSkuSettings": {
             "Standard_D1_v2": {
