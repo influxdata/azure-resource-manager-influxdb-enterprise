@@ -450,6 +450,7 @@
                 }
             }
         },
+        "vmChronoSize": "Standard_DS1_v2",
         "location": "[parameters('location')]",
         "metaNodesIpPrefix": "10.0.0.1",
         "dataNodesIpPrefix": "10.0.1.1",
@@ -472,7 +473,7 @@
         "lbBackEndPoolsAdded": {
             "backendPools": [
                 {
-                  "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', concat('lb-influxdb'), 'LBBE')]"
+                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'lb-influxdb', 'LBBE')]"
                 }
             ]
         },
@@ -527,8 +528,7 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
+                    "resources": []
                 }
             }
         },
@@ -687,6 +687,9 @@
                     },
                     "_artifactsLocation": {
                         "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "vmChronoSize": {
+                        "value": "[variables('vmChronoSize')]"
                     },
                     "location": {
                         "value": "[variables('location')]"

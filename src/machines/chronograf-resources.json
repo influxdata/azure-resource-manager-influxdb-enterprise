@@ -28,6 +28,12 @@
                 "description": "Location where resources will be provisioned"
             }
         },
+        "vmChronoSize": {
+            "type": "string",
+            "metadata": {
+                "description": "Default machine size of the provisioned Chronograf WM"
+            }
+        },
         "subnet": {
             "type": "object",
             "metadata": {
@@ -63,8 +69,7 @@
         }
     },
     "variables": {
-        "vmSize": "Standard_DS1_v2",
-        "subnetRef": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('subnet').vnet), '/subnets/', parameters('subnet').name)]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks', concat(parameters('subnet').vnet), '/subnets/', parameters('subnet').name)]",
         "vmName": "[concat('vm', parameters('namespace'))]",
         "publicIpName": "[concat('pip-', parameters('namespace'))]",
         "securityGroupName": "[concat('nsg-', parameters('namespace'))]",
@@ -150,7 +155,7 @@
         {
             "name": "osProfileChronograf",
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "2019-05-01",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -184,9 +189,9 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "[variables('vmSize')]"
+                    "vmSize":"[parameters('vmChronoSize')]"
                 },
-                "osProfile": "[reference('Microsoft.Resources/deployments/osProfileChronograf', ' 2019-03-01').outputs.osProfile.value]",
+                "osProfile": "[reference('Microsoft.Resources/deployments/osProfileChronograf','2019-07-01').outputs.osProfile.value]",
                 "storageProfile": {
                     "imageReference": "[parameters('osSettings').imageReference]",
                     "osDisk": {
