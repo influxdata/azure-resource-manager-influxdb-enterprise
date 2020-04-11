@@ -125,7 +125,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-04-01",
+            "apiVersion": "2015-06-15",
             "name": "[variables('nicName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -143,13 +143,13 @@
                             },
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
+                                },
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('securityGroupName'))]"
                             }
                         }
                     }
-                ],
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('securityGroupName'))]"
-                }
+                ]
             }
         },
         {
