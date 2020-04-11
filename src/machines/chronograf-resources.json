@@ -142,10 +142,12 @@
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
                             },
                             "subnet": {
-                                "id": "[variables('subnetRef')]"
-                                },
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('securityGroupName'))]"
+                                "id": "[variables('subnetRef')]",
+                                "properties": {
+                                    "networkSecurityGroup": {
+                                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('securityGroupName'))]"
+                                    }
+                                }
                             }
                         }
                     }
