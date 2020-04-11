@@ -69,8 +69,7 @@
         }
     },
     "variables": {
-
-        "subnetRef": "[resourceId('Microsoft.Network/loadBalancers/virtualNetworks', concat(parameters('subnet').vnet, '/subnets/'), parameters('subnet').name)]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks', parameters('subnet').vnet, '/subnets/', parameters('subnet').name)]",
         "vmName": "[concat('vm', parameters('namespace'))]",
         "publicIpName": "[concat('pip-', parameters('namespace'))]",
         "securityGroupName": "[concat('nsg-', parameters('namespace'))]",
