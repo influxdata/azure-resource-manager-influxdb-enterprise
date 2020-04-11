@@ -143,13 +143,13 @@
                             },
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
-                            },
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('securityGroupName'))]"
                             }
                         }
                     }
-                ]
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('securityGroupName'))]"
+                }
             }
         },
         {
@@ -189,7 +189,7 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize":"[parameters('vmChronoSize')]"
+                    "vmSize": "[parameters('vmChronoSize')]"
                 },
                 "osProfile": "[reference('Microsoft.Resources/deployments/osProfileChronograf','2019-07-01').outputs.osProfile.value]",
                 "storageProfile": {
