@@ -191,7 +191,7 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[reference('Microsoft.Resources/deployments/', 'osProfileData', concat(copyindex(), '2019-05-01').outputs.osProfile.value)]",
+                "osProfile": "[reference('Microsoft.Resources/deployments/', concat('osProfileData',copyindex(), '2019-05-01').outputs.osProfile.value)]",
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
