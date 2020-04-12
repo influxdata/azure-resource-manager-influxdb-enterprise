@@ -199,7 +199,7 @@
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
-                        "offer": "influxdb-enterprise-vm",,
+                        "offer": "influxdb-enterprise-vm",
                         "sku": "data",
                         "version": "latest"
                     },
