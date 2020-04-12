@@ -171,7 +171,7 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[reference('Microsoft.Resources/deployments/osProfileMeta', copyindex(1), '2019-05-01'.outputs.osProfile.value)]",
+                "osProfile": "[reference('Microsoft.Resources/deployments/osProfileMeta', copyindex(), '2019-05-01').outputs.osProfile.value]",
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
@@ -248,7 +248,7 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[reference('Microsoft.Resources/deployments/osProfileMeta0', '2019-05-01'.outputs.osProfile.value)]",
+                "osProfile": "[reference('Microsoft.Resources/deployments/osProfileMeta0', '2019-05-01').outputs.osProfile.value]",
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
