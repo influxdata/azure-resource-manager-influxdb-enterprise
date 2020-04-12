@@ -191,11 +191,15 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[reference('Microsoft.Resources/deployments/', concat('osProfileData',copyindex(), '2019-05-01').outputs.osProfile.value)]",
+                "osProfile": {
+                    "computerName": "[concat('vm', parameters('namespace'), '-', copyindex())]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('password')]"
+                 },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
-                        "offer": "influxdb-enterprise-vm",
+                        "offer": "influxdb-enterprise-vm",,
                         "sku": "data",
                         "version": "latest"
                     },
