@@ -8,6 +8,13 @@
                 "description": "Base uri of resources"
             }
         },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            },
+            "defaultValue": ""
+        },
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -87,7 +94,7 @@
         }
     },
     "variables": {
-        "subnetRef": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('subnet').vnet), '/subnets/', parameters('subnet').name)]"
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]"
     },
     "resources": [
         {
@@ -139,7 +146,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), 'partials/osProfile-resources.json')]",
+                   "uri": "[uri(parameters('_artifactsLocation'), concat('partials/osProfile-resources.json',parameters('_artifactsLocationSasToken'))) ]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -184,7 +191,7 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileData', copyindex()), '2019-05-01').outputs.osProfile.value]",
+                "osProfile": "[reference('Microsoft.Resources/deployments/osProfileData', concat(copyindex(), '2019-05-01').outputs.osProfile.value)]",
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
