@@ -24,9 +24,37 @@
             "metadata": {
                 "description": "Load balancer setting (internal/external)"
             }
+        },
+        "ilbIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The static IP address to use with the internal load balancer configuration"
+            }
         }
     },
     "variables": {
+        "externalFELBConfig": [
+            {
+                "name": "LBFE",
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses','pip-influxdb')]"
+                    }
+                }
+            }
+        ],
+        "internalFELBConfig": [
+            {
+                "Name": "LBFE",
+                "Properties": {
+                    "subnet": {
+                        "Id": "[resourceId('Microsoft.Network/virtualNetworks',parameters('networkSettings').virtualNetworkName, '/subnets/', parameters('networkSettings').subnet.meta.name)]"
+                    },
+                    "privateIPAddress": "[parameters('ilbIpAddress')]",
+                    "privateIPAllocationMethod": "Static"
+                }
+            }
+        ],
         "feLoadBalancerConfig": "[variables(concat(parameters('loadBalancerType'), 'FELBConfig'))]"
     },
     "resources": [
