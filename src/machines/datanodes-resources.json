@@ -194,7 +194,7 @@
                 "osProfile": {
                     "computerName": "[concat('vm', parameters('namespace'), '-', copyindex())]",
                     "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('password')]"
+                    "adminPassword": "[parameters('password').password]"
                  },
                 "storageProfile": {
                     "imageReference": {
