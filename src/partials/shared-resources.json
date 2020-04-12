@@ -48,7 +48,7 @@
                 "Name": "LBFE",
                 "Properties": {
                     "subnet": {
-                        "Id": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('networkSettings').virtualNetworkName), '/subnets/', parameters('networkSettings').subnet.meta.name)]"
+                        "Id": "[resourceId('Microsoft.Network/virtualNetworks',parameters('networkSettings').virtualNetworkName, '/subnets/', parameters('networkSettings').subnet.meta.name)]"
                     },
                     "privateIPAddress": "[parameters('ilbIpAddress')]",
                     "privateIPAllocationMethod": "Static"
@@ -115,10 +115,10 @@
                         "name": "influxDB",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/frontendIPConfigurations/LBFE')]"
+                                "id": "[resourceId('Microsoft.Network/loadBalancers','lb-influxdb','/frontendIPConfigurations/LBFE')]"
                             },
                             "backendAddressPool": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/backendAddressPools/LBBE')]"
+                                "id": "[resourceId('Microsoft.Network/loadBalancers','lb-influxdb','/backendAddressPools/LBBE')]"
                             },
                             "protocol": "tcp",
                             "frontendPort": 8086,
@@ -126,7 +126,7 @@
                             "enableFloatingIP": false,
                             "idleTimeoutInMinutes": 5,
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb-influxdb'),'/probes/influxProbe')]"
+                                "id": "[resourceId('Microsoft.Network/loadBalancers','lb-influxdb','/probes/influxProbe')]"
                             }
                         }
                     }
