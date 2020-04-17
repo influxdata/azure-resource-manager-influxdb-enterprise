@@ -284,8 +284,8 @@
             "vmSizeMetaNodes": "[steps('clusterConfig').vmSizeMetaNodes]",
             "adminUsername": "[basics('adminUsername')]",
             "password": "[basics('password')]",
-            "influxdbUsername": "[steps('clusterConfig').adminCreds.influxdbUsername]",
-            "influxdbPassword": "[steps('clusterConfig').adminCreds.influxdbPassword]",
+            "influxdbUsername": "[steps('clusterConfig').influxdbUsername]",
+            "influxdbPassword": "[steps('clusterConfig').influxdbPassword]",
             "location": "[location()]"
         }
     }
