@@ -181,14 +181,16 @@
             "authenticationType": "[parameters('password').authenticationType]",
             "sshPublicKey": "[if(equals(parameters('password').authenticationType,'sshPublicKey'),parameters('password').sshPublicKey,json('null'))]"
         },
-        "baseTemplateUrl":"https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/starc-dev/src/",
-        "sharedTemplateUrl": "[uri(variables('baseTemplateUrl'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
-        "metaTemplateUrl": "[uri(variables('baseTemplateUrl'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "templateBaseUrl":"https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/starc-dev/src/",
+        "sharedTemplateUrl": "[uri(variables('templateBaseUrl'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "metaTemplateUrl": "[uri(variables('templateBaseUrl'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
         "chronografTemplates": {
             "No": "empty/empty-resources.json",
             "Yes": "machines/chronograf-resources.json"
         },
-        "chronografTemplateUrl": "[uri(variables('baseTemplateUrl'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
+        "chronografTemplateUrl": "[uri(variables('templateBaseUrl'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
+        "chronografInstallScript": "[uri(parameters('_artifactsLocation'), concat('/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
+
         "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
         "osSettings": {
             "imageReference": {
@@ -206,8 +208,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(variables('baseTemplateUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]",
-                            "[concat(variables('baseTemplateUrl'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[concat(variables('templateBaseUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]",
+                            "[concat(variables('templateBaseUrl'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
                     }
@@ -219,8 +221,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(variables('baseTemplateUrl'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
-                            "[concat(variables('baseTemplateUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[concat(variables('templateBaseUrl'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
+                            "[concat(variables('templateBaseUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
                     }
@@ -232,8 +234,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(variables('baseTemplateUrl'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
-                            "[concat(variables('baseTemplateUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[concat(variables('templateBaseUrl'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
+                            "[concat(variables('templateBaseUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
                     }
@@ -245,7 +247,7 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(variables('baseTemplateUrl'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[uriComponentToString(variables('chronografInstallScript'))]"
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
                     }
@@ -290,7 +292,7 @@
         "dataNodeStorageSettings": {
             "diskSize": "[variables('dataDiskSizes')[parameters('vmDataDiskSize')]]"
         },
-        "dataTemplateUrl": "[uri(variables('baseTemplateUrl'), concat('machines/datanodes-resources.json', parameters('_artifactsLocationSasToken')))]"
+        "dataTemplateUrl": "[uri(variables('templateBaseUrl'), concat('machines/datanodes-resources.json', parameters('_artifactsLocationSasToken')))]"
     },
     "resources": [
         {
