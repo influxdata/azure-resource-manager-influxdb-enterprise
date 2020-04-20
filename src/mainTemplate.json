@@ -189,8 +189,6 @@
             "Yes": "machines/chronograf-resources.json"
         },
         "chronografTemplateUrl": "[uri(variables('templateBaseUrl'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
-        "chronografInstallScript": "[uri(parameters('_artifactsLocation'), concat('/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
-
         "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
         "osSettings": {
             "imageReference": {
@@ -247,7 +245,7 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[uriComponentToString(variables('chronografInstallScript'))]"
+                            "[concat(variables('templateBaseUrl'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
                     }
