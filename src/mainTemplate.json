@@ -126,7 +126,6 @@
         },
         "adminUsername": {
             "type": "string",
-            "defaultValue":"test",
             "metadata": {
                 "description": "Admin username used when provisioning virtual machines"
             }
@@ -182,13 +181,14 @@
             "authenticationType": "[parameters('password').authenticationType]",
             "sshPublicKey": "[if(equals(parameters('password').authenticationType,'sshPublicKey'),parameters('password').sshPublicKey,json('null'))]"
         },
-        "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
-        "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "baseTemplateUrl":"https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/starc-dev/src/",
+        "sharedTemplateUrl": "[uri(variables('baseTemplateUrl'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "metaTemplateUrl": "[uri(variables('baseTemplateUrl'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
         "chronografTemplates": {
             "No": "empty/empty-resources.json",
             "Yes": "machines/chronograf-resources.json"
         },
-        "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
+        "chronografTemplateUrl": "[uri(variables('baseTemplateUrl'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
         "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
         "osSettings": {
             "imageReference": {
@@ -206,8 +206,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[concat(variables('baseTemplateUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]",
+                            "[concat(variables('baseTemplateUrl'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
                     }
@@ -219,8 +219,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[concat(variables('baseTemplateUrl'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
+                            "[concat(variables('baseTemplateUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
                     }
@@ -232,8 +232,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[concat(variables('baseTemplateUrl'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
+                            "[concat(variables('baseTemplateUrl'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
                     }
@@ -245,7 +245,7 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[concat(variables('baseTemplateUrl'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
                     }
@@ -293,19 +293,6 @@
         "dataTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/datanodes-resources.json', parameters('_artifactsLocationSasToken')))]"
     },
     "resources": [
-        {
-            "name": "linkedTemplate",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-08-01",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[uri('https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/starc-dev/src/','mainTemplate.json')]",
-                    "contentVersion": "1.0.0.0",
-                    "resources": []
-                }
-            }
-        },
         {
             "name": "pid-300e07de-2c76-5904-be70-589ac8f15cf8",
             "type": "Microsoft.Resources/deployments",
