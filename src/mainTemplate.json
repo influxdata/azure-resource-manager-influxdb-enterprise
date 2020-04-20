@@ -205,8 +205,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[uri(parameters('_artifactsLocation'), concat('/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]",
-                            "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]"
+                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]",
+                            "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
                     }
@@ -218,8 +218,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[uri(parameters('_artifactsLocation'), concat('/scripts/autopart.sh' , parameters('_artifactsLocationSasToken')))]",
-                            "[uri(parameters('_artifactsLocation'), concat('/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]"
+                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
+                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
                     }
@@ -231,8 +231,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[uri(parameters('_artifactsLocation'), concat('/scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
-                            "[uri(parameters('_artifactsLocation'), concat('/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]"
+                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
+                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
                     }
@@ -244,7 +244,7 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[uri(parameters('_artifactsLocation'), concat('/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]"
+                            "[concat(parameters('_artifactsLocation'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
                     }
@@ -294,6 +294,19 @@
     "resources": [
         {
             "name": "pid-300e07de-2c76-5904-be70-589ac8f15cf8",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        },
+        {
+            "name": "templateLink",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-08-01",
             "properties": {
