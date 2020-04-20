@@ -290,7 +290,7 @@
         "dataNodeStorageSettings": {
             "diskSize": "[variables('dataDiskSizes')[parameters('vmDataDiskSize')]]"
         },
-        "dataTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/datanodes-resources.json', parameters('_artifactsLocationSasToken')))]"
+        "dataTemplateUrl": "[uri(variables('baseTemplateUrl'), concat('machines/datanodes-resources.json', parameters('_artifactsLocationSasToken')))]"
     },
     "resources": [
         {
