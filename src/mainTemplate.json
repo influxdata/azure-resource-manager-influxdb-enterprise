@@ -126,6 +126,7 @@
         },
         "adminUsername": {
             "type": "string",
+            "defaultValue":"test",
             "metadata": {
                 "description": "Admin username used when provisioning virtual machines"
             }
