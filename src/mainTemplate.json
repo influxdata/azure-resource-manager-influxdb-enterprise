@@ -293,6 +293,19 @@
     },
     "resources": [
         {
+            "name": "linkedTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/starc-dev/src/",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        },
+        {
             "name": "pid-300e07de-2c76-5904-be70-589ac8f15cf8",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-08-01",
@@ -300,19 +313,6 @@
                 "mode": "Incremental",
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": []
-                }
-            }
-        },
-        {
-            "name": "templateLink",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-08-01",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/master/src/",
                     "contentVersion": "1.0.0.0",
                     "resources": []
                 }
