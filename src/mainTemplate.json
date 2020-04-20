@@ -4,7 +4,7 @@
     "parameters": {
         "_artifactsLocation": {
             "type": "string",
-            "defaultValue": "[deployment().properties.templateLink.uri]",
+            "defaultValue": "https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/master/src/",
             "metadata": {
                 "description": "The base URI where artifacts required by this template are located, including a trailing '/'"
             }
@@ -138,7 +138,6 @@
         },
         "influxdbUsername": {
             "type": "string",
-            "defaultValue": "admin",
             "metadata": {
                 "description": "Database username for admin user with ALL PRIVILEGES"
             }
@@ -252,7 +251,6 @@
                 }
             }
         },
-        "vmChronoSize": "Standard_DS1_v2",
         "location": "[parameters('location')]",
         "metaNodesIpPrefix": "10.0.0.1",
         "dataNodesIpPrefix": "10.0.1.1",
@@ -462,9 +460,6 @@
                     },
                     "_artifactsLocation": {
                         "value": "[parameters('_artifactsLocation')]"
-                    },
-                    "vmChronoSize": {
-                        "value": "[variables('vmChronoSize')]"
                     },
                     "location": {
                         "value": "[variables('location')]"

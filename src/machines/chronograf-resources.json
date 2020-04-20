@@ -28,12 +28,6 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "vmChronoSize": {
-            "type": "string",
-            "metadata": {
-                "description": "Default machine size of the provisioned Chronograf WM"
-            }
-        },
         "subnet": {
             "type": "object",
             "metadata": {
@@ -191,7 +185,7 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "[parameters('vmChronoSize')]"
+                    "vmSize": "Standard_DS1_v2"
                 },
                 "osProfile": "[reference('Microsoft.Resources/deployments/osProfileChronograf','2019-07-01').outputs.osProfile.value]",
                 "storageProfile": {
