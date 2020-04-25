@@ -183,11 +183,7 @@
         },
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
-        "chronografTemplates": {
-            "No": "empty/empty-resources.json",
-            "Yes": "machines/chronograf-resources.json"
-        },
-        "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
+        "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/chronograf-resources.json', parameters('_artifactsLocationSasToken')))]",
         "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
         "osSettings": {
             "imageReference": {
@@ -436,6 +432,7 @@
             }
         },
         {
+            "condition": "[equals(parameters('chronograf'), 'Yes')]",
             "name": "chronograf",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-08-01",
@@ -463,6 +460,9 @@
                     },
                     "location": {
                         "value": "[variables('location')]"
+                    },
+                    "vmSize": {
+                        "value": "Standard_DS1_v2"
                     },
                     "subnet": {
                         "value": "[variables('networkSettings').subnet.data]"
