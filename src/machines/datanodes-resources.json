@@ -94,7 +94,35 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]"
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "copy": [
+                    {
+                        "name": "[concat('osProfileData', copyindex())]",
+                        "count": "[parameters('vmCount')]",
+                        "input":{
+                        "password_osProfile": {
+                            "computername":  "[concat('vm', parameters('namespace'), '-', copyindex())]",
+                            "adminUsername": "[parameters('adminUsername')]",
+                            "adminPassword": "[parameters('password').password]"
+                        },
+                        "sshPublicKey_osProfile": {
+                            "computername": "[concat('vm', parameters('namespace'), '-', copyindex())]",
+                            "adminUsername": "[parameters('adminUsername')]",
+                            "linuxConfiguration": {
+                                "disablePasswordAuthentication": "true",
+                                "ssh": {
+                                    "publicKeys": [
+                                        {
+                                            "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                                            "keyData": "[parameters('password').sshPublicKey]"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        ]
     },
     "resources": [
         {
@@ -191,7 +219,7 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[reference(resourceId('Microsoft.Resources/deployments/osProfileData', copyindex(), '2019-08-01').outputs.osProfile.value)]",
+                "osProfile": "[reference(resourceId('Microsoft.Resources/deployments/osProfileData0', '2019-08-01').outputs.osProfile.value)]",
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
