@@ -55,13 +55,6 @@
                 "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
             }
         },
-        "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_DS1_v2",
-            "metadata": {
-                "description": "Size of the Chronograf instance"
-            }
-        },
         "osSettings": {
             "type": "object",
             "metadata": {
@@ -192,7 +185,7 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
+                    "vmSize":  "[parameters('osSettings').vmChronoSize]"
                 },
                 "osProfile": "[reference('Microsoft.Resources/deployments/osProfileChronograf','2019-07-01').outputs.osProfile.value]",
                 "storageProfile": {

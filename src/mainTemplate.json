@@ -192,6 +192,7 @@
                 "sku": "18.04-LTS",
                 "version": "latest"
             },
+            "vmChronoSize":"Standard_DS1_v2",
             "managementPort": "22",
             "extensionSettings": {
                 "meta": {
@@ -460,9 +461,6 @@
                     },
                     "location": {
                         "value": "[variables('location')]"
-                    },
-                    "vmSize": {
-                        "value": "Standard_DS1_v2"
                     },
                     "subnet": {
                         "value": "[variables('networkSettings').subnet.data]"
