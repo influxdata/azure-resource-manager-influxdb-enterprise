@@ -94,36 +94,8 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
-        "copy": [
-                    {
-                        "name": "[concat('osProfileData', copyindex())]",
-                        "count": "[parameters('vmCount')]",
-                        "input":{
-                        "password_osProfile": {
-                            "computername":  "[concat('vm', parameters('namespace'), '-', copyindex())]",
-                            "adminUsername": "[parameters('adminUsername')]",
-                            "adminPassword": "[parameters('password').password]"
-                        },
-                        "sshPublicKey_osProfile": {
-                            "computername": "[concat('vm', parameters('namespace'), '-', copyindex())]",
-                            "adminUsername": "[parameters('adminUsername')]",
-                            "linuxConfiguration": {
-                                "disablePasswordAuthentication": "true",
-                                "ssh": {
-                                    "publicKeys": [
-                                        {
-                                            "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-                                            "keyData": "[parameters('password').sshPublicKey]"
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
-            }
-        ]
-    },
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]"
+        },
     "resources": [
         {
             "apiVersion": "2019-07-01",
