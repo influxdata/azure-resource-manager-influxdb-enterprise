@@ -94,8 +94,21 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]"
-        },
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "sshPublicKey_osProfile": {
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('password').sshPublicKey]"
+                    }
+                ]
+            }
+        }
+      }
+    },
     "resources": [
         {
             "apiVersion": "2019-07-01",
@@ -191,7 +204,12 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[resourceID(reference('Microsoft.Resources/deployments/osProfileData0'), '2019-08-01').outputs.osProfile.value]",
+                "osProfile": {
+                    "computerName":  "[concat('vm', parameters('namespace'), '-', copyindex())]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('password').password]",
+                    "linuxConfiguration": "[variables('sshPublicKey_osProfile')]"
+                    },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
