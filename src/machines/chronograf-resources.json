@@ -155,8 +155,7 @@
                 "provider": "[toUpper(parameters('influxTags').provider)]"
             },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
-                "[concat('Microsoft.Resources/deployments/', 'osProfileChronograf')]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
             ],
             "properties": {
                 "hardwareProfile": {

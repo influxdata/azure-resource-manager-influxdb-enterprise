@@ -152,8 +152,7 @@
             },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
-                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
-                "[concat('Microsoft.Resources/deployments/', 'osProfileData', copyindex())]"
+                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]"
             ],
             "properties": {
                 "availabilitySet": {
