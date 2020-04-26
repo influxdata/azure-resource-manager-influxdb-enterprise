@@ -75,7 +75,18 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]"
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": "true",
+             "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('password').sshPublicKey]"
+                    }
+                ]
+            }
+        }
     },
     "resources": [
         {
@@ -171,7 +182,12 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[concat(reference('Microsoft.Resources/deployments/osProfileMeta', copyindex(1)), '2019-05-01').outputs.osProfile.value]",
+                "osProfile": {
+                    "computerName":  "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
@@ -248,7 +264,12 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[concat(reference('Microsoft.Resources/deployments/osProfileMeta0'), '2019-05-01').outputs.osProfile.value]",
+                "osProfile": {
+                    "computerName":  "[concat('vm', parameters('namespace'), '-0')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
