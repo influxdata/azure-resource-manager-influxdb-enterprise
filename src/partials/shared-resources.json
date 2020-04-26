@@ -27,6 +27,16 @@
         }
     },
     "variables": {
+        "externalFELBConfig": [
+            {
+                "name": "LBFE",
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses','pip-influxdb')]"
+                    }
+                }
+            }
+        ],
         "feLoadBalancerConfig": "[variables(concat(parameters('loadBalancerType'), 'FELBConfig'))]"
     },
     "resources": [
