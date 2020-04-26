@@ -231,8 +231,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[variables('chronoScriptUrl')]",
-                            "[variables('chronoScriptUrl')]"
+                            "[variables('diskScriptUrl')]",
+                            "[variables('clusterScriptUrl')]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
                     }
