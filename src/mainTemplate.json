@@ -322,9 +322,6 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
-                    },
                     "metaNodesIpPrefix": {
                         "value": "[variables('metaNodesIpPrefix')]"
                     },
@@ -395,9 +392,6 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
-                    },
                     "dataNodesIpPrefix": {
                         "value": "[variables('dataNodesIpPrefix')]"
                     },
@@ -454,9 +448,6 @@
                     },
                     "password": {
                         "value": "[variables('password')]"
-                    },
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
                     },
                     "location": {
                         "value": "[variables('location')]"

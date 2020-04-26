@@ -2,19 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "_artifactsLocation": {
-            "type": "string",
-            "metadata": {
-                "description": "The base URI where artifacts required by this template are located, including a trailing '/'"
-            }
-        },
-        "_artifactsLocationSasToken": {
-            "type": "securestring",
-            "metadata": {
-                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
-            },
-            "defaultValue": ""
-        },
         "namespace": {
             "type": "string",
             "defaultValue": "chronograf",
@@ -67,7 +54,18 @@
         "vmName": "[concat('vm', parameters('namespace'))]",
         "publicIpName": "[concat('pip-', parameters('namespace'))]",
         "securityGroupName": "[concat('nsg-', parameters('namespace'))]",
-        "nicName": "[concat('nic-0-vm', parameters('namespace'))]"
+        "nicName": "[concat('nic-0-vm', parameters('namespace'))]",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": "true",
+             "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('password').sshPublicKey]"
+                    }
+                ]
+            }
+        }
     },
     "resources": [
         {
@@ -149,29 +147,6 @@
             }
         },
         {
-            "name": "osProfileChronograf",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-05-01",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('partials/osProfile-resources.json',parameters('_artifactsLocationSasToken'))) ]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "adminUserName": {
-                        "value": "[parameters('adminUsername')]"
-                    },
-                    "password": {
-                        "value": "[parameters('password')]"
-                    },
-                    "computerName": {
-                        "value": "[variables('vmName')]"
-                    }
-                }
-            }
-        },
-        {
             "apiVersion": "2019-07-01",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[variables('vmName')]",
@@ -187,7 +162,12 @@
                 "hardwareProfile": {
                     "vmSize":  "[parameters('osSettings').vmChronoSize]"
                 },
-                "osProfile": "[reference('Microsoft.Resources/deployments/osProfileChronograf','2019-07-01').outputs.osProfile.value]",
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
                 "storageProfile": {
                     "imageReference": "[parameters('osSettings').imageReference]",
                     "osDisk": {
