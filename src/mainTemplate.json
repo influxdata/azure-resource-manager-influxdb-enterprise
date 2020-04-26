@@ -182,7 +182,7 @@
             "sshPublicKey": "[if(equals(parameters('password').authenticationType,'sshPublicKey'),parameters('password').sshPublicKey,json('null'))]"
         },
         "chronoScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
-        "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-install.sh', parameters('_artifactsLocationSasToken')))]",
+        "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]",
         "diskScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
