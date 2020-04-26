@@ -1,3 +1,4 @@
+  
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
@@ -14,12 +15,6 @@
                 "description": "Network settings object"
             }
         },
-        "ilbIpAddress": {
-            "type": "string",
-            "metadata": {
-                "description": "The static IP address to use with the internal load balancer configuration"
-            }
-        },
         "loadBalancerType": {
             "type": "string",
             "defaultValue": "external",
@@ -29,6 +24,12 @@
             ],
             "metadata": {
                 "description": "Load balancer setting (internal/external)"
+            }
+        },
+        "ilbIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The static IP address to use with the internal load balancer configuration"
             }
         }
     },
