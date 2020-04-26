@@ -48,8 +48,8 @@ CHRONOGRAF_VERSION="1.8.3"
 
 install_chronograf()
 {
-    local PACKAGE="chronograf_1.7.16_amd64.deb"
-    local DOWNLOAD_URL="https://dl.influxdata.com/chronograf/releases/chronograf_1.7.16_amd64.deb"
+    local PACKAGE="chronograf_${CHRONOGRAF_VERSION}_amd64.deb"
+    local DOWNLOAD_URL="https://dl.influxdata.com/chronograf/releases/chronograf_${CHRONOGRAF_VERSION}_amd64.deb"
 
     log "[install_chronograf] download Chronograf $CHRONOGRAF_VERSION"
     log "[install_chronograf] download location $DOWNLOAD_URL"
