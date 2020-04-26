@@ -40,7 +40,7 @@ fi
 #########################
 
 #Script Parameters
-CHRONOGRAF_VERSION="1.7.16"
+CHRONOGRAF_VERSION="1.8.3"
 
 #########################
 # Installation func
