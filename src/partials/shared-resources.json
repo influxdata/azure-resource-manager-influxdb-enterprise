@@ -14,6 +14,12 @@
                 "description": "Network settings object"
             }
         },
+        "ilbIpAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "The static IP address to use with the internal load balancer configuration"
+            }
+        },
         "loadBalancerType": {
             "type": "string",
             "defaultValue": "external",
