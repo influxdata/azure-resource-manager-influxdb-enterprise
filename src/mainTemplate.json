@@ -181,6 +181,9 @@
             "authenticationType": "[parameters('password').authenticationType]",
             "sshPublicKey": "[if(equals(parameters('password').authenticationType,'sshPublicKey'),parameters('password').sshPublicKey,json('null'))]"
         },
+        "chronoScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
+        "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-install.sh', parameters('_artifactsLocationSasToken')))]",
+        "diskScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
         "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/chronograf-resources.json', parameters('_artifactsLocationSasToken')))]",
@@ -202,8 +205,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[variables('diskScriptUrl')]",
+                            "[variables('clusterScriptUrl')]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
                     }
@@ -215,8 +218,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[variables('diskScriptUrl')]",
+                            "[variables('clusterScriptUrl')]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
                     }
@@ -228,8 +231,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[variables('chronoScriptUrl')]",
+                            "[variables('chronoScriptUrl')]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
                     }
@@ -241,7 +244,7 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[variables('chronoScriptUrl')]"
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
                     }
