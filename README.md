@@ -112,7 +112,7 @@ The `--parameters` can specify a different location for the items that get provi
 
 ### Web based deploy
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Finfluxdata%2Fazure-resource-manager-influxdb-enterprise%2Fmaster%2Fsrc%2FmainTemplate.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Finfluxdata%2Fazure-resource-manager-influxdb-enterprise%2Fstarc-dev%2Fsrc%2FmainTemplate.json" target="_blank">
    <img alt="Deploy to Azure" src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
