@@ -33,6 +33,16 @@
         }
     },
     "variables": {
+        "externalFELBConfig": [
+            {
+                "name": "LBFE",
+                "properties": {
+                    "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses','pip-influxdb')]"
+                    }
+                }
+            }
+        ],
         "internalFELBConfig": [
             {
                 "Name": "LBFE",
@@ -94,7 +104,7 @@
                 "[concat('Microsoft.Network/virtualNetworks/', parameters('networkSettings').virtualNetworkName)]"
             ],
             "properties": {
-                "frontendIPConfigurations": "[variables('feLoadBalancerConfig')]",
+                "frontendIPConfigurations": "[if(equals(parameters('loadBalancerType'), 'external'), variables('externalFELBConfig'), variables('internalFELBConfig'))]",
                 "backendAddressPools": [
                     {
                         "name": "LBBE"
