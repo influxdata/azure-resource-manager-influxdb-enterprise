@@ -33,16 +33,6 @@
         }
     },
     "variables": {
-        "externalFELBConfig": [
-            {
-                "name": "LBFE",
-                "properties": {
-                    "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses','pip-influxdb')]"
-                    }
-                }
-            }
-        ],
         "internalFELBConfig": [
             {
                 "Name": "LBFE",
