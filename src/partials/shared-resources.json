@@ -24,12 +24,6 @@
             "metadata": {
                 "description": "Load balancer setting (internal/external)"
             }
-        },
-        "ilbIpAddress": {
-            "type": "string",
-            "metadata": {
-                "description": "The static IP address to use with the internal load balancer configuration"
-            }
         }
     },
     "variables": {
