@@ -37,6 +37,18 @@
                 }
             }
         ],
+        "internalFELBConfig": [
+            {
+                "Name": "LBFE",
+                "Properties": {
+                    "subnet": {
+                        "Id": "[concat(resourceId('Microsoft.Network/virtualNetworks',parameters('networkSettings').virtualNetworkName), '/subnets/', parameters('networkSettings').subnet.meta.name)]"
+                    },
+                    "privateIPAddress": "[parameters('ilbIpAddress')]",
+                    "privateIPAllocationMethod": "Static"
+                }
+            }
+        ],
         "feLoadBalancerConfig": "[variables(concat(parameters('loadBalancerType'), 'FELBConfig'))]"
     },
     "resources": [
