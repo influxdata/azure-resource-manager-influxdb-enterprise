@@ -54,8 +54,7 @@
                     "privateIPAllocationMethod": "Static"
                 }
             }
-        ],
-        "feLoadBalancerConfig": "[variables(concat(parameters('loadBalancerType'), 'FELBConfig'))]"
+        ]
     },
     "resources": [
         {
