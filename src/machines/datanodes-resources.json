@@ -205,8 +205,8 @@
                 "osProfile": {
                     "computerName": "[concat('vm', parameters('namespace'), '-', copyindex())]",
                     "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('password').password]",
-                    "linuxConfiguration": "[if(equals(parameters('password').sshPublicKey, 'password'), json('null'), variables('linuxConfiguration'))]"
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
                 },
                 "storageProfile": {
                     "imageReference": {
