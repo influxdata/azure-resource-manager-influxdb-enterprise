@@ -132,8 +132,7 @@
             },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1))]",
-                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
-                "[concat('Microsoft.Resources/deployments/', 'osProfileMeta', copyindex(1))]"
+                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]"
             ],
             "properties": {
                 "availabilitySet": {
@@ -213,7 +212,6 @@
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', 'nic-0-vm', parameters('namespace'), '-0')]",
                 "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
-                "[concat('Microsoft.Resources/deployments/', 'osProfileMeta0')]",
                 "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-1','/extensions/', 'configureMetanode1')]",
                 "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-2','/extensions/', 'configureMetanode2')]"
             ],
