@@ -115,7 +115,7 @@
                         "name": "influxDB",
                         "properties": {
                             "frontendIPConfiguration": {
-                                "id": "[resourceId('Microsoft.Network/loadBalancers','lb-influxdb','/frontendIPConfigurations/LBFE')]"
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations','lb-influxdb','LBFE')]"
                             },
                             "backendAddressPool": {
                                 "id": "[resourceId('Microsoft.Network/loadBalancers','lb-influxdb','/backendAddressPools/LBBE')]"
