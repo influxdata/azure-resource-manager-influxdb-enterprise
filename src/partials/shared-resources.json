@@ -118,7 +118,7 @@
                                 "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations','lb-influxdb','LBFE')]"
                             },
                             "backendAddressPool": {
-                                "id": "[resourceId('Microsoft.Network/loadBalancers','lb-influxdb','/backendAddressPools/LBBE')]"
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools','lb-influxdb','LBBE')]"
                             },
                             "protocol": "tcp",
                             "frontendPort": 8086,
@@ -126,7 +126,7 @@
                             "enableFloatingIP": false,
                             "idleTimeoutInMinutes": 5,
                             "probe": {
-                                "id": "[resourceId('Microsoft.Network/loadBalancers','lb-influxdb','/probes/influxProbe')]"
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/probes','lb-influxdb','influxProbe')]"
                             }
                         }
                     }
