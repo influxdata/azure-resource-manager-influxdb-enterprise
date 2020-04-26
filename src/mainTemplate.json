@@ -193,6 +193,7 @@
                 "version": "latest"
             },
             "managementPort": "22",
+            "chronoSize": "Standard_D2_v2",
             "extensionSettings": {
                 "meta": {
                     "publisher": "Microsoft.Azure.Extensions",

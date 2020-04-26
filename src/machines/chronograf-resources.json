@@ -159,7 +159,7 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize":  "[parameters('osSettings').vmChronoSize]"
+                    "vmSize":  "[parameters('osSettings').chronoSize]"
                 },
                 "osProfile": {
                     "computerName": "[variables('vmName')]",
