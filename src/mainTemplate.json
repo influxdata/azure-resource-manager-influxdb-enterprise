@@ -4,7 +4,7 @@
     "parameters": {
         "_artifactsLocation": {
             "type": "string",
-            "defaultValue": "https://raw.githubusercontent.com/influxdata/azure-resource-manager-influxdb-enterprise/master/src/",
+            "defaultValue": "[deployment().properties.templateLink.uri]",
             "metadata": {
                 "description": "The base URI where artifacts required by this template are located, including a trailing '/'"
             }
@@ -181,13 +181,12 @@
             "authenticationType": "[parameters('password').authenticationType]",
             "sshPublicKey": "[if(equals(parameters('password').authenticationType,'sshPublicKey'),parameters('password').sshPublicKey,json('null'))]"
         },
+        "chronoScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
+        "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]",
+        "diskScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
-        "chronografTemplates": {
-            "No": "empty/empty-resources.json",
-            "Yes": "machines/chronograf-resources.json"
-        },
-        "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat(variables('chronografTemplates')[parameters('chronograf')], parameters('_artifactsLocationSasToken')))]",
+        "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/chronograf-resources.json', parameters('_artifactsLocationSasToken')))]",
         "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
         "osSettings": {
             "imageReference": {
@@ -197,6 +196,7 @@
                 "version": "latest"
             },
             "managementPort": "22",
+            "chronoSize": "Standard_D2_v2",
             "extensionSettings": {
                 "meta": {
                     "publisher": "Microsoft.Azure.Extensions",
@@ -205,8 +205,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), 'scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[variables('diskScriptUrl')]",
+                            "[variables('clusterScriptUrl')]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
                     }
@@ -218,8 +218,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh' , parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[variables('diskScriptUrl')]",
+                            "[variables('clusterScriptUrl')]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
                     }
@@ -231,8 +231,8 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/autopart.sh', parameters('_artifactsLocationSasToken'))]",
-                            "[concat(parameters('_artifactsLocation'), '/scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[variables('diskScriptUrl')]",
+                            "[variables('clusterScriptUrl')]"
                         ],
                         "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
                     }
@@ -244,7 +244,7 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                         "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken'))]"
+                            "[variables('chronoScriptUrl')]"
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
                     }
@@ -326,9 +326,6 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
-                    },
                     "metaNodesIpPrefix": {
                         "value": "[variables('metaNodesIpPrefix')]"
                     },
@@ -399,9 +396,6 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
-                    },
                     "dataNodesIpPrefix": {
                         "value": "[variables('dataNodesIpPrefix')]"
                     },
@@ -436,6 +430,7 @@
             }
         },
         {
+            "condition": "[equals(parameters('chronograf'), 'Yes')]",
             "name": "chronograf",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-08-01",
@@ -457,9 +452,6 @@
                     },
                     "password": {
                         "value": "[variables('password')]"
-                    },
-                    "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
                     },
                     "location": {
                         "value": "[variables('location')]"

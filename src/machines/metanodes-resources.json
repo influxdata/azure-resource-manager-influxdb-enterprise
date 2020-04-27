@@ -2,19 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "_artifactsLocation": {
-            "type": "string",
-            "metadata": {
-                "description": "Base uri of resources"
-            }
-        },
-        "_artifactsLocationSasToken": {
-            "type": "securestring",
-            "metadata": {
-                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
-            },
-            "defaultValue": ""
-        },
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -75,7 +62,18 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]"
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": "true",
+             "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('password').sshPublicKey]"
+                    }
+                ]
+            }
+        }
     },
     "resources": [
         {
@@ -116,33 +114,6 @@
             }
         },
         {
-            "apiVersion": "2019-08-01",
-            "type": "Microsoft.Resources/deployments",
-            "name": "[concat('osProfileMeta', copyindex())]",
-            "copy": {
-                "name": "osProfileLoop",
-                "count": 3
-            },
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('partials/osProfile-resources.json',parameters('_artifactsLocationSasToken'))) ]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "adminUserName": {
-                        "value": "[parameters('adminUsername')]"
-                    },
-                    "password": {
-                        "value": "[parameters('password')]"
-                    },
-                    "computerName": {
-                        "value": "[concat('vm', parameters('namespace'), '-', copyindex())]"
-                    }
-                }
-            }
-        },
-        {
             "apiVersion": "2019-07-01",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
@@ -161,8 +132,7 @@
             },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(1), '-vm', parameters('namespace'), '-', copyindex(1))]",
-                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
-                "[concat('Microsoft.Resources/deployments/', 'osProfileMeta', copyindex(1))]"
+                "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]"
             ],
             "properties": {
                 "availabilitySet": {
@@ -171,7 +141,12 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta', copyindex(1)), '2019-05-01').outputs.osProfile.value]",
+                "osProfile": {
+                    "computerName":  "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
@@ -237,7 +212,6 @@
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', 'nic-0-vm', parameters('namespace'), '-0')]",
                 "[concat('Microsoft.Compute/availabilitySets/', 'avail-', parameters('namespace'))]",
-                "[concat('Microsoft.Resources/deployments/', 'osProfileMeta0')]",
                 "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-1','/extensions/', 'configureMetanode1')]",
                 "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-2','/extensions/', 'configureMetanode2')]"
             ],
@@ -248,7 +222,12 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
-                "osProfile": "[reference(concat('Microsoft.Resources/deployments/osProfileMeta0'), '2019-05-01').outputs.osProfile.value]",
+                "osProfile": {
+                    "computerName":  "[concat('vm', parameters('namespace'), '-0')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[if(equals(parameters('password').authenticationType,'password'),parameters('password').password,json('null'))]",
+                    "linuxConfiguration": "[if(equals(parameters('password').authenticationType, 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "influxdata",
