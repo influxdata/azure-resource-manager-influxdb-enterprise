@@ -71,7 +71,7 @@
                         "toolTip": "Initial password for admin user.",
                         "constraints": {
                             "required": true,
-                            "regex": "^(?!(?:adm|admin|admin123|password|root",
+                            "regex": "^(?!(?:adm|admin|audio|backup|bin|cdrom|crontab|daemon|dialout|password|disk|fax|floppy|fuse|games|gnats|irc|kmem|landscape|libuuid|list|lp|mail|man|messagebus|mlocate|netdev|news|nobody|nogroup|operator|plugdev|proxy|root|sasl|shadow|src|ssh|sshd|staff|sudo|sync|sys|syslog|tape|tty|users|utmp|uucp|video|voice|whoopsie|www\\-data)$)\\w+$",
                             "validationMessage": "Password must not be a reserved word"                       
                          },
                         "options": {

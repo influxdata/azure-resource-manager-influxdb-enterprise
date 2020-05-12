@@ -218,6 +218,7 @@ configure_datanodes()
       echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${DATA_ENV_FILE}"
       echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${DATA_ENV_FILE}"
       echo INFLUXDB_DATA_INDEX_VERSION=\"tsi1\" >> "${DATA_ENV_FILE}"    
+      echo INFLUXDB_HTTP_FLUX_ENABLED=\"true\" >> "${DATA_ENV_FILE}"    
     else
       log  "err: cannot create /etc/default/influxdb file. you will need to manually configure the datanode"
       exit 1
