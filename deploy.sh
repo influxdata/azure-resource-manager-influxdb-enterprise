@@ -28,9 +28,9 @@ if ! (az vm image terms show --urn influxdata:influxdb-enterprise-vm:data:1.7.10
       az vm image terms accept --urn influxdata:influxdb-enterprise-vm:meta:1.7.10
 fi
 
-az group deployment create \
+az deployment group create \
+      --resource-group "${resource_group}" \
       --template-file src/mainTemplate.json \
       --verbose \
-      --resource-group "${resource_group}" \
       --mode Complete \
       --parameters parameters/parameters.json
