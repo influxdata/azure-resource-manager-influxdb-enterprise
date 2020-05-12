@@ -56,9 +56,7 @@
                         "label": "Database admin username",
                         "toolTip": "Initial username for InfluxDB admin user.",
                         "constraints": {
-                            "required": true,
-                            "regex": "^(?!(?:adm|admin|audio|backup|bin|cdrom|crontab|daemon|dialout|password|disk|fax|floppy|fuse|games|gnats|irc|kmem|landscape|libuuid|list|lp|mail|man|messagebus|mlocate|netdev|news|nobody|nogroup|operator|plugdev|proxy|root|sasl|shadow|src|ssh|sshd|staff|sudo|sync|sys|syslog|tape|tty|users|utmp|uucp|video|voice|whoopsie|www\\-data)$)\\w+$",
-                            "validationMessage": "Username must not be a reserved Ubuntu username or word"
+                            "required": true
                         }
                     },
                     {
@@ -71,8 +69,8 @@
                         "toolTip": "Initial password for admin user.",
                         "constraints": {
                             "required": true,
-                            "regex": "^(?!(?:adm|admin|audio|backup|bin|cdrom|crontab|daemon|dialout|password|disk|fax|floppy|fuse|games|gnats|irc|kmem|landscape|libuuid|list|lp|mail|man|messagebus|mlocate|netdev|news|nobody|nogroup|operator|plugdev|proxy|root|sasl|shadow|src|ssh|sshd|staff|sudo|sync|sys|syslog|tape|tty|users|utmp|uucp|video|voice|whoopsie|www\\-data)$)\\w+$",
-                            "validationMessage": "Password must not be a reserved word"                       
+                            "regex": "^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{7,}$",
+                            "validationMessage": "Password must be at least 7 characters with one alpha-numeric character."
                          },
                         "options": {
                             "hideConfirmation": false
