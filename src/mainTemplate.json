@@ -65,7 +65,7 @@
         },
         "vmSizeDataNodes": {
             "type": "string",
-            "defaultValue": "Standard_DS3_v2",
+            "defaultValue": "Standard_DS2_v2",
             "allowedValues": [
                 "Standard_DS1_v2",
                 "Standard_DS2_v2",
@@ -150,18 +150,6 @@
         },
         "location": {
             "type": "string",
-            "allowedValues": [
-                "westus",
-                "eastus",
-                "eastus2",
-                "centralus",
-                "southcentralus",
-                "northcentralus",
-                "eastasia",
-                "southeastasia",
-                "westeurope",
-                "northeurope"
-            ],
             "defaultValue": "[resourceGroup().location]",
             "metadata": {
                 "description": "Location where resources will be provisioned.  A value of 'ResourceGroup' will deploy the resource to the same location of the resource group the resources are provisioned into"

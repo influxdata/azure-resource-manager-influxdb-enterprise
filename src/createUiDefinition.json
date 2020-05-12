@@ -109,9 +109,9 @@
                         "label": "Datanode VM Size",
                         "toolTip": "Choose VM SKU size for datanodes.",
                         "recommendedSizes": [
-                            "Standard_DS3_v2",
-                            "Standard_DS1_v2",
                             "Standard_DS2_v2",
+                            "Standard_DS1_v2",
+                            "Standard_DS3_v2",
                             "Standard_DS4_v2",
                             "Standard_DS5_v2"
                         ],
