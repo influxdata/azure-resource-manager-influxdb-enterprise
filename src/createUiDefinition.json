@@ -108,7 +108,7 @@
                     {
                         "name": "vmSizeDataNodes",
                         "type": "Microsoft.Compute.SizeSelector",
-                        "label": "Datanode VM Size",
+                        "label": "WARNING: make sure total core count does not exceed region or subscription limits.",
                         "toolTip": "Choose VM SKU size for datanodes.",
                         "recommendedSizes": [
                             "Standard_DS2_v2",
