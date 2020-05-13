@@ -12,8 +12,8 @@
                 "toolTip": "Specify a user for accessing the virtual machines within your cluster. Must be a valid Ubuntu username",
                 "constraints": {
                     "required": true,
-                    "regex": "^(?!(?:adm|admin|audio|backup|bin|cdrom|crontab|daemon|dialout|dip|disk|fax|floppy|fuse|games|gnats|irc|kmem|landscape|libuuid|list|lp|mail|man|messagebus|mlocate|netdev|news|nobody|nogroup|operator|plugdev|proxy|root|sasl|shadow|src|ssh|sshd|staff|sudo|sync|sys|syslog|tape|tty|users|utmp|uucp|video|voice|whoopsie|www\\-data)$)\\w+$",
-                    "validationMessage": "Username must not be a reserved Ubuntu username"
+                    "regex": "^(?!(?:adm|admin|audio|backup|bin|cdrom|crontab|daemon|dialout|password|disk|fax|floppy|fuse|games|gnats|irc|kmem|landscape|libuuid|list|lp|mail|man|messagebus|mlocate|netdev|news|nobody|nogroup|operator|plugdev|proxy|root|sasl|shadow|src|ssh|sshd|staff|sudo|sync|sys|syslog|tape|tty|users|utmp|uucp|video|voice|whoopsie|www\\-data)$)\\w+$",
+                    "validationMessage": "Username must not be a reserved Ubuntu username or word"
                 },
                 "osPlatform": "Linux"
             },
@@ -56,9 +56,7 @@
                         "label": "Database admin username",
                         "toolTip": "Initial username for InfluxDB admin user.",
                         "constraints": {
-                            "required": true,
-                            "regex": "^(?!(?:adm|admin|audio|backup|bin|cdrom|crontab|daemon|dialout|dip|disk|fax|floppy|fuse|games|gnats|irc|kmem|landscape|libuuid|list|lp|mail|man|messagebus|mlocate|netdev|news|nobody|nogroup|operator|plugdev|proxy|root|sasl|shadow|src|ssh|sshd|staff|sudo|sync|sys|syslog|tape|tty|users|utmp|uucp|video|voice|whoopsie|www\\-data)$)\\w+$",
-                            "validationMessage": "Username must not be a reserved username"
+                            "required": true
                         }
                     },
                     {
@@ -70,8 +68,10 @@
                         },
                         "toolTip": "Initial password for admin user.",
                         "constraints": {
-                            "required": true
-                        },
+                            "required": true,
+                            "regex": "^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{7,}$",
+                            "validationMessage": "Password must be at least 7 characters with one alpha-numeric character."
+                         },
                         "options": {
                             "hideConfirmation": false
                         }
@@ -107,11 +107,11 @@
                         "name": "vmSizeDataNodes",
                         "type": "Microsoft.Compute.SizeSelector",
                         "label": "Datanode VM Size",
-                        "toolTip": "Choose VM SKU size for datanodes.",
+                        "toolTip": "Please note: Ensure total core count does not exceed [region or subscription limits.](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits)",
                         "recommendedSizes": [
-                            "Standard_DS3_v2",
-                            "Standard_DS1_v2",
                             "Standard_DS2_v2",
+                            "Standard_DS1_v2",
+                            "Standard_DS3_v2",
                             "Standard_DS4_v2",
                             "Standard_DS5_v2"
                         ],
@@ -181,7 +181,7 @@
                         "name": "vmSizeMetaNodes",
                         "type": "Microsoft.Compute.SizeSelector",
                         "label": "Metanode VM Size",
-                        "toolTip": "Choose VM SKU size for metanodes, (3) will be provisioned",
+                        "toolTip": "Total of nodes (3) will be provisioned",
                         "recommendedSizes": [
                             "Standard_D1_v2",
                             "Standard_D2_v2"
