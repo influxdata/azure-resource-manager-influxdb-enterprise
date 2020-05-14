@@ -4,8 +4,8 @@
         "subscription_id": "{{env `AZURE_SUBSCRIPTION_ID`}}",
         "region": "centralus",
         "listing_type": "billing",
-        "influxdb_version": "1.7.9",
-        "telegraf_version": "1.12.6"
+        "influxdb_version": "1.8.0",
+        "telegraf_version": "1.14.2"
     },
     "builders": [
         {
