@@ -172,9 +172,12 @@ configure_metanodes()
     #create etc/default/influxdb file to over-ride configuration defaults
     touch "${META_ENV_FILE}"
     if [ $? -eq 0 ]; then
-      echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${META_ENV_FILE}"
-      echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${META_ENV_FILE}"
-      echo INFLUXDB_META_DIR=\"/influxdb/meta\" >> "${META_ENV_FILE}"    
+      cat > "${META_ENV_FILE}" <<-EOF
+        INFLUXDB_HOSTNAME="${HOSTNAME}"
+        INFLUXDB_ENTERPRISE_MARKETPLACE_ENV="azure"
+        INFLUXDB_META_DIR="/influxdb/meta"
+        INFLUXDB_DATA_QUERY_LOG_ENABLED="false"
+EOF
     else
       log  "err: cannot create /etc/default/influxdb file. you will need to manually configure the metanode"
       exit 1
@@ -215,10 +218,18 @@ configure_datanodes()
     #create etc/default/influxdb file to over-ride configuration defaults
     touch "${DATA_ENV_FILE}"
     if [ $? -eq 0 ]; then
-      echo INFLUXDB_HOSTNAME=\"${HOSTNAME}\" >> "${DATA_ENV_FILE}"
-      echo INFLUXDB_ENTERPRISE_MARKETPLACE_ENV=\"azure\" >> "${DATA_ENV_FILE}"
-      echo INFLUXDB_DATA_INDEX_VERSION=\"tsi1\" >> "${DATA_ENV_FILE}"    
-      echo INFLUXDB_HTTP_FLUX_ENABLED=\"true\" >> "${DATA_ENV_FILE}"    
+      cat > "${DATA_ENV_FILE}" <<-EOF
+        INFLUXDB_HOSTNAME="${HOSTNAME}"
+        INFLUXDB_ENTERPRISE_MARKETPLACE_ENV="azure"
+        INFLUXDB_META_DIR="/influxdb/meta"
+        INFLUXDB_DATA_DIR="/influxdb/data"
+        INFLUXDB_DATA_WAL_DIR="/influxdb/wal"
+        INFLUXDB_DATA_QUERY_LOG_ENABLED="false"
+        INFLUXDB_DATA_INDEX_VERSION="tsi1"
+        INFLUXDB_HTTP_FLUX_ENABLED="true"
+        INFLUXDB_CLUSTER_LOG_QUERIES_AFTER="10s"
+        INFLUXDB_HINTED_HANDOFF_DIR="/influxdb/hh"
+EOF
     else
       log  "err: cannot create /etc/default/influxdb file. you will need to manually configure the datanode"
       exit 1

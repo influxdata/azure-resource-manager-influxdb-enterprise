@@ -7,6 +7,5 @@ sudo dpkg -i "kapacitor_$1_amd64.deb"
 rm "kapacitor_$1_amd64.deb"
 sudo systemctl stop kapacitor.service
 sudo systemctl disable kapacitor.service
-sudo mv /etc/kapacitor/kapacitor.conf /etc/kapacitor/kapacitor.conf.original
-sudo mv /tmp/config/kapacitor.conf /etc/kapacitor/kapacitor.conf
+sudo mv /etc/kapacitor/kapacitor-monitor.conf /etc/kapacitor/kapacitor-monitor.conf
 sudo chown -R kapacitor:kapacitor /etc/kapacitor/kapacitor.conf

@@ -3,10 +3,10 @@
     "variables": {
         "subscription_id": "{{env `AZURE_SUBSCRIPTION_ID`}}",
         "region": "centralus",
-        "telegraf_version": "1.12.6",
-        "influxdb_version": "1.7.9",
-        "chronograf_version": "1.7.14",
-        "kapacitor_version": "1.5.3"
+        "telegraf_version": "1.14.2",
+        "influxdb_version": "1.8.0",
+        "chronograf_version": "1.8.4",
+        "kapacitor_version": "1.5.5"
     },
     "builders": [
         {
