@@ -8,6 +8,9 @@
     "chronograf": {
         "value": "Yes"
     },
+    "monitor": {
+        "value": "No"
+    },
     "vmSizeDataNodes": {
         "value": "Standard_DS2_v2"
     },

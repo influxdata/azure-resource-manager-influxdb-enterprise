@@ -26,42 +26,13 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "influxTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "influxdata"
-            },
-            "metadata": {
-                "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
-            }
-        },
-        "subnet": {
-            "type": "object",
-            "metadata": {
-                "description": "The name of the subnet to deploy resources into"
-            }
-        },
-        "dataNodesIpPrefix": {
-            "type": "string",
-            "metadata": {
-                "description": "IP Prefix used to append index for static addresses"
-            }
-        },
-        "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_A1",
-            "metadata": {
-                "description": "Size of the InfluxEnterprise data nodes"
-            }
-        },
-        "vmCount": {
-            "type": "int",
-            "defaultValue": 2,
-            "metadata": {
-                "description": "Number of InfluxEnterpirse data nodes"
-            }
-        },
         "osSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "OS settings to deploy on"
+            }
+        },
+        "networkSettings": {
             "type": "object",
             "metadata": {
                 "description": "OS settings to deploy on"
@@ -81,10 +52,10 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.data.vnet, parameters('networkSettings').subnet.data.name)]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
-             "ssh": {
+            "ssh": {
                 "publicKeys": [
                     {
                         "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
@@ -101,8 +72,8 @@
             "name": "[concat('avail-', parameters('namespace'))]",
             "location": "[parameters('location')]",
             "properties": {
-                "platformUpdateDomainCount": 20,
-                "platformFaultDomainCount": 3
+                "platformUpdateDomainCount": 10,
+                "platformFaultDomainCount": "[parameters('networkSettings').platformFaultDomainCount]"
             },
             "sku": {
                 "name": "Aligned"
@@ -115,7 +86,7 @@
             "location": "[parameters('location')]",
             "copy": {
                 "name": "[concat('dataNodeNic','nicLoop')]",
-                "count": "[parameters('vmCount')]"
+                "count": "[parameters('osSettings').vmDataNodeCount]"
             },
             "properties": {
                 "ipConfigurations": [
@@ -123,7 +94,7 @@
                         "name": "ipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[concat(parameters('dataNodesIpPrefix'),copyindex())]",
+                            "privateIPAddress": "[concat(parameters('networkSettings').dataNodesIpPrefix,copyindex())]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },
@@ -139,7 +110,7 @@
             "name": "[concat('vm', parameters('namespace'), '-', copyindex())]",
             "location": "[parameters('location')]",
             "tags": {
-                "provider": "[toUpper(parameters('influxTags').provider)]"
+                "provider": "[parameters('osSettings').influxTags.provider]"
             },
             "plan": {
                 "name": "data",
@@ -148,7 +119,7 @@
             },
             "copy": {
                 "name": "[concat(parameters('namespace'), 'virtualMachineLoop')]",
-                "count": "[parameters('vmCount')]"
+                "count": "[parameters('osSettings').vmDataNodeCount]"
             },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
@@ -159,7 +130,7 @@
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
                 },
                 "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
+                    "vmSize":  "[parameters('osSettings').vmSizeDataNodes]"
                 },
                 "osProfile": {
                     "computerName": "[concat('vm', parameters('namespace'), '-', copyindex())]",

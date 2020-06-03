@@ -45,7 +45,18 @@
                 "No"
             ],
             "metadata": {
-                "description": "Provision a machine with Chronograf on it"
+                "description": "Provision a single instance with Chronograf service installed."
+            }
+        },
+        "monitor": {
+            "type": "string",
+            "defaultValue": "No",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "metadata": {
+                "description": "Provision a single instance with InfluxDB-OSS service installed."
             }
         },
         "vmDataDiskSize": {
@@ -121,13 +132,13 @@
                 "Standard_D5_v2"
             ],
             "metadata": {
-                "description": "Size of the InfluxEnterprise meta nodes, 3 of these will be provisioned"
+                "description": "Size of the InfluxEnterprise meta nodes, 3 instances will be provisioned"
             }
         },
         "adminUsername": {
             "type": "string",
             "metadata": {
-                "description": "Admin username used when provisioning virtual machines"
+                "description": "Admin username used when provisioning all virtual machines"
             }
         },
         "password": {
@@ -139,13 +150,13 @@
         "influxdbUsername": {
             "type": "string",
             "metadata": {
-                "description": "Database username for admin user with ALL PRIVILEGES"
+                "description": "InfluxDB Enterpise username for admin user with ALL PRIVILEGES"
             }
         },
         "influxdbPassword": {
             "type": "securestring",
             "metadata": {
-                "description": "Database password for admin user with ALL PRIVILEGES"
+                "description": "InfluxDB Enterpise password for admin user with ALL PRIVILEGES"
             }
         },
         "location": {
@@ -169,13 +180,17 @@
             "authenticationType": "[parameters('password').authenticationType]",
             "sshPublicKey": "[if(equals(parameters('password').authenticationType,'sshPublicKey'),parameters('password').sshPublicKey,json('null'))]"
         },
+        "location": "[parameters('location')]",
         "chronoScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
-        "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]",
+        "influxdbScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/influxdb-install.sh', parameters('_artifactsLocationSasToken')))]",
+        "enterpriseScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/enterprise-configure.sh', parameters('_artifactsLocationSasToken')))]",
         "diskScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
         "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/chronograf-resources.json', parameters('_artifactsLocationSasToken')))]",
-        "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
+        "monitorTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/monitor-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "commonInstallParams": "[concat(' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
+        "clusterInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -m ', parameters('monitor'))]",
         "osSettings": {
             "imageReference": {
                 "publisher": "Canonical",
@@ -183,8 +198,12 @@
                 "sku": "18.04-LTS",
                 "version": "latest"
             },
-            "managementPort": "22",
-            "chronoSize": "Standard_D2_v2",
+
+            "vmSizeDataNodes": "[parameters('vmSizeDataNodes')]",
+            "vmSizeMetaNodes": "[parameters('vmSizeMetaNodes')]",
+            "vmDataNodeCount": "[parameters('vmDataNodeCount')]",
+            "influxTags": "[parameters('influxTags')]",
+            "vmDefaultSize": "Standard_DS2_v2",
             "extensionSettings": {
                 "meta": {
                     "publisher": "Microsoft.Azure.Extensions",
@@ -194,9 +213,9 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s meta', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
                 "data": {
@@ -207,12 +226,12 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s data', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
-                "master": {
+                "leader": {
                     "publisher": "Microsoft.Azure.Extensions",
                     "type": "CustomScript",
                     "typeHandlerVersion": "2.0",
@@ -220,9 +239,9 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s leader', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
                 "chronograf": {
@@ -236,13 +255,55 @@
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
                     }
+                },
+                "monitor": {
+                    "publisher": "Microsoft.Azure.Extensions",
+                    "type": "CustomScript",
+                    "typeHandlerVersion": "2.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                        "fileUris": [
+                            "[variables('influxdbScriptUrl')]"
+                        ],
+                        "commandToExecute": "[concat('bash influxdb-install.sh', variables('commonInstallParams'))]"
+                    }
                 }
             }
         },
-        "location": "[parameters('location')]",
-        "metaNodesIpPrefix": "10.0.0.1",
-        "dataNodesIpPrefix": "10.0.1.1",
+        "locations": {
+            "eastus": {
+                "platformFaultDomainCount": 3
+            },
+            "eastus2": {
+                "platformFaultDomainCount": 3
+            },
+            "centralus": {
+                "platformFaultDomainCount": 3
+            },
+            "northcentralus": {
+                "platformFaultDomainCount": 3
+            },
+            "southcentralus": {
+                "platformFaultDomainCount": 3
+            },
+            "westus": {
+                "platformFaultDomainCount": 3
+            },
+            "canadacentral": {
+                "platformFaultDomainCount": 3
+            },
+            "northeurope": {
+                "platformFaultDomainCount": 3
+            },
+            "westeurope": {
+                "platformFaultDomainCount": 3
+            }
+        },
         "networkSettings": {
+            "platformFaultDomainCount": "[if(contains(variables('locations'), variables('location')), variables('locations')[variables('location')].platformFaultDomainCount, 2)]",
+            "metaNodesIpPrefix": "10.0.0.1",
+            "dataNodesIpPrefix": "10.0.1.1",
+            "managementPort": "22",
             "virtualNetworkName": "[parameters('virtualNetworkName')]",
             "addressPrefix": "10.0.0.0/16",
             "subnet": {
@@ -289,7 +350,8 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
         },
@@ -314,23 +376,14 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "metaNodesIpPrefix": {
-                        "value": "[variables('metaNodesIpPrefix')]"
-                    },
                     "location": {
                         "value": "[variables('location')]"
-                    },
-                    "influxTags": {
-                        "value": "[parameters('influxTags')]"
-                    },
-                    "vmSize": {
-                        "value": "[parameters('vmSizeMetaNodes')]"
                     },
                     "namespace": {
                         "value": "meta"
                     },
-                    "subnet": {
-                        "value": "[variables('networkSettings').subnet.meta]"
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
                     },
                     "osSettings": {
                         "value": "[variables('osSettings')]"
@@ -384,29 +437,17 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "dataNodesIpPrefix": {
-                        "value": "[variables('dataNodesIpPrefix')]"
-                    },
                     "location": {
                         "value": "[variables('location')]"
-                    },
-                    "influxTags": {
-                        "value": "[parameters('influxTags')]"
                     },
                     "storageSettings": {
                         "value": "[variables('dataNodeStorageSettings')]"
                     },
-                    "subnet": {
-                        "value": "[variables('networkSettings').subnet.data]"
-                    },
-                    "vmSize": {
-                        "value": "[parameters('vmSizeDataNodes')]"
-                    },
-                    "vmCount": {
-                        "value": "[parameters('vmDataNodeCount')]"
-                    },
                     "namespace": {
                         "value": "data"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
                     },
                     "osSettings": {
                         "value": "[variables('osSettings')]"
@@ -435,8 +476,41 @@
                     "adminUsername": {
                         "value": "[parameters('adminUsername')]"
                     },
-                    "influxTags": {
-                        "value": "[parameters('influxTags')]"
+                    "password": {
+                        "value": "[variables('password')]"
+                    },
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "namespace": {
+                        "value": "chronograf"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
+                    },
+                    "osSettings": {
+                        "value": "[variables('osSettings')]"
+                    }
+                }
+            }
+        },
+        {
+            "condition": "[equals(parameters('monitor'), 'Yes')]",
+            "name": "monitor",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'shared')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('monitorTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
                     },
                     "password": {
                         "value": "[variables('password')]"
@@ -444,8 +518,11 @@
                     "location": {
                         "value": "[variables('location')]"
                     },
-                    "subnet": {
-                        "value": "[variables('networkSettings').subnet.data]"
+                    "namespace": {
+                        "value": "monitor"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
                     },
                     "osSettings": {
                         "value": "[variables('osSettings')]"

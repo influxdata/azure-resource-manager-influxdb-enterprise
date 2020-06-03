@@ -4,7 +4,6 @@
     "parameters": {
         "namespace": {
             "type": "string",
-            "defaultValue": "chronograf",
             "metadata": {
                 "description": "The namespace prefix for resources created by this template"
             }
@@ -13,12 +12,6 @@
             "type": "string",
             "metadata": {
                 "description": "Location where resources will be provisioned"
-            }
-        },
-        "subnet": {
-            "type": "object",
-            "metadata": {
-                "description": "Subnet object for provisioning resources in (expects properties name as the subnet name, and vnet as the virtual network name on the object)"
             }
         },
         "adminUsername": {
@@ -33,13 +26,10 @@
                 "description": "Administrator password used when provisioning virtual machines"
             }
         },
-        "influxTags": {
+        "networkSettings": {
             "type": "object",
-            "defaultValue": {
-                "provider": "influxdata"
-            },
             "metadata": {
-                "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
+                "description": "Network settings to deploy on"
             }
         },
         "osSettings": {
@@ -50,14 +40,14 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.data.vnet, parameters('networkSettings').subnet.data.name)]",
         "vmName": "[concat('vm', parameters('namespace'))]",
         "publicIpName": "[concat('pip-', parameters('namespace'))]",
         "securityGroupName": "[concat('nsg-', parameters('namespace'))]",
         "nicName": "[concat('nic-0-vm', parameters('namespace'))]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
-             "ssh": {
+            "ssh": {
                 "publicKeys": [
                     {
                         "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
@@ -80,8 +70,8 @@
                         "properties": {
                             "description": "Allow inbound SSH traffic from anyone",
                             "protocol": "Tcp",
-                            "sourcePortRange": "[parameters('osSettings').managementPort]",
-                            "destinationPortRange": "[parameters('osSettings').managementPort]",
+                            "sourcePortRange": "[parameters('networkSettings').managementPort]",
+                            "destinationPortRange": "[parameters('networkSettings').managementPort]",
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
@@ -152,14 +142,14 @@
             "name": "[variables('vmName')]",
             "location": "[parameters('location')]",
             "tags": {
-                "provider": "[toUpper(parameters('influxTags').provider)]"
+                "provider": "[parameters('osSettings').influxTags.provider]"
             },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize":  "[parameters('osSettings').chronoSize]"
+                    "vmSize": "[parameters('osSettings').vmDefaultSize]"
                 },
                 "osProfile": {
                     "computerName": "[variables('vmName')]",
@@ -201,5 +191,10 @@
             ]
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "resourceID": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
+        }
+    }
 }

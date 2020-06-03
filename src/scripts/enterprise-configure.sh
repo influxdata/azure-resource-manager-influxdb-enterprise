@@ -13,10 +13,11 @@ help()
     echo " "
     echo "This script configures a new InfluxEnterpise cluster deployed with Azure ARM templates."
     echo "Parameters:"
-    echo "-n  Configure specific node_type [meta || data || master]"
-    echo "-u  Supply influxdb admin username  cluster nodes - used in case of [master] node only"
-    echo "-p  Supply influxdb admin password  cluster nodes - used in case of [master] node only"
-    echo "-c  Number of datanodes to configure - used in case of [data||master] node configurations"
+    echo "-s  Configure specific enterprise service [meta || data || leader]"
+    echo "-c  Number of datanodes to configure - used by [leader] service"
+    echo "-m  Monitor instance enabled, if [Yes] then start Telegraf services"
+    echo "-u  Supply influxdb admin username enterprise  - used by [leader] service only"
+    echo "-p  Supply influxdb admin password enterprise  - used by [leader] service only"
     echo "-h  view this help content"
 }
 
@@ -29,13 +30,12 @@ help()
 log()
 {
      echo \[$(date +%d%m%Y-%H:%M:%S)\] "$1"
-     echo \[$(date +%d%m%Y-%H:%M:%S)\] "$1" >> /var/log/cluster-configuration.log
+     echo \[$(date +%d%m%Y-%H:%M:%S)\] "$1" >> /var/log/enterprise-configuration.log
 }
 
 
-log "Begin execution of Cluster Configuration script extension on ${HOSTNAME}"
+log "Begin execution of Enterpise Cluster script extension on ${HOSTNAME}"
 START_TIME=$SECONDS
-
 
 #########################
 # Check user access
@@ -55,23 +55,25 @@ META_CONFIG_FILE="/etc/influxdb/influxdb-meta.conf"
 DATA_CONFIG_FILE="/etc/influxdb/influxdb.conf"
 META_ENV_FILE="/etc/default/influxdb-meta"
 DATA_ENV_FILE="/etc/default/influxdb"
-ETC_HOSTS="/etc/hosts"
-
+TELEGRAF_CONFIG_FILE="/etc/telegraf/telegraf.conf"
 
 #Loop through options passed
-while getopts :n:c:u:p:h optname; do
+while getopts :s:c:m:u:p:h optname; do
   log "Option $optname set"
   case $optname in
-    n)  #configure [meta||data||master] nodes
-      NODE_TYPE="${OPTARG}"
+    s)  #configure specific service [meta||data||leader]
+      SERVICE="${OPTARG}"
       ;;
-    c) #number os datanodes - used in case of [data||master] nodes configurations
+    c) #number of os datanodes - used by [leader] service only
       COUNT="${OPTARG}"
       ;;
-    u) #influxdb admin username - used in case of [master] node configurations only
+    m) #monitor instance enabled, if [Yes] then start telegraf services
+      MONITOR="${OPTARG}"
+      ;;
+    u) #influxdb admin username - used by [leader] service only
       INFLUXDB_USER="${OPTARG}"
       ;;
-    p) #influxdb admin password - used in case of [master] node configurations only
+    p) #influxdb admin password - used by [leader] service only
       INFLUXDB_PWD="${OPTARG}"
       ;;
     h) #show help
@@ -89,46 +91,6 @@ done
 #########################
 # Configuration functions
 #########################
-
-setup_metanodes()
-{
-  # TEMP-SOLUTION: Hard coded privateIP's
-  # Append metanode vm hostname  to the hsots file
-
-  log "[setup_metanodes] adding all metanodes to the /etc/hosts file"
-  if [ -n "$(grep ${HOSTNAME} /etc/hosts)" ]
-    then
-      log "[setup_metanodes] hostname already exists : $(grep $HOSTNAME $ETC_HOSTS)"
-    else
-        for i in $(seq 0 2); do 
-          echo "10.0.0.1${i} vmmeta-${i}" >> /etc/hosts
-        done        
-  fi
-}
-
-setup_datanodes()
-{
-  # TEMP-SOLUTION: Hard coded privateIP's
-  # Append metanode vm hostname  to the hsots file
-
-  if [ -z "${COUNT}" ]; then
-    log  "err: missing datanode count parameter..."
-    exit 2
-  fi
-
-  END=`expr ${COUNT} - 1`
-
-  log "[setup_datanodes] adding all datanodes to the /etc/hosts file"
-
-  if [ -n "$(grep ${HOSTNAME} /etc/hosts)" ]
-    then
-      log "[setup_datanodes] hostname already exists : $(grep $HOSTNAME $ETC_HOSTS)"
-    else
-        for i in $(seq 0 "${END}"); do 
-          echo "10.0.1.1${i} vmdata-${i}" >> /etc/hosts
-        done        
-  fi
-}
 
 join_metanodes()
 {
@@ -164,9 +126,6 @@ configure_metanodes()
       exit $EXIT_CODE
     fi
     
-    #need to update the influxdb-meta.conf default values
-    log  "[sed_cmd] updated ${META_CONFIG_FILE} default file values"
-
     chown influxdb:influxdb "${META_CONFIG_FILE}"
 
     #create etc/default/influxdb file to over-ride configuration defaults
@@ -193,6 +152,9 @@ EOF
      log  "err: creating file ${META_GEN_FILE}. you will need to manually configure the metanode"
      exit 1
   fi
+
+  start_service influxdb-meta 
+
 }
 
 configure_datanodes()
@@ -209,9 +171,6 @@ configure_datanodes()
        log "err: could not copy new ${DATA_GEN_FILE} file to /etc/influxdb"
       exit $EXIT_CODE
     fi
-
-    #need to update the influxdb.conf default values
-    log  "[sed_cmd] updated ${META_CONFIG_FILE} default file values"
 
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
 
@@ -248,6 +207,7 @@ EOF
      log  "err: creating file ${DATA_GEN_FILE}. you will need to manually configure the metanode"
      exit 1
   fi
+  start_service influxdb 
 }
 datanode_count()
 {
@@ -255,48 +215,86 @@ datanode_count()
   log "[datanode_count] checking COUNT parameter"
 
   if [ -z "${COUNT}" ]; then
-    log "err: please set \$_COUNT parameter..."
+    log "err: datanode count not set - please set -c parameter."
 
     exit 1
   fi
 }
-
-start_systemd()
+telegraf()
 {
-  if [[ ${NODE_TYPE} == "meta" ]] || [[ ${NODE_TYPE} == "master" ]]; then
-    log "[start_systemd] starting metanode"
-    systemctl start influxdb-meta
+  #generate and stage new telegraf configuration file
+  log "[configure_telegraf] generating new telegraf configuration file at ${TELEGRAF_CONFIG_FILE}"
+
+    touch "${TELEGRAF_CONFIG_FILE}"
+    if [ $? -eq 0 ]; then
+      cat > "${TELEGRAF_CONFIG_FILE}" <<-EOF
+      #Global Agent Configuration
+          [agent]
+            hostname = "${HOSTNAME}"
+
+          # Input Plugins
+          [[inputs.cpu]]
+              percpu = true
+              totalcpu = true
+              collect_cpu_time = false
+              report_active = false
+          [[inputs.disk]]
+              ignore_fs = ["tmpfs", "devtmpfs", "devfs"]
+          [[inputs.diskio]]
+          [[inputs.mem]]
+          [[inputs.net]]
+          [[inputs.system]]
+          [[inputs.swap]]
+          [[inputs.netstat]]
+          [[inputs.processes]]
+
+          # Output Plugin InfluxDB
+          [[outputs.influxdb]]
+            database = "telegraf"
+            urls = [ "http://vmmonitor:8086" ]
+            username = "${INFLUXDB_USER}"
+            password = "${INFLUXDB_PWD}"
+EOF
+    else
+      log  "err: cannot create /etc/telegraf/telegraf.conf file. you will need to manually configure telegraf"
+      exit 1
+    fi
+    
+    chown telegraf:telegraf "${TELEGRAF_CONFIG_FILE}"
+
+    #starting telegraf service 
+    log "[systemd] starting telegraf"
+    systemctl start telegraf
     sleep 5
-  elif [[ ${NODE_TYPE} == "data" ]]; then
-    log "[start_systemd] starting datanode"
-    systemctl start influxdb
+    start_service telegraf 
+}
+start_service()
+{
+   # s stores $1 service argument passed to start_service()
+   s=$1
+    #start service 
+    systemctl start ${s}
     sleep 5
-  fi
+
+    if (systemctl -q is-active ${s}); then 
+      log "info: ${s} service running."
+    else
+      log "err:  ${s} service did not start, please check and restart manually."
+      exit 1
+    fi
 }
 
 create_user()
 {
-#check service status
-log "[create_user] create influxdb admin user"
-
-payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
-
-curl -s -k -X POST \
-    -d "${payload}" \
-    "http://vmdata-0:8086/query"
-    
-}
-process_check()
-{
   #check service status
-  log "[process_check] check service process started"
+  log "[create_user] create influxdb admin user"
 
-  PROC_CHECK=`ps aux | grep -v grep | grep influxdb`
-  EXIT_CODE=$?
-  if [[ $EXIT_CODE -ne 0 ]]; then
-    log "err: could not start influxdb service, try starting manually."
-    exit $EXIT_CODE
-  fi
+  payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
+
+  curl -s -k -X POST \
+      -d "${payload}" \
+      "http://vmdata-0:8086/query"
+      
 }
 
 install_ntp()
@@ -318,51 +316,46 @@ if [[ $EXIT_CODE -ne 0 ]]; then
   log "[apt-get] failed updating apt-get. exit code: $EXIT_CODE"
   exit $EXIT_CODE
 fi
-log "[apt-get] updated apt-get"
 
 
-#format data disk (Find data disks then partition, format, and mount it
+# format data disk (Find data disks then partition, format, and mount it
 # as seperate drive under /influxdb/* )_
 #------------------------
 log "[autopart] running auto partitioning & mounting"
-
 bash autopart.sh
 
 
-if [[ ${NODE_TYPE} == "meta" ]] || [[ ${NODE_TYPE} == "master" ]]; then
-    log "[metanode_funcs] executing metanode configuration functions"
-
-    setup_metanodes
-
+if [[ ${SERVICE} == "meta" ]] || [[ ${SERVICE} == "leader" ]]; then
+    log "[metanode_service] executing metanode configuration functions"
     configure_metanodes
-
-elif [[ ${NODE_TYPE} == "data" ]]; then
-    log "[datanode_funcs] executing datanode configuration functions"
-    
-    datanode_count
-
-    setup_datanodes
-
+elif [[ ${SERVICE} == "data" ]]; then
+    log "[datanode_service] executing datanode configuration functions"
     configure_datanodes
 else 
-    log "err: node_type unknown, please set a valid node_type"
+    log "err: service type unknown, please set a valid service"
 
     help
     exit 2
 fi
 
-
-#start service & check process
+#start telegraf service
 #------------------------
-start_systemd
+systemd_servies
 
 process_check
 
-
-#master metanode funcs to join all nodes to cluster 
+#start telegraf service
 #------------------------
-if [[ ${NODE_TYPE} == "master" ]];then
-  log "[master_metanode] executing cluster join commands on master metanode"
+telegraf
+
+if [[ ${MONITOR} == "Yes" ]]; then
+    log "infor: monitoring instance configured, enabling Telegraf services on host"
+    telegraf
+fi
+
+#------------------------
+if [[ ${SERVICE} == "leader" ]];then
+  log "[leader_service] executing cluster join commands on leader metanode"
 
   datanode_count
 
