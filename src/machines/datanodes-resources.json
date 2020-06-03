@@ -101,8 +101,8 @@
             "name": "[concat('avail-', parameters('namespace'))]",
             "location": "[parameters('location')]",
             "properties": {
-                "platformUpdateDomainCount": 20,
-                "platformFaultDomainCount": 3
+                "platformUpdateDomainCount": 8,
+                "platformFaultDomainCount": 2
             },
             "sku": {
                 "name": "Aligned"
