@@ -23,9 +23,9 @@ if ! (az group show --name "${resource_group}"); then
 fi
 
 # Accept the legal terms for the influxdata offer skus (only needs ti be run once for your sunscritopn ID)
-if ! (az vm image terms show --urn influxdata:influxdb-enterprise-vm:data:1.7.10 --query "accepted"); then
-      az vm image terms accept --urn influxdata:influxdb-enterprise-vm:data:1.7.10
-      az vm image terms accept --urn influxdata:influxdb-enterprise-vm:meta:1.7.10
+if ! (az vm image terms show --urn influxdata:influxdb-enterprise-vm:data:latest --query "accepted"); then
+      az vm image terms accept --urn influxdata:influxdb-enterprise-vm:data:latest
+      az vm image terms accept --urn influxdata:influxdb-enterprise-vm:meta:latest
 fi
 
 az deployment group create \
