@@ -90,46 +90,6 @@ done
 # Configuration functions
 #########################
 
-setup_metanodes()
-{
-  # TEMP-SOLUTION: Hard coded privateIP's
-  # Append metanode vm hostname  to the hsots file
-
-  log "[setup_metanodes] adding all metanodes to the /etc/hosts file"
-  if [ -n "$(grep ${HOSTNAME} /etc/hosts)" ]
-    then
-      log "[setup_metanodes] hostname already exists : $(grep $HOSTNAME $ETC_HOSTS)"
-    else
-        for i in $(seq 0 2); do 
-          echo "10.0.0.1${i} vmmeta-${i}" >> /etc/hosts
-        done        
-  fi
-}
-
-setup_datanodes()
-{
-  # TEMP-SOLUTION: Hard coded privateIP's
-  # Append metanode vm hostname  to the hsots file
-
-  if [ -z "${COUNT}" ]; then
-    log  "err: missing datanode count parameter..."
-    exit 2
-  fi
-
-  END=`expr ${COUNT} - 1`
-
-  log "[setup_datanodes] adding all datanodes to the /etc/hosts file"
-
-  if [ -n "$(grep ${HOSTNAME} /etc/hosts)" ]
-    then
-      log "[setup_datanodes] hostname already exists : $(grep $HOSTNAME $ETC_HOSTS)"
-    else
-        for i in $(seq 0 "${END}"); do 
-          echo "10.0.1.1${i} vmdata-${i}" >> /etc/hosts
-        done        
-  fi
-}
-
 join_metanodes()
 {
   #joining meatanodes
@@ -318,10 +278,9 @@ if [[ $EXIT_CODE -ne 0 ]]; then
   log "[apt-get] failed updating apt-get. exit code: $EXIT_CODE"
   exit $EXIT_CODE
 fi
-log "[apt-get] updated apt-get"
 
 
-#format data disk (Find data disks then partition, format, and mount it
+# format data disk (Find data disks then partition, format, and mount it
 # as seperate drive under /influxdb/* )_
 #------------------------
 log "[autopart] running auto partitioning & mounting"
@@ -332,16 +291,12 @@ bash autopart.sh
 if [[ ${NODE_TYPE} == "meta" ]] || [[ ${NODE_TYPE} == "master" ]]; then
     log "[metanode_funcs] executing metanode configuration functions"
 
-   # setup_metanodes
-
     configure_metanodes
 
 elif [[ ${NODE_TYPE} == "data" ]]; then
     log "[datanode_funcs] executing datanode configuration functions"
     
     datanode_count
-
-  #  setup_datanodes
 
     configure_datanodes
 else 
