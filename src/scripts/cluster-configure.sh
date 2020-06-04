@@ -332,7 +332,7 @@ bash autopart.sh
 if [[ ${NODE_TYPE} == "meta" ]] || [[ ${NODE_TYPE} == "master" ]]; then
     log "[metanode_funcs] executing metanode configuration functions"
 
-    setup_metanodes
+   # setup_metanodes
 
     configure_metanodes
 
@@ -341,7 +341,7 @@ elif [[ ${NODE_TYPE} == "data" ]]; then
     
     datanode_count
 
-    setup_datanodes
+  #  setup_datanodes
 
     configure_datanodes
 else 
