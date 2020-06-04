@@ -32,12 +32,6 @@
                 "description": "The VNET and Subnet to deploy the nodes in to"
             }
         },
-        "metaNodesIpPrefix": {
-            "type": "string",
-            "metadata": {
-                "description": "IP Prefix used to append index for static addresses"
-            }
-        },
         "platformFaultDomainCount": {
             "type": "int",
             "metadata": {
@@ -51,6 +45,12 @@
                 "description": "Size of the InfluxEnterprise meta nodes"
             }
         },
+        "networkSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "OS settings to deploy on"
+            }
+        },
         "osSettings": {
             "type": "object",
             "metadata": {
@@ -59,7 +59,7 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.meta.vnet, parameters('networkSettings').subnet.meta.name)]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
              "ssh": {
@@ -101,7 +101,7 @@
                         "name": "ipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[concat(parameters('metaNodesIpPrefix'), copyindex())]",
+                            "privateIPAddress": "[concat(parameters('networkSettings').metaNodesIpPrefix, copyindex())]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
