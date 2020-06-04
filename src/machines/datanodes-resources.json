@@ -26,18 +26,6 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "subnet": {
-            "type": "object",
-            "metadata": {
-                "description": "The name of the subnet to deploy resources into"
-            }
-        },
-        "dataNodesIpPrefix": {
-            "type": "string",
-            "metadata": {
-                "description": "IP Prefix used to append index for static addresses"
-            }
-        },
         "vmSize": {
             "type": "string",
             "defaultValue": "Standard_A1",
@@ -64,6 +52,12 @@
                 "description": "OS settings to deploy on"
             }
         },
+        "networkSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "OS settings to deploy on"
+            }
+        },
         "namespace": {
             "type": "string",
             "metadata": {
@@ -78,7 +72,7 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.data.vnet, parameters('networkSettings').subnet.data.name)]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
             "ssh": {
@@ -120,7 +114,7 @@
                         "name": "ipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[concat(parameters('dataNodesIpPrefix'),copyindex())]",
+                            "privateIPAddress": "[concat(parameters('networkSettings').dataNodesIpPrefix,copyindex())]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             },

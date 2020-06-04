@@ -271,9 +271,9 @@
             }
         },
         "platformFaultDomainCount": "[if(contains(variables('locations'), variables('location')), variables('locations')[variables('location')].platformFaultDomainCount, 2)]",
-        "metaNodesIpPrefix": "10.0.0.1",
-        "dataNodesIpPrefix": "10.0.1.1",
         "networkSettings": {
+            "metaNodesIpPrefix": "10.0.0.1",
+            "dataNodesIpPrefix": "10.0.1.1",
             "virtualNetworkName": "[parameters('virtualNetworkName')]",
             "addressPrefix": "10.0.0.0/16",
             "subnet": {
@@ -346,8 +346,8 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "metaNodesIpPrefix": {
-                        "value": "[variables('metaNodesIpPrefix')]"
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
                     },
                     "location": {
                         "value": "[variables('location')]"
@@ -360,9 +360,6 @@
                     },
                     "namespace": {
                         "value": "meta"
-                    },
-                    "subnet": {
-                        "value": "[variables('networkSettings').subnet.meta]"
                     },
                     "osSettings": {
                         "value": "[variables('osSettings')]"
@@ -416,20 +413,17 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "dataNodesIpPrefix": {
-                        "value": "[variables('dataNodesIpPrefix')]"
-                    },
                     "location": {
                         "value": "[variables('location')]"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
                     },
                     "platformFaultDomainCount": {
                         "value": "[variables('platformFaultDomainCount')]"
                     },
                     "storageSettings": {
                         "value": "[variables('dataNodeStorageSettings')]"
-                    },
-                    "subnet": {
-                        "value": "[variables('networkSettings').subnet.data]"
                     },
                     "vmSize": {
                         "value": "[parameters('vmSizeDataNodes')]"
