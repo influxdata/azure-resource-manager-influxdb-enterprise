@@ -270,8 +270,8 @@
                 "platformFaultDomainCount": 3
             }
         },
-        "platformFaultDomainCount": "[if(contains(variables('locations'), variables('location')), variables('locations')[variables('location')].platformFaultDomainCount, 2)]",
         "networkSettings": {
+            "platformFaultDomainCount": "[if(contains(variables('locations'), variables('location')), variables('locations')[variables('location')].platformFaultDomainCount, 2)]",
             "metaNodesIpPrefix": "10.0.0.1",
             "dataNodesIpPrefix": "10.0.1.1",
             "virtualNetworkName": "[parameters('virtualNetworkName')]",
@@ -346,20 +346,17 @@
                     "password": {
                         "value": "[variables('password')]"
                     },
-                    "networkSettings": {
-                        "value": "[variables('networkSettings')]"
-                    },
                     "location": {
                         "value": "[variables('location')]"
-                    },
-                    "platformFaultDomainCount": {
-                        "value": "[variables('platformFaultDomainCount')]"
                     },
                     "vmSize": {
                         "value": "[parameters('vmSizeMetaNodes')]"
                     },
                     "namespace": {
                         "value": "meta"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
                     },
                     "osSettings": {
                         "value": "[variables('osSettings')]"
@@ -416,12 +413,6 @@
                     "location": {
                         "value": "[variables('location')]"
                     },
-                    "networkSettings": {
-                        "value": "[variables('networkSettings')]"
-                    },
-                    "platformFaultDomainCount": {
-                        "value": "[variables('platformFaultDomainCount')]"
-                    },
                     "storageSettings": {
                         "value": "[variables('dataNodeStorageSettings')]"
                     },
@@ -433,6 +424,9 @@
                     },
                     "namespace": {
                         "value": "data"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
                     },
                     "osSettings": {
                         "value": "[variables('osSettings')]"

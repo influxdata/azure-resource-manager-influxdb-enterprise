@@ -33,12 +33,6 @@
                 "description": "Size of the InfluxEnterprise data nodes"
             }
         },
-        "platformFaultDomainCount": {
-            "type": "int",
-            "metadata": {
-                "description": "Number of Fault Domains"
-            }
-        },
         "vmCount": {
             "type": "int",
             "defaultValue": 2,
@@ -93,7 +87,7 @@
             "location": "[parameters('location')]",
             "properties": {
                 "platformUpdateDomainCount": 10,
-                "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]"
+                "platformFaultDomainCount": "[parameters('networkSettings').platformFaultDomainCount]"
             },
             "sku": {
                 "name": "Aligned"

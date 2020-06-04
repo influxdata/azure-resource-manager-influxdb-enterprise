@@ -56,7 +56,9 @@
                         "label": "Database admin username",
                         "toolTip": "Initial username for InfluxDB admin user.",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "validationMessage": "Username must not be a reserved word."
+
                         }
                     },
                     {

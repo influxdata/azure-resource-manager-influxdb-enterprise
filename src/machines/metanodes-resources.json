@@ -26,12 +26,6 @@
                 "description": "The namespace for resources created by this template"
             }
         },
-        "platformFaultDomainCount": {
-            "type": "int",
-            "metadata": {
-                "description": "Number of Fault Domains"
-            }
-        },
         "vmSize": {
             "type": "string",
             "defaultValue": "Standard_A0",
@@ -74,7 +68,7 @@
             "location": "[parameters('location')]",
             "properties": {
                 "platformUpdateDomainCount": 3,
-                "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]"
+                "platformFaultDomainCount": "[parameters('networkSettings').platformFaultDomainCount]"
             },
             "sku": {
                 "name": "Aligned"
