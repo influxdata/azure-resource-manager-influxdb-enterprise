@@ -20,15 +20,6 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "influxTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "influxdata"
-            },
-            "metadata": {
-                "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
-            }
-        },
         "namespace": {
             "type": "string",
             "metadata": {
@@ -45,6 +36,12 @@
             "type": "string",
             "metadata": {
                 "description": "IP Prefix used to append index for static addresses"
+            }
+        },
+        "platformFaultDomainCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of Fault Domains"
             }
         },
         "vmSize": {
@@ -83,7 +80,7 @@
             "location": "[parameters('location')]",
             "properties": {
                 "platformUpdateDomainCount": 3,
-                "platformFaultDomainCount": 2
+                "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]"
             },
             "sku": {
                 "name": "Aligned"
@@ -119,7 +116,7 @@
             "name": "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
             "location": "[parameters('location')]",
             "tags": {
-                "provider": "[toUpper(parameters('influxTags').provider)]"
+                "provider": "[parameters('osSettings').influxTags.provider]"
             },
             "plan": {
                 "name": "meta",
@@ -202,7 +199,7 @@
             "name": "[concat('vm', parameters('namespace'), '-0')]",
             "location": "[parameters('location')]",
             "tags": {
-                "provider": "[toUpper(parameters('influxTags').provider)]"
+                "provider": "[parameters('osSettings').influxTags.provider]"
             },
             "plan": {
                 "name": "meta",

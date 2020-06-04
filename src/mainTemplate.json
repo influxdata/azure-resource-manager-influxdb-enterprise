@@ -169,6 +169,7 @@
             "authenticationType": "[parameters('password').authenticationType]",
             "sshPublicKey": "[if(equals(parameters('password').authenticationType,'sshPublicKey'),parameters('password').sshPublicKey,json('null'))]"
         },
+        "location": "[parameters('location')]",
         "chronoScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
         "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]",
         "diskScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
@@ -183,6 +184,7 @@
                 "sku": "18.04-LTS",
                 "version": "latest"
             },
+            "influxTags": "[parameters('influxTags')]",
             "managementPort": "22",
             "chronoSize": "Standard_D2_v2",
             "extensionSettings": {
@@ -239,7 +241,36 @@
                 }
             }
         },
-        "location": "[parameters('location')]",
+        "locations": {
+            "eastus": {
+                "platformFaultDomainCount": 3
+            },
+            "eastus2": {
+                "platformFaultDomainCount": 3
+            },
+            "centralus": {
+                "platformFaultDomainCount": 3
+            },
+            "northcentralus": {
+                "platformFaultDomainCount": 3
+            },
+            "southcentralus": {
+                "platformFaultDomainCount": 3
+            },
+            "westus": {
+                "platformFaultDomainCount": 3
+            },
+            "canadacentral": {
+                "platformFaultDomainCount": 3
+            },
+            "northeurope": {
+                "platformFaultDomainCount": 3
+            },
+            "westeurope": {
+                "platformFaultDomainCount": 3
+            }
+        },
+        "platformFaultDomainCount": "[if(contains(variables('locations'), variables('location')), variables('locations')[variables('location')].platformFaultDomainCount, 2)]",
         "metaNodesIpPrefix": "10.0.0.1",
         "dataNodesIpPrefix": "10.0.1.1",
         "networkSettings": {
@@ -289,7 +320,8 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
         },
@@ -320,8 +352,8 @@
                     "location": {
                         "value": "[variables('location')]"
                     },
-                    "influxTags": {
-                        "value": "[parameters('influxTags')]"
+                    "platformFaultDomainCount": {
+                        "value": "[variables('platformFaultDomainCount')]"
                     },
                     "vmSize": {
                         "value": "[parameters('vmSizeMetaNodes')]"
@@ -390,8 +422,8 @@
                     "location": {
                         "value": "[variables('location')]"
                     },
-                    "influxTags": {
-                        "value": "[parameters('influxTags')]"
+                    "platformFaultDomainCount": {
+                        "value": "[variables('platformFaultDomainCount')]"
                     },
                     "storageSettings": {
                         "value": "[variables('dataNodeStorageSettings')]"
@@ -434,9 +466,6 @@
                 "parameters": {
                     "adminUsername": {
                         "value": "[parameters('adminUsername')]"
-                    },
-                    "influxTags": {
-                        "value": "[parameters('influxTags')]"
                     },
                     "password": {
                         "value": "[variables('password')]"

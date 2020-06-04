@@ -26,15 +26,6 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "influxTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "influxdata"
-            },
-            "metadata": {
-                "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
-            }
-        },
         "subnet": {
             "type": "object",
             "metadata": {
@@ -52,6 +43,12 @@
             "defaultValue": "Standard_A1",
             "metadata": {
                 "description": "Size of the InfluxEnterprise data nodes"
+            }
+        },
+        "platformFaultDomainCount": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of Fault Domains"
             }
         },
         "vmCount": {
@@ -84,7 +81,7 @@
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
-             "ssh": {
+            "ssh": {
                 "publicKeys": [
                     {
                         "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
@@ -102,7 +99,7 @@
             "location": "[parameters('location')]",
             "properties": {
                 "platformUpdateDomainCount": 10,
-                "platformFaultDomainCount": 2
+                "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]"
             },
             "sku": {
                 "name": "Aligned"
@@ -139,7 +136,7 @@
             "name": "[concat('vm', parameters('namespace'), '-', copyindex())]",
             "location": "[parameters('location')]",
             "tags": {
-                "provider": "[toUpper(parameters('influxTags').provider)]"
+                "provider": "[parameters('osSettings').influxTags.provider]"
             },
             "plan": {
                 "name": "data",
@@ -217,5 +214,6 @@
             ]
         }
     ],
-    "outputs": {}
+    "outputs": {
+    }
 }
