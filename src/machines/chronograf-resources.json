@@ -71,8 +71,8 @@
                         "properties": {
                             "description": "Allow inbound SSH traffic from anyone",
                             "protocol": "Tcp",
-                            "sourcePortRange": "[parameters('osSettings').managementPort]",
-                            "destinationPortRange": "[parameters('osSettings').managementPort]",
+                            "sourcePortRange": "[parameters('networkSettings').managementPort]",
+                            "destinationPortRange": "[parameters('networkSettings').managementPort]",
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
