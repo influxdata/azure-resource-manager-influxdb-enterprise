@@ -417,9 +417,6 @@
                     "storageSettings": {
                         "value": "[variables('dataNodeStorageSettings')]"
                     },
-                    "vmCount": {
-                        "value": "[parameters('vmDataNodeCount')]"
-                    },
                     "namespace": {
                         "value": "data"
                     },
@@ -459,8 +456,8 @@
                     "location": {
                         "value": "[variables('location')]"
                     },
-                    "subnet": {
-                        "value": "[variables('networkSettings').subnet.data]"
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
                     },
                     "osSettings": {
                         "value": "[variables('osSettings')]"

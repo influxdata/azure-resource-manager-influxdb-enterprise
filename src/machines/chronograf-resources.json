@@ -15,12 +15,6 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "subnet": {
-            "type": "object",
-            "metadata": {
-                "description": "Subnet object for provisioning resources in (expects properties name as the subnet name, and vnet as the virtual network name on the object)"
-            }
-        },
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -33,6 +27,12 @@
                 "description": "Administrator password used when provisioning virtual machines"
             }
         },
+        "networkSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "Network settings to deploy on"
+            }
+        },
         "osSettings": {
             "type": "object",
             "metadata": {
@@ -41,14 +41,14 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.data.vnet, parameters('networkSettings').subnet.data.name)]",
         "vmName": "[concat('vm', parameters('namespace'))]",
         "publicIpName": "[concat('pip-', parameters('namespace'))]",
         "securityGroupName": "[concat('nsg-', parameters('namespace'))]",
         "nicName": "[concat('nic-0-vm', parameters('namespace'))]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
-             "ssh": {
+            "ssh": {
                 "publicKeys": [
                     {
                         "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
@@ -150,7 +150,7 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize":  "[parameters('osSettings').chronoSize]"
+                    "vmSize": "[parameters('osSettings').chronoSize]"
                 },
                 "osProfile": {
                     "computerName": "[variables('vmName')]",
@@ -192,5 +192,10 @@
             ]
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "resourceID": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
+        }
+    }
 }
