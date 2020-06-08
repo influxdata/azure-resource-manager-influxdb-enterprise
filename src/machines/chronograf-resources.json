@@ -33,15 +33,6 @@
                 "description": "Administrator password used when provisioning virtual machines"
             }
         },
-        "influxTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "influxdata"
-            },
-            "metadata": {
-                "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
-            }
-        },
         "osSettings": {
             "type": "object",
             "metadata": {
@@ -152,7 +143,7 @@
             "name": "[variables('vmName')]",
             "location": "[parameters('location')]",
             "tags": {
-                "provider": "[toUpper(parameters('influxTags').provider)]"
+                "provider": "[parameters('osSettings').influxTags.provider]"
             },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"

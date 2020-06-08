@@ -184,8 +184,11 @@
                 "sku": "18.04-LTS",
                 "version": "latest"
             },
+
+            "vmSizeDataNodes": "[parameters('vmSizeDataNodes')]",
+            "vmSizeMetaNodes": "[parameters('vmSizeMetaNodes')]",
+            "vmDataNodeCount": "[parameters('vmDataNodeCount')]",
             "influxTags": "[parameters('influxTags')]",
-            "managementPort": "22",
             "chronoSize": "Standard_D2_v2",
             "extensionSettings": {
                 "meta": {
@@ -274,6 +277,7 @@
             "platformFaultDomainCount": "[if(contains(variables('locations'), variables('location')), variables('locations')[variables('location')].platformFaultDomainCount, 2)]",
             "metaNodesIpPrefix": "10.0.0.1",
             "dataNodesIpPrefix": "10.0.1.1",
+            "managementPort": "22",
             "virtualNetworkName": "[parameters('virtualNetworkName')]",
             "addressPrefix": "10.0.0.0/16",
             "subnet": {
@@ -415,9 +419,6 @@
                     },
                     "storageSettings": {
                         "value": "[variables('dataNodeStorageSettings')]"
-                    },
-                    "vmSize": {
-                        "value": "[parameters('vmSizeDataNodes')]"
                     },
                     "vmCount": {
                         "value": "[parameters('vmDataNodeCount')]"

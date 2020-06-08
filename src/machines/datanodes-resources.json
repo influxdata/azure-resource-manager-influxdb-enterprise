@@ -26,20 +26,6 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_A1",
-            "metadata": {
-                "description": "Size of the InfluxEnterprise data nodes"
-            }
-        },
-        "vmCount": {
-            "type": "int",
-            "defaultValue": 2,
-            "metadata": {
-                "description": "Number of InfluxEnterpirse data nodes"
-            }
-        },
         "osSettings": {
             "type": "object",
             "metadata": {
@@ -100,7 +86,7 @@
             "location": "[parameters('location')]",
             "copy": {
                 "name": "[concat('dataNodeNic','nicLoop')]",
-                "count": "[parameters('vmCount')]"
+                "count": "[parameters('osSettings').vmDataNodeCount]"
             },
             "properties": {
                 "ipConfigurations": [
@@ -133,7 +119,7 @@
             },
             "copy": {
                 "name": "[concat(parameters('namespace'), 'virtualMachineLoop')]",
-                "count": "[parameters('vmCount')]"
+                "count": "[parameters('osSettings').vmDataNodeCount]"
             },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', 'nic-', copyindex(), '-vm', parameters('namespace'), '-', copyindex())]",
@@ -144,7 +130,7 @@
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
                 },
                 "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
+                    "vmSize":  "[parameters('osSettings').vmSizeDataNodes]"
                 },
                 "osProfile": {
                     "computerName": "[concat('vm', parameters('namespace'), '-', copyindex())]",
@@ -202,6 +188,5 @@
             ]
         }
     ],
-    "outputs": {
-    }
+    "outputs": {}
 }
