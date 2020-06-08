@@ -45,7 +45,18 @@
                 "No"
             ],
             "metadata": {
-                "description": "Provision a machine with Chronograf on it"
+                "description": "Provision a single instance with Chronograf service installed."
+            }
+        },
+        "monitor": {
+            "type": "string",
+            "defaultValue": "No",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "metadata": {
+                "description": "Provision a single instance with InfluxDB-OSS service installed."
             }
         },
         "vmDataDiskSize": {
@@ -121,13 +132,13 @@
                 "Standard_D5_v2"
             ],
             "metadata": {
-                "description": "Size of the InfluxEnterprise meta nodes, 3 of these will be provisioned"
+                "description": "Size of the InfluxEnterprise meta nodes, 3 instances will be provisioned"
             }
         },
         "adminUsername": {
             "type": "string",
             "metadata": {
-                "description": "Admin username used when provisioning virtual machines"
+                "description": "Admin username used when provisioning all virtual machines"
             }
         },
         "password": {
@@ -139,13 +150,13 @@
         "influxdbUsername": {
             "type": "string",
             "metadata": {
-                "description": "Database username for admin user with ALL PRIVILEGES"
+                "description": "InfluxDB Enterpise username for admin user with ALL PRIVILEGES"
             }
         },
         "influxdbPassword": {
             "type": "securestring",
             "metadata": {
-                "description": "Database password for admin user with ALL PRIVILEGES"
+                "description": "InfluxDB Enterpise password for admin user with ALL PRIVILEGES"
             }
         },
         "location": {
@@ -171,12 +182,15 @@
         },
         "location": "[parameters('location')]",
         "chronoScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
-        "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]",
+        "influxdbScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/influxdb-install.sh', parameters('_artifactsLocationSasToken')))]",
+        "enterpriseScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/enterprise-configure.sh', parameters('_artifactsLocationSasToken')))]",
         "diskScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
         "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/chronograf-resources.json', parameters('_artifactsLocationSasToken')))]",
-        "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
+        "monitorTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/monitor-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "commonInstallParams": "[concat(' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
+        "clusterInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -m ', parameters('monitor'))]",
         "osSettings": {
             "imageReference": {
                 "publisher": "Canonical",
@@ -189,7 +203,7 @@
             "vmSizeMetaNodes": "[parameters('vmSizeMetaNodes')]",
             "vmDataNodeCount": "[parameters('vmDataNodeCount')]",
             "influxTags": "[parameters('influxTags')]",
-            "chronoSize": "Standard_D2_v2",
+            "vmDefaultSize": "Standard_DS2_v2",
             "extensionSettings": {
                 "meta": {
                     "publisher": "Microsoft.Azure.Extensions",
@@ -199,9 +213,9 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s meta', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
                 "data": {
@@ -212,12 +226,12 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s data', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
-                "master": {
+                "leader": {
                     "publisher": "Microsoft.Azure.Extensions",
                     "type": "CustomScript",
                     "typeHandlerVersion": "2.0",
@@ -225,9 +239,9 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s leader', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
                 "chronograf": {
@@ -240,6 +254,18 @@
                             "[variables('chronoScriptUrl')]"
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
+                    }
+                },
+                "monitor": {
+                    "publisher": "Microsoft.Azure.Extensions",
+                    "type": "CustomScript",
+                    "typeHandlerVersion": "2.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                        "fileUris": [
+                            "[variables('influxdbScriptUrl')]"
+                        ],
+                        "commandToExecute": "[concat('bash influxdb-install.sh', variables('commonInstallParams'))]"
                     }
                 }
             }
@@ -455,6 +481,45 @@
                     },
                     "location": {
                         "value": "[variables('location')]"
+                    },
+                    "namespace": {
+                        "value": "chronograf"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
+                    },
+                    "osSettings": {
+                        "value": "[variables('osSettings')]"
+                    }
+                }
+            }
+        },
+        {
+            "condition": "[equals(parameters('monitor'), 'Yes')]",
+            "name": "monitor",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'shared')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('monitorTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "password": {
+                        "value": "[variables('password')]"
+                    },
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "namespace": {
+                        "value": "monitor"
                     },
                     "networkSettings": {
                         "value": "[variables('networkSettings')]"

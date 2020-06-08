@@ -4,7 +4,6 @@
     "parameters": {
         "namespace": {
             "type": "string",
-            "defaultValue": "chronograf",
             "metadata": {
                 "description": "The namespace prefix for resources created by this template"
             }
@@ -71,8 +70,8 @@
                         "properties": {
                             "description": "Allow inbound SSH traffic from anyone",
                             "protocol": "Tcp",
-                            "sourcePortRange": "[parameters('osSettings').managementPort]",
-                            "destinationPortRange": "[parameters('osSettings').managementPort]",
+                            "sourcePortRange": "[parameters('networkSettings').managementPort]",
+                            "destinationPortRange": "[parameters('networkSettings').managementPort]",
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
@@ -150,7 +149,7 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "[parameters('osSettings').chronoSize]"
+                    "vmSize": "[parameters('osSettings').vmDefaultSize]"
                 },
                 "osProfile": {
                     "computerName": "[variables('vmName')]",

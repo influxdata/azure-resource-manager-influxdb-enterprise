@@ -51,8 +51,7 @@ install_chronograf()
     local PACKAGE="chronograf_${CHRONOGRAF_VERSION}_amd64.deb"
     local DOWNLOAD_URL="https://dl.influxdata.com/chronograf/releases/chronograf_${CHRONOGRAF_VERSION}_amd64.deb"
 
-    log "[install_chronograf] download Chronograf $CHRONOGRAF_VERSION"
-    log "[install_chronograf] download location $DOWNLOAD_URL"
+    log "[download_chronograf] downloading Chronograf from location $DOWNLOAD_URL"
 
     wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
     EXIT_CODE=$?
@@ -60,25 +59,15 @@ install_chronograf()
         log "err: downloading Chronograf $CHRONOGRAF_VERSION..."
         exit $EXIT_CODE
     fi
-    log "[install_chronograf] downloaded Chronograf $CHRONOGRAF_VERSION"
 
     log "[install_chronorgaf] installing Chronorgaf $CHRONOGRAF_VERSION"
     dpkg -i $PACKAGE
-    log "[install_chronograf] installed Chronograf $CHRONOGRAF_VERSION"
 }
-
-configure_systemd()
-{
-    log "[configure_systemd] configure systemd to start Chronograf service automatically when system boots"
-    systemctl daemon-reload
-    systemctl enable chronograf.service
-}
-
 start_systemd()
 {
     log "[start_systemd] starting Chronorgaf"
     systemctl start chronograf.service
-    log "[start_systemd] started Chronograf"
+    sleep 5
 }
 
 #########################
@@ -96,8 +85,6 @@ fi
 log "[apt-get] updated apt-get"
 
 install_chronograf
-
-configure_systemd
 
 start_systemd
 
