@@ -66,8 +66,8 @@
                     {
                         "name": "ipconfig1",
                         "properties": {
-                            "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[parameters('networkSettings').monitorNodeIpPrefix]",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAddress": "[parameters('networkSettings').dataNodesIpPrefix]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }

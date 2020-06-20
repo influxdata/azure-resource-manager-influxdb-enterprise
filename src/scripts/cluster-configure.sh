@@ -55,7 +55,6 @@ META_CONFIG_FILE="/etc/influxdb/influxdb-meta.conf"
 DATA_CONFIG_FILE="/etc/influxdb/influxdb.conf"
 META_ENV_FILE="/etc/default/influxdb-meta"
 DATA_ENV_FILE="/etc/default/influxdb"
-ETC_HOSTS="/etc/hosts"
 
 
 #Loop through options passed
