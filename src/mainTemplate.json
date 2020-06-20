@@ -45,7 +45,18 @@
                 "No"
             ],
             "metadata": {
-                "description": "Provision a machine with Chronograf on it"
+                "description": "Provision a machine with Chronograf installed on it"
+            }
+        },
+        "monitor": {
+            "type": "string",
+            "defaultValue": "No",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "metadata": {
+                "description": "Provision a machine with InfluxDB-OSS installed on it"
             }
         },
         "vmDataDiskSize": {
@@ -176,6 +187,7 @@
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
         "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/chronograf-resources.json', parameters('_artifactsLocationSasToken')))]",
+        "monitorTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/monitor-resources.json', parameters('_artifactsLocationSasToken')))]",
         "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
         "osSettings": {
             "imageReference": {
@@ -189,7 +201,7 @@
             "vmSizeMetaNodes": "[parameters('vmSizeMetaNodes')]",
             "vmDataNodeCount": "[parameters('vmDataNodeCount')]",
             "influxTags": "[parameters('influxTags')]",
-            "chronoSize": "Standard_D2_v2",
+            "vmDefaultSize": "Standard_DS2_v2",
             "extensionSettings": {
                 "meta": {
                     "publisher": "Microsoft.Azure.Extensions",
@@ -455,6 +467,45 @@
                     },
                     "location": {
                         "value": "[variables('location')]"
+                    },
+                    "namespace": {
+                        "value": "chronograf"
+                    },
+                    "networkSettings": {
+                        "value": "[variables('networkSettings')]"
+                    },
+                    "osSettings": {
+                        "value": "[variables('osSettings')]"
+                    }
+                }
+            }
+        },
+        {
+            "condition": "[equals(parameters('monitor'), 'Yes')]",
+            "name": "monitor",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'shared')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('monitorTemplateUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "password": {
+                        "value": "[variables('password')]"
+                    },
+                    "location": {
+                        "value": "[variables('location')]"
+                    },
+                    "namespace": {
+                        "value": "monitor"
                     },
                     "networkSettings": {
                         "value": "[variables('networkSettings')]"

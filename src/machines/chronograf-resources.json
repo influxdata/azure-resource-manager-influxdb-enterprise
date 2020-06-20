@@ -4,7 +4,6 @@
     "parameters": {
         "namespace": {
             "type": "string",
-            "defaultValue": "chronograf",
             "metadata": {
                 "description": "The namespace prefix for resources created by this template"
             }
@@ -150,7 +149,7 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "[parameters('osSettings').chronoSize]"
+                    "vmSize": "[parameters('osSettings').vmDefaultSize]"
                 },
                 "osProfile": {
                     "computerName": "[variables('vmName')]",
