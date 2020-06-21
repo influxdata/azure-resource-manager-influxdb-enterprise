@@ -126,7 +126,7 @@ start_systemd()
 {
     log "[start_systemd] starting InfluxDB"
     systemctl start influxdb.service
-    sleep 5
+    sleep 10
     log "[start_systemd] started InfluxDB"
 }
 
