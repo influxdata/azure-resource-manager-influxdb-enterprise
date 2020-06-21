@@ -182,6 +182,7 @@
         },
         "location": "[parameters('location')]",
         "chronoScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
+        "influxdbScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/influxdb-install.sh', parameters('_artifactsLocationSasToken')))]",
         "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]",
         "diskScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
@@ -252,6 +253,18 @@
                             "[variables('chronoScriptUrl')]"
                         ],
                         "commandToExecute": "bash chronograf-install.sh"
+                    }
+                },
+                "monitor": {
+                    "publisher": "Microsoft.Azure.Extensions",
+                    "type": "CustomScript",
+                    "typeHandlerVersion": "2.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                        "fileUris": [
+                            "[variables('influxdbScriptUrl')]"
+                        ],
+                        "commandToExecute": "[concat('bash influxdb-install.sh', variables('commonInstallParams'))]"
                     }
                 }
             }
