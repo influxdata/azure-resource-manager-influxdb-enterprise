@@ -51,7 +51,6 @@ install_chronograf()
     local PACKAGE="chronograf_${CHRONOGRAF_VERSION}_amd64.deb"
     local DOWNLOAD_URL="https://dl.influxdata.com/chronograf/releases/chronograf_${CHRONOGRAF_VERSION}_amd64.deb"
 
-    log "[install_chronograf] download Chronograf $CHRONOGRAF_VERSION"
     log "[install_chronograf] download location $DOWNLOAD_URL"
 
     wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
@@ -64,7 +63,6 @@ install_chronograf()
 
     log "[install_chronorgaf] installing Chronorgaf $CHRONOGRAF_VERSION"
     dpkg -i $PACKAGE
-    log "[install_chronograf] installed Chronograf $CHRONOGRAF_VERSION"
 }
 
 configure_systemd()

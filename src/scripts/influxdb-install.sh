@@ -12,8 +12,8 @@ help()
     echo " "
     echo "This script configures a new InfluxDB OSS node for monitoring the enterprise cluster deployed with Azure ARM templates."
     echo "Parameters:"
-    echo "-u  Supply influxdb admin username"
-    echo "-p  Supply influxdb admin password"
+    echo "-u  influxdb admin username"
+    echo "-p  influxdb admin password"
     echo "-h  view this help content"
 }
 
@@ -83,7 +83,6 @@ install_influxdb()
     local PACKAGE="influxdb_${OSS_VERSION}_amd64.deb"
     local DOWNLOAD_URL="https://dl.influxdata.com/influxdb/releases/influxdb_${OSS_VERSION}_amd64.deb"
 
-    log "[install_influxdb_oss] download InfluxDB $OSS_VERSION"
     log "[install_influxdb_oss] download location $DOWNLOAD_URL"
 
     wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
@@ -112,14 +111,16 @@ EOF
 }
 create_user()
 {
-#check service status
-log "[create_user] create oss admin user"
+    #check service status
+    log "[create_user] create oss admin user"
+    log "debug: ${INFLUXDB_USER}"
+    log "debug: ${INFLUXDB_PWD}"
 
-payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
+    payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
 
-curl -s -k -X POST \
-    -d "${payload}" \
-    "http://vmmonitor:8086/query"
+    curl -s -k -X POST \
+        -d "${payload}" \
+        "http://vmmonitor:8086/query"
     
 }
 configure_systemd()
@@ -133,7 +134,7 @@ start_systemd()
 {
     log "[start_systemd] starting InfluxDB"
     systemctl start influxdb.service
-    sleep 5
+    sleep 10
     log "[start_systemd] started InfluxDB"
 }
 
@@ -153,7 +154,7 @@ log "[apt-get] updated apt-get"
 
 install_influxdb
 
-configure_systemd
+#configure_systemd
 
 start_systemd
 

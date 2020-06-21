@@ -59,6 +59,10 @@
                 "description": "Provision a machine with InfluxDB-OSS installed on it"
             }
         },
+        "debug": {
+            "type": "string",
+            "defaultValue": "No"
+        },
         "vmDataDiskSize": {
             "type": "string",
             "defaultValue": "32GiB",
@@ -356,6 +360,7 @@
             }
         },
         {
+            "condition": "[equals(parameters('debug'), 'Yes')]",
             "name": "metanodes",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-08-01",
@@ -418,6 +423,7 @@
             }
         },
         {
+            "condition": "[equals(parameters('debug'), 'Yes')]",
             "name": "datanodes",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-08-01",
