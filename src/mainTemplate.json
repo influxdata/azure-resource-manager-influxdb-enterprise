@@ -241,7 +241,7 @@
                             "[variables('diskScriptUrl')]",
                             "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash enterprise-configure.sh -s leader', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s leader', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
                 "chronograf": {

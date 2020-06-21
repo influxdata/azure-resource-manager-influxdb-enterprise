@@ -218,7 +218,7 @@ datanode_count()
   log "[datanode_count] checking COUNT parameter"
 
   if [ -z "${COUNT}" ]; then
-    log "err: please set -c \$_COUNT parameter..."
+    log "err: datanode count not set - please set -c parameter."
 
     exit 1
   fi
