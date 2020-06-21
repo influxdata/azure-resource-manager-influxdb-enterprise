@@ -245,13 +245,13 @@
             "resources": [
                 {
                     "type": "Microsoft.Compute/virtualMachines/extensions",
-                    "name": "[concat('vm', parameters('namespace'),'-0', '/configureMaster0')]",
+                    "name": "[concat('vm', parameters('namespace'),'-0', '/configureLeader0')]",
                     "apiVersion": "2019-07-01",
                     "location": "[parameters('location')]",
                     "dependsOn": [
                         "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-0')]"
                     ],
-                    "properties": "[parameters('osSettings').extensionSettings.master]"
+                    "properties": "[parameters('osSettings').extensionSettings.leader]"
                 }
             ]
         }

@@ -13,10 +13,10 @@ help()
     echo " "
     echo "This script configures a new InfluxEnterpise cluster deployed with Azure ARM templates."
     echo "Parameters:"
-    echo "-n  Configure specific node_type [meta || data || master]"
-    echo "-u  Supply influxdb admin username  cluster nodes - used in case of [master] node only"
-    echo "-p  Supply influxdb admin password  cluster nodes - used in case of [master] node only"
-    echo "-c  Number of datanodes to configure - used in case of [data||master] node configurations"
+    echo "-n  Configure specific service [meta || data || leader]"
+    echo "-u  Supply influxdb admin username  cluster nodes - used in case of [leader] node only"
+    echo "-p  Supply influxdb admin password  cluster nodes - used in case of [leader] node only"
+    echo "-c  Number of datanodes to configure - used in case of [data||leader] node configurations"
     echo "-h  view this help content"
 }
 
@@ -55,22 +55,24 @@ META_CONFIG_FILE="/etc/influxdb/influxdb-meta.conf"
 DATA_CONFIG_FILE="/etc/influxdb/influxdb.conf"
 META_ENV_FILE="/etc/default/influxdb-meta"
 DATA_ENV_FILE="/etc/default/influxdb"
+TELEGRAF_CONFIG_FILE="/etc/default/telegraf.conf"
+
 
 
 #Loop through options passed
 while getopts :n:c:u:p:h optname; do
   log "Option $optname set"
   case $optname in
-    n)  #configure [meta||data||master] nodes
-      NODE_TYPE="${OPTARG}"
+    n)  #configure [meta||data||leader] nodes
+      SERVICE="${OPTARG}"
       ;;
-    c) #number os datanodes - used in case of [data||master] nodes configurations
+    c) #number os datanodes - used in case of [data||leader] nodes configurations
       COUNT="${OPTARG}"
       ;;
-    u) #influxdb admin username - used in case of [master] node configurations only
+    u) #influxdb admin username - used in case of [leader] node configurations only
       INFLUXDB_USER="${OPTARG}"
       ;;
-    p) #influxdb admin password - used in case of [master] node configurations only
+    p) #influxdb admin password - used in case of [leader] node configurations only
       INFLUXDB_PWD="${OPTARG}"
       ;;
     h) #show help
@@ -219,15 +221,60 @@ datanode_count()
     exit 1
   fi
 }
-
-start_systemd()
+telegraf()
 {
-  if [[ ${NODE_TYPE} == "meta" ]] || [[ ${NODE_TYPE} == "master" ]]; then
-    log "[start_systemd] starting metanode"
+  #generate and stage new telegraf configuration file
+  log "[configure_telegraf] generating new telegraf configuration file at ${TELEGRAF_CONFIG_FILE}"
+
+    touch "${TELEGRAF_CONFIG_FILE}"
+    if [ $? -eq 0 ]; then
+        cat <<EOF >> "${TELEGRAF_ENV_FILE)"
+      #Global Agent Configuration
+          [agent]
+            hostname = "${HOSTNAME}"
+
+          # Input Plugins
+          [[inputs.cpu]]
+              percpu = true
+              totalcpu = true
+              collect_cpu_time = false
+              report_active = false
+          [[inputs.disk]]
+              ignore_fs = ["tmpfs", "devtmpfs", "devfs"]
+          [[inputs.diskio]]
+          [[inputs.mem]]
+          [[inputs.net]]
+          [[inputs.system]]
+          [[inputs.swap]]
+          [[inputs.netstat]]
+          [[inputs.processes]]
+
+          # Output Plugin InfluxDB
+          [[outputs.influxdb]]
+            database = "telegraf"
+            urls = [ "http://vmmonitor:8086" ]
+            username = "${INFLUXDB_USER}"
+            password = "${INFLUXDB_PWD}"
+EOF
+    else
+      log  "err: cannot create /etc/telegraf/telegraf.conf file. you will need to manually configure telegraf"
+      exit 1
+    fi
+    
+    #starting telegraf service 
+    log "[systemd] starting telegraf"
+    systemctl start telegraf
+    sleep 5
+
+}
+systemd_servies()
+{
+  if [[ ${SERVICE} == "meta" ]] || [[ ${SERVICE} == "leader" ]]; then
+    log "[systemd] starting metanode"
     systemctl start influxdb-meta
     sleep 5
-  elif [[ ${NODE_TYPE} == "data" ]]; then
-    log "[start_systemd] starting datanode"
+  elif [[ ${SERVICE} == "data" ]]; then
+    log "[systemd] starting datanode"
     systemctl start influxdb
     sleep 5
   fi
@@ -287,19 +334,19 @@ log "[autopart] running auto partitioning & mounting"
 bash autopart.sh
 
 
-if [[ ${NODE_TYPE} == "meta" ]] || [[ ${NODE_TYPE} == "master" ]]; then
+if [[ ${SERVICE} == "meta" ]] || [[ ${SERVICE} == "leader" ]]; then
     log "[metanode_funcs] executing metanode configuration functions"
 
     configure_metanodes
 
-elif [[ ${NODE_TYPE} == "data" ]]; then
+elif [[ ${SERVICE} == "data" ]]; then
     log "[datanode_funcs] executing datanode configuration functions"
     
     datanode_count
 
     configure_datanodes
 else 
-    log "err: node_type unknown, please set a valid node_type"
+    log "err: service type unknown, please set a valid service"
 
     help
     exit 2
@@ -308,15 +355,17 @@ fi
 
 #start service & check process
 #------------------------
-start_systemd
+systemd_servies
 
 process_check
 
+telegraf
 
-#master metanode funcs to join all nodes to cluster 
+
+#leader metanode funcs to join all nodes to cluster 
 #------------------------
-if [[ ${NODE_TYPE} == "master" ]];then
-  log "[master_metanode] executing cluster join commands on master metanode"
+if [[ ${SERVICE} == "leader" ]];then
+  log "[leader_metanode] executing cluster join commands on leader metanode"
 
   datanode_count
 

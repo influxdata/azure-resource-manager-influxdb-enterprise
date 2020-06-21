@@ -183,7 +183,7 @@
         "location": "[parameters('location')]",
         "chronoScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/chronograf-install.sh', parameters('_artifactsLocationSasToken')))]",
         "influxdbScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/influxdb-install.sh', parameters('_artifactsLocationSasToken')))]",
-        "clusterScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/cluster-configure.sh', parameters('_artifactsLocationSasToken')))]",
+        "enterpriseScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/enterprise-configure.sh', parameters('_artifactsLocationSasToken')))]",
         "diskScriptUrl": "[uri(parameters('_artifactsLocation'), concat('scripts/autopart.sh', parameters('_artifactsLocationSasToken')))]",
         "sharedTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('partials/shared-resources.json', parameters('_artifactsLocationSasToken')))]",
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
@@ -212,9 +212,9 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n meta', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -n meta', variables('commonInstallParams'))]"
                     }
                 },
                 "data": {
@@ -225,12 +225,12 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n data', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -n data', variables('commonInstallParams'))]"
                     }
                 },
-                "master": {
+                "leader": {
                     "publisher": "Microsoft.Azure.Extensions",
                     "type": "CustomScript",
                     "typeHandlerVersion": "2.0",
@@ -238,9 +238,9 @@
                     "settings": {
                         "fileUris": [
                             "[variables('diskScriptUrl')]",
-                            "[variables('clusterScriptUrl')]"
+                            "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash cluster-configure.sh -n master', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -n leader', variables('commonInstallParams'))]"
                     }
                 },
                 "chronograf": {

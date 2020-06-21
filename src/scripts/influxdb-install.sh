@@ -7,6 +7,17 @@
 # 06/2020 Initial Version
 #--------------------------
 
+help()
+{
+    echo " "
+    echo "This script configures a new InfluxDB OSS node for monitoring the enterprise cluster deployed with Azure ARM templates."
+    echo "Parameters:"
+    echo "-u  Supply influxdb admin username"
+    echo "-p  Supply influxdb admin password"
+    echo "-c  Number of datanodes to configure"
+    echo "-h  view this help content"
+}
+
 #########################
 # Logging func
 #########################
@@ -34,6 +45,31 @@ then
     echo "You must be root to run this program." >&2
     exit 3
 fi
+
+#Loop through options passed
+while getopts :c:u:p:h optname; do
+  log "Option $optname set"
+  case $optname in
+    c) #number os datanodes
+      COUNT="${OPTARG}"
+      ;;
+    u) #influxdb admin username
+      INFLUXDB_USER="${OPTARG}"
+      ;;
+    p) #influxdb admin password
+      INFLUXDB_PWD="${OPTARG}"
+      ;;
+    h) #show help
+      help
+      exit 2
+      ;;
+    \?) #unrecognized option - show help
+      echo -e \\n"Option -${BOLD}$OPTARG${NORM} not allowed."
+      help
+      exit 2
+      ;;
+  esac
+done
 
 #########################
 # Parameter handling
@@ -88,7 +124,6 @@ configure_systemd()
 start_systemd()
 {
     log "[start_systemd] starting InfluxDB"
-    systemctl unmask influxdb.service
     systemctl start influxdb.service
     log "[start_systemd] started InfluxDB"
 }
