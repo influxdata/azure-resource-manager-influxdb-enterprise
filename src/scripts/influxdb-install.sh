@@ -14,7 +14,6 @@ help()
     echo "Parameters:"
     echo "-u  Supply influxdb admin username"
     echo "-p  Supply influxdb admin password"
-    echo "-c  Number of datanodes to configure"
     echo "-h  view this help content"
 }
 
@@ -47,12 +46,9 @@ then
 fi
 
 #Loop through options passed
-while getopts :c:u:p:h optname; do
+while getopts :u:p:h optname; do
   log "Option $optname set"
   case $optname in
-    c) #number os datanodes
-      COUNT="${OPTARG}"
-      ;;
     u) #influxdb admin username
       INFLUXDB_USER="${OPTARG}"
       ;;

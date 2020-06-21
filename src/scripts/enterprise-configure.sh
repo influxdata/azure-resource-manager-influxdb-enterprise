@@ -57,13 +57,11 @@ META_ENV_FILE="/etc/default/influxdb-meta"
 DATA_ENV_FILE="/etc/default/influxdb"
 TELEGRAF_CONFIG_FILE="/etc/telegraf/telegraf.conf"
 
-
-
 #Loop through options passed
 while getopts :n:c:u:p:h optname; do
   log "Option $optname set"
   case $optname in
-    n)  #configure [meta||data||leader] nodes
+    s)  #configure [meta||data||leader] nodes
       SERVICE="${OPTARG}"
       ;;
     c) #number os datanodes - used in case of [data||leader] nodes configurations
@@ -154,6 +152,9 @@ EOF
      log  "err: creating file ${META_GEN_FILE}. you will need to manually configure the metanode"
      exit 1
   fi
+
+  start_service influxdb-meta 
+
 }
 
 configure_datanodes()
@@ -209,6 +210,7 @@ EOF
      log  "err: creating file ${DATA_GEN_FILE}. you will need to manually configure the metanode"
      exit 1
   fi
+  start_service influxdb 
 }
 datanode_count()
 {
@@ -263,23 +265,22 @@ EOF
     
     chown telegraf:telegraf "${TELEGRAF_CONFIG_FILE}"
 
-    #starting telegraf service 
-    log "[systemd] starting telegraf"
-    systemctl start telegraf
+    start_service telegraf 
+}
+start_service()
+{
+   # s stores $1 service argument passed to start_service()
+   s=$1
+    #start service 
+    systemctl start ${s}
     sleep 5
 
-}
-systemd_servies()
-{
-  if [[ ${SERVICE} == "meta" ]] || [[ ${SERVICE} == "leader" ]]; then
-    log "[systemd] starting metanode"
-    systemctl start influxdb-meta
-    sleep 5
-  elif [[ ${SERVICE} == "data" ]]; then
-    log "[systemd] starting datanode"
-    systemctl start influxdb
-    sleep 5
-  fi
+    if (systemctl -q is-active ${s}); then 
+      log "info: ${s} service running."
+    else
+      log "err:  ${s} did not start, please check and restart manually."
+      exit 1
+    fi
 }
 
 create_user()
@@ -293,18 +294,6 @@ curl -s -k -X POST \
     -d "${payload}" \
     "http://vmdata-0:8086/query"
     
-}
-process_check()
-{
-  #check service status
-  log "[process_check] check service process started"
-
-  PROC_CHECK=`ps aux | grep -v grep | grep influxdb`
-  EXIT_CODE=$?
-  if [[ $EXIT_CODE -ne 0 ]]; then
-    log "err: could not start influxdb service, try starting manually."
-    exit $EXIT_CODE
-  fi
 }
 
 install_ntp()
@@ -352,19 +341,12 @@ else
     exit 2
 fi
 
-
-#start service & check process
-#------------------------
-systemd_servies
-
-process_check
-
 #start telegraf service
 #------------------------
 telegraf
 
 
-#leader metanode funcs to join all nodes to cluster 
+#leader funcs to join all nodes to cluster 
 #------------------------
 if [[ ${SERVICE} == "leader" ]];then
   log "[leader_metanode] executing cluster join commands on leader metanode"

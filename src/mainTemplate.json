@@ -214,7 +214,7 @@
                             "[variables('diskScriptUrl')]",
                             "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash enterprise-configure.sh -n meta', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s meta', variables('commonInstallParams'))]"
                     }
                 },
                 "data": {
@@ -227,7 +227,7 @@
                             "[variables('diskScriptUrl')]",
                             "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash enterprise-configure.sh -n data', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s data', variables('commonInstallParams'))]"
                     }
                 },
                 "leader": {
@@ -240,7 +240,7 @@
                             "[variables('diskScriptUrl')]",
                             "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash enterprise-configure.sh -n leader', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s leader', variables('commonInstallParams'))]"
                     }
                 },
                 "chronograf": {
