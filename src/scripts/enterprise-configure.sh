@@ -58,7 +58,7 @@ DATA_ENV_FILE="/etc/default/influxdb"
 TELEGRAF_CONFIG_FILE="/etc/telegraf/telegraf.conf"
 
 #Loop through options passed
-while getopts :s:c:M:u:p:h optname; do
+while getopts :s:c:m:u:p:h optname; do
   log "Option $optname set"
   case $optname in
     s)  #configure specific service [meta||data||leader]
