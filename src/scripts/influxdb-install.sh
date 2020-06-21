@@ -102,7 +102,7 @@ install_influxdb()
     touch "/etc/default/influxdb"
     if [ $? -eq 0 ]; then
       cat > "/etc/default/influxdb" <<-EOF
-        IINFLUXDB_HTTP_AUTH_ENABLED="true"
+        INFLUXDB_HTTP_AUTH_ENABLED="true"
         INFLUXDB_DATA_INDEX_VERSION="tsi1"
         INFLUXDB_HTTP_FLUX_ENABLED="true"
 EOF
@@ -156,6 +156,8 @@ install_influxdb
 configure_systemd
 
 start_systemd
+
+create_user
 
 ELAPSED_TIME=$(($SECONDS - $START_TIME))
 PRETTY=$(printf '%dh:%dm:%ds\n' $(($ELAPSED_TIME/3600)) $(($ELAPSED_TIME%3600/60)) $(($ELAPSED_TIME%60)))
