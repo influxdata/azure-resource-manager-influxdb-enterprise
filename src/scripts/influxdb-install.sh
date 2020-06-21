@@ -121,20 +121,12 @@ create_user()
     curl -s -k -X POST \
         -d "${payload}" \
         "http://vmmonitor:8086/query"
-    
 }
-configure_systemd()
-{
-    log "[configure_systemd] configure systemd to start InfluxDB service automatically when system boots"
-    systemctl daemon-reload
-    systemctl enable chronograf.service
-}
-
 start_systemd()
 {
     log "[start_systemd] starting InfluxDB"
     systemctl start influxdb.service
-    sleep 10
+    sleep 5
     log "[start_systemd] started InfluxDB"
 }
 
@@ -153,8 +145,6 @@ fi
 log "[apt-get] updated apt-get"
 
 install_influxdb
-
-#configure_systemd
 
 start_systemd
 

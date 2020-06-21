@@ -282,15 +282,15 @@ start_service()
 
 create_user()
 {
-#check service status
-log "[create_user] create influxdb admin user"
+  #check service status
+  log "[create_user] create influxdb admin user"
 
-payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
+  payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
 
-curl -s -k -X POST \
-    -d "${payload}" \
-    "http://vmdata-0:8086/query"
-    
+  curl -s -k -X POST \
+      -d "${payload}" \
+      "http://vmdata-0:8086/query"
+      
 }
 
 install_ntp()

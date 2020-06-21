@@ -61,7 +61,7 @@
         },
         "debug": {
             "type": "string",
-            "defaultValue": "No"
+            "defaultValue": "Yes"
         },
         "vmDataDiskSize": {
             "type": "string",
