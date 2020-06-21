@@ -151,7 +151,7 @@ if [[ $EXIT_CODE -ne 0 ]]; then
 fi
 log "[apt-get] updated apt-get"
 
-install_chronograf
+install_influxdb
 
 configure_systemd
 
