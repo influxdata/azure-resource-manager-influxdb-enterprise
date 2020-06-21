@@ -83,7 +83,7 @@ install_influxdb()
     local PACKAGE="influxdb_${OSS_VERSION}_amd64.deb"
     local DOWNLOAD_URL="https://dl.influxdata.com/influxdb/releases/influxdb_${OSS_VERSION}_amd64.deb"
 
-    log "[install_influxdb_oss] download location $DOWNLOAD_URL"
+    log "[download_oss] download InfluxDB OSS from location $DOWNLOAD_URL"
 
     wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
     EXIT_CODE=$?
@@ -91,9 +91,8 @@ install_influxdb()
         log "err: downloading InfluxDB $OSS_VERSION"
         exit $EXIT_CODE
     fi
-    log "[install_influxdb_oss] downloaded InfluxDB $OSS_VERSION"
 
-    log "[install_influxdb_oss] installing InfluxDB $OSS_VERSION"
+    log "[install_oss] installing InfluxDB $OSS_VERSION"
     dpkg -i $PACKAGE
 
     #create etc/default/influxdb file to over-ride configuration defaults
@@ -113,9 +112,6 @@ create_user()
 {
     #check service status
     log "[create_user] create oss admin user"
-    log "debug: ${INFLUXDB_USER}"
-    log "debug: ${INFLUXDB_PWD}"
-
     payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
 
     curl -s -k -X POST \
