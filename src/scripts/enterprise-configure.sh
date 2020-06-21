@@ -58,13 +58,13 @@ DATA_ENV_FILE="/etc/default/influxdb"
 TELEGRAF_CONFIG_FILE="/etc/telegraf/telegraf.conf"
 
 #Loop through options passed
-while getopts :n:c:u:p:h optname; do
+while getopts :s:c:u:p:h optname; do
   log "Option $optname set"
   case $optname in
     s)  #configure [meta||data||leader] nodes
       SERVICE="${OPTARG}"
       ;;
-    c) #number os datanodes - used in case of [data||leader] nodes configurations
+    c) #number os datanodes - used in case of [leader] nodes configurations
       COUNT="${OPTARG}"
       ;;
     u) #influxdb admin username - used in case of [leader] node configurations only

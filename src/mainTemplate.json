@@ -189,7 +189,8 @@
         "metaTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/metanodes-resources.json', parameters('_artifactsLocationSasToken')))]",
         "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/chronograf-resources.json', parameters('_artifactsLocationSasToken')))]",
         "monitorTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/monitor-resources.json', parameters('_artifactsLocationSasToken')))]",
-        "commonInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
+        "commonInstallParams": "[concat(' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
+        "clusterInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'))]",
         "osSettings": {
             "imageReference": {
                 "publisher": "Canonical",
@@ -214,7 +215,7 @@
                             "[variables('diskScriptUrl')]",
                             "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash enterprise-configure.sh -s meta', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s meta', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
                 "data": {
@@ -227,7 +228,7 @@
                             "[variables('diskScriptUrl')]",
                             "[variables('enterpriseScriptUrl')]"
                         ],
-                        "commandToExecute": "[concat('bash enterprise-configure.sh -s data', variables('commonInstallParams'))]"
+                        "commandToExecute": "[concat('bash enterprise-configure.sh -s data', variables('clusterInstallParams'), variables('commonInstallParams'))]"
                     }
                 },
                 "leader": {
