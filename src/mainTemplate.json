@@ -190,7 +190,7 @@
         "chronografTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/chronograf-resources.json', parameters('_artifactsLocationSasToken')))]",
         "monitorTemplateUrl": "[uri(parameters('_artifactsLocation'), concat('machines/monitor-resources.json', parameters('_artifactsLocationSasToken')))]",
         "commonInstallParams": "[concat(' -u ', parameters('influxdbUsername'), ' -p ', parameters('influxdbPassword'))]",
-        "clusterInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'))]",
+        "clusterInstallParams": "[concat(' -c ', parameters('vmDataNodeCount'), ' -m ', parameters('monitor'))]",
         "osSettings": {
             "imageReference": {
                 "publisher": "Canonical",

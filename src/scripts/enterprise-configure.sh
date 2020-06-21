@@ -13,10 +13,11 @@ help()
     echo " "
     echo "This script configures a new InfluxEnterpise cluster deployed with Azure ARM templates."
     echo "Parameters:"
-    echo "-n  Configure specific service [meta || data || leader]"
-    echo "-u  Supply influxdb admin username enterprise  - used in case of [leader] node only"
-    echo "-p  Supply influxdb admin password enterprise  - used in case of [leader] node only"
-    echo "-c  Number of datanodes to configure - used in case of [data||leader] node configurations"
+    echo "-s  Configure specific enterprise service [meta || data || leader]"
+    echo "-c  Number of datanodes to configure - used by [leader] service"
+    echo "-m  Monitor instance enabled, if [Yes] then start Telegraf services"
+    echo "-u  Supply influxdb admin username enterprise  - used by [leader] service only"
+    echo "-p  Supply influxdb admin password enterprise  - used by [leader] service only"
     echo "-h  view this help content"
 }
 
@@ -35,7 +36,6 @@ log()
 
 log "Begin execution of Enterpise Cluster script extension on ${HOSTNAME}"
 START_TIME=$SECONDS
-
 
 #########################
 # Check user access
@@ -58,19 +58,22 @@ DATA_ENV_FILE="/etc/default/influxdb"
 TELEGRAF_CONFIG_FILE="/etc/telegraf/telegraf.conf"
 
 #Loop through options passed
-while getopts :s:c:u:p:h optname; do
+while getopts :s:c:M:u:p:h optname; do
   log "Option $optname set"
   case $optname in
-    s)  #configure [meta||data||leader] nodes
+    s)  #configure specific service [meta||data||leader]
       SERVICE="${OPTARG}"
       ;;
-    c) #number os datanodes - used in case of [leader] nodes configurations
+    c) #number of os datanodes - used by [leader] service only
       COUNT="${OPTARG}"
       ;;
-    u) #influxdb admin username - used in case of [leader] node configurations only
+    m) #monitor instance enabled, if [Yes] then start telegraf services
+      MONITOR="${OPTARG}"
+      ;;
+    u) #influxdb admin username - used by [leader] service only
       INFLUXDB_USER="${OPTARG}"
       ;;
-    p) #influxdb admin password - used in case of [leader] node configurations only
+    p) #influxdb admin password - used by [leader] service only
       INFLUXDB_PWD="${OPTARG}"
       ;;
     h) #show help
@@ -123,9 +126,6 @@ configure_metanodes()
       exit $EXIT_CODE
     fi
     
-    #need to update the influxdb-meta.conf default values
-    log  "[sed_cmd] updated ${META_CONFIG_FILE} default file values"
-
     chown influxdb:influxdb "${META_CONFIG_FILE}"
 
     #create etc/default/influxdb file to over-ride configuration defaults
@@ -171,9 +171,6 @@ configure_datanodes()
        log "err: could not copy new ${DATA_GEN_FILE} file to /etc/influxdb"
       exit $EXIT_CODE
     fi
-
-    #need to update the influxdb.conf default values
-    log  "[sed_cmd] updated ${META_CONFIG_FILE} default file values"
 
     chown influxdb:influxdb "${DATA_CONFIG_FILE}"
 
@@ -278,7 +275,7 @@ start_service()
     if (systemctl -q is-active ${s}); then 
       log "info: ${s} service running."
     else
-      log "err:  ${s} did not start, please check and restart manually."
+      log "err:  ${s} service did not start, please check and restart manually."
       exit 1
     fi
 }
@@ -321,18 +318,14 @@ fi
 # as seperate drive under /influxdb/* )_
 #------------------------
 log "[autopart] running auto partitioning & mounting"
-
 bash autopart.sh
 
 
 if [[ ${SERVICE} == "meta" ]] || [[ ${SERVICE} == "leader" ]]; then
-    log "[metanode_funcs] executing metanode configuration functions"
-
+    log "[metanode_service] executing metanode configuration functions"
     configure_metanodes
-
 elif [[ ${SERVICE} == "data" ]]; then
-    log "[datanode_funcs] executing datanode configuration functions"
-    
+    log "[datanode_service] executing datanode configuration functions"
     configure_datanodes
 else 
     log "err: service type unknown, please set a valid service"
@@ -343,13 +336,16 @@ fi
 
 #start telegraf service
 #------------------------
-telegraf
 
+if [[ ${MONITOR} == "Yes" ]]; then
+    log "infor: monitoring instance configured, enabling Telegraf services on host"
+    telegraf
+fi
 
 #leader funcs to join all nodes to cluster 
 #------------------------
 if [[ ${SERVICE} == "leader" ]];then
-  log "[leader_metanode] executing cluster join commands on leader metanode"
+  log "[leader_service] executing cluster join commands on leader metanode"
 
   datanode_count
 

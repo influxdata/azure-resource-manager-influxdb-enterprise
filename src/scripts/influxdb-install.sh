@@ -75,12 +75,12 @@ done
 OSS_VERSION="1.8.0"
 
 #########################
-# Installation func
+# Installation 
 #########################
 
-install_chronograf()
+install_influxdb()
 {
-    local PACKAGE="chronograf_${OSS_VERSION}_amd64.deb"
+    local PACKAGE="influxdb_${OSS_VERSION}_amd64.deb"
     local DOWNLOAD_URL="https://dl.influxdata.com/influxdb/releases/influxdb_${OSS_VERSION}_amd64.deb"
 
     log "[install_influxdb_oss] download InfluxDB $OSS_VERSION"
@@ -89,14 +89,27 @@ install_chronograf()
     wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
-        log "err: downloading InfluxDB $OSS_VERSION..."
+        log "err: downloading InfluxDB $OSS_VERSION"
         exit $EXIT_CODE
     fi
     log "[install_influxdb_oss] downloaded InfluxDB $OSS_VERSION"
 
-    log "[install_chroinstall_influxdb_ossnorgaf] installing InfluxDB $OSS_VERSION"
+    log "[install_influxdb_oss] installing InfluxDB $OSS_VERSION"
     dpkg -i $PACKAGE
     log "[install_influxdb_oss] installed InfluxDB $OSS_VERSION"
+
+    #create etc/default/influxdb file to over-ride configuration defaults
+    touch "/etc/default/influxdb"
+    if [ $? -eq 0 ]; then
+      cat > "/etc/default/influxdb" <<-EOF
+        IINFLUXDB_HTTP_AUTH_ENABLED="true"
+        INFLUXDB_DATA_INDEX_VERSION="tsi1"
+        INFLUXDB_HTTP_FLUX_ENABLED="true"
+EOF
+    else
+      log  "err: cannot create /etc/default/influxdb file. you will need to manually configure the datanode"
+      exit 1
+    fi
 }
 create_user()
 {
