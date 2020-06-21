@@ -215,12 +215,12 @@
             },
             {
                 "name": "externalAccessStep",
-                "label": "External Access & Chronograf",
+                "label": "External Access & Add-ons",
                 "subLabel": {
                     "preValidation": "Required",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "External Access & Chronograf",
+                "bladeTitle": "External Access & Add-ons",
                 "elements": [
                     {
                         "name": "chronografSection",
@@ -233,6 +233,32 @@
                                 "label": "Install Chronograf?",
                                 "defaultValue": "No",
                                 "toolTip": "Yes, to provision a single Chronograf instance.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "monitorSection",
+                        "type": "Microsoft.Common.Section",
+                        "label": "OSS Monitoring",
+                        "elements": [
+                            {
+                                "name": "monitor",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Install InfluxDB-OSS?",
+                                "defaultValue": "No",
+                                "toolTip": "Yes, to provision a single InfluxDB-OSS instance for monitoring your enterpise cluster. This will also configure and enable Telegraf services on the Enterpise Nodes",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -280,6 +306,7 @@
         "outputs": {
             "loadBalancerType": "[steps('externalAccessStep').externalAccessSection.loadBalancerType]",
             "chronograf": "[steps('externalAccessStep').chronografSection.chronograf]",
+            "monitor": "[steps('externalAccessStep').monitorSection.monitor]",
             "vmSizeDataNodes": "[steps('clusterConfig').vmSizeDataNodes]",
             "vmDataDiskSize": "[steps('clusterConfig').vmDataDiskSize]",
             "vmDataNodeCount": "[steps('clusterConfig').vmDataNodeCount]",
