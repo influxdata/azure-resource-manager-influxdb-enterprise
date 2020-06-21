@@ -96,7 +96,6 @@ install_influxdb()
 
     log "[install_influxdb_oss] installing InfluxDB $OSS_VERSION"
     dpkg -i $PACKAGE
-    log "[install_influxdb_oss] installed InfluxDB $OSS_VERSION"
 
     #create etc/default/influxdb file to over-ride configuration defaults
     touch "/etc/default/influxdb"
@@ -114,7 +113,7 @@ EOF
 create_user()
 {
 #check service status
-log "[create_user] create influxdb admin user"
+log "[create_user] create oss admin user"
 
 payload="q=CREATE USER ${INFLUXDB_USER} WITH PASSWORD '${INFLUXDB_PWD}' WITH ALL PRIVILEGES"
 
@@ -134,6 +133,7 @@ start_systemd()
 {
     log "[start_systemd] starting InfluxDB"
     systemctl start influxdb.service
+    sleep 5
     log "[start_systemd] started InfluxDB"
 }
 
