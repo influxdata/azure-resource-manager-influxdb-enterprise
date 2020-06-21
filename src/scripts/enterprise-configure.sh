@@ -14,8 +14,8 @@ help()
     echo "This script configures a new InfluxEnterpise cluster deployed with Azure ARM templates."
     echo "Parameters:"
     echo "-n  Configure specific service [meta || data || leader]"
-    echo "-u  Supply influxdb admin username  cluster nodes - used in case of [leader] node only"
-    echo "-p  Supply influxdb admin password  cluster nodes - used in case of [leader] node only"
+    echo "-u  Supply influxdb admin username enterprise  - used in case of [leader] node only"
+    echo "-p  Supply influxdb admin password enterprise  - used in case of [leader] node only"
     echo "-c  Number of datanodes to configure - used in case of [data||leader] node configurations"
     echo "-h  view this help content"
 }
@@ -29,11 +29,11 @@ help()
 log()
 {
      echo \[$(date +%d%m%Y-%H:%M:%S)\] "$1"
-     echo \[$(date +%d%m%Y-%H:%M:%S)\] "$1" >> /var/log/cluster-configuration.log
+     echo \[$(date +%d%m%Y-%H:%M:%S)\] "$1" >> /var/log/enterprise-configuration.log
 }
 
 
-log "Begin execution of Cluster Configuration script extension on ${HOSTNAME}"
+log "Begin execution of Enterpise Cluster script extension on ${HOSTNAME}"
 START_TIME=$SECONDS
 
 
@@ -55,7 +55,7 @@ META_CONFIG_FILE="/etc/influxdb/influxdb-meta.conf"
 DATA_CONFIG_FILE="/etc/influxdb/influxdb.conf"
 META_ENV_FILE="/etc/default/influxdb-meta"
 DATA_ENV_FILE="/etc/default/influxdb"
-TELEGRAF_CONFIG_FILE="/etc/default/telegraf.conf"
+TELEGRAF_CONFIG_FILE="/etc/telegraf/telegraf.conf"
 
 
 
@@ -216,7 +216,7 @@ datanode_count()
   log "[datanode_count] checking COUNT parameter"
 
   if [ -z "${COUNT}" ]; then
-    log "err: please set \$_COUNT parameter..."
+    log "err: please set -c \$_COUNT parameter..."
 
     exit 1
   fi
@@ -228,7 +228,7 @@ telegraf()
 
     touch "${TELEGRAF_CONFIG_FILE}"
     if [ $? -eq 0 ]; then
-        cat <<EOF >> "${TELEGRAF_ENV_FILE)"
+      cat > "${TELEGRAF_CONFIG_FILE}" <<-EOF
       #Global Agent Configuration
           [agent]
             hostname = "${HOSTNAME}"
@@ -261,6 +261,8 @@ EOF
       exit 1
     fi
     
+    chown telegraf:telegraf "${TELEGRAF_CONFIG_FILE}"
+
     #starting telegraf service 
     log "[systemd] starting telegraf"
     systemctl start telegraf
@@ -342,8 +344,6 @@ if [[ ${SERVICE} == "meta" ]] || [[ ${SERVICE} == "leader" ]]; then
 elif [[ ${SERVICE} == "data" ]]; then
     log "[datanode_funcs] executing datanode configuration functions"
     
-    datanode_count
-
     configure_datanodes
 else 
     log "err: service type unknown, please set a valid service"
@@ -359,6 +359,8 @@ systemd_servies
 
 process_check
 
+#start telegraf service
+#------------------------
 telegraf
 
 
