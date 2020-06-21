@@ -342,7 +342,7 @@ if [[ ${MONITOR} == "Yes" ]]; then
     telegraf
 fi
 
-#leader funcs to join all nodes to cluster 
+#leader service to join all nodes to cluster 
 #------------------------
 if [[ ${SERVICE} == "leader" ]];then
   log "[leader_service] executing cluster join commands on leader metanode"
