@@ -57,6 +57,7 @@
                         "toolTip": "Initial username for InfluxDB admin user.",
                         "constraints": {
                             "required": true,
+                            "regex": "^(?!(?:password)$)\\w+$",
                             "validationMessage": "Username must not be a reserved word."
 
                         }
@@ -225,14 +226,14 @@
                     {
                         "name": "chronografSection",
                         "type": "Microsoft.Common.Section",
-                        "label": "Chronograf",
+                        "label": "Add Chronograf",
                         "elements": [
                             {
                                 "name": "chronograf",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Install Chronograf?",
+                                "label": "Install Chronograf service",
                                 "defaultValue": "No",
-                                "toolTip": "Yes, to provision a single Chronograf instance on port :8888.",
+                                "toolTip": "Yes, to provision a single Chronograf instance on port :8888",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -251,14 +252,14 @@
                     {
                         "name": "monitorSection",
                         "type": "Microsoft.Common.Section",
-                        "label": "OSS Monitoring",
+                        "label": "Add Monitoring",
                         "elements": [
                             {
                                 "name": "monitor",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Install InfluxDB-OSS?",
+                                "label": "Install InfluxDB service",
                                 "defaultValue": "No",
-                                "toolTip": "Yes, to provision a single InfluxDB-OSS instance for monitoring your enterpise cluster. This will also configure and enable Telegraf services on the Enterpise Nodes",
+                                "toolTip": "Yes, to provision a single InfluxDB-OSS instance for monitoring your enterpise cluster. This will also configure and enable Telegraf services on all enterpise nodes",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -284,7 +285,7 @@
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Load balancer type",
                                 "defaultValue": "Internal",
-                                "toolTip": "Choose whether the load balancer should be public facing (external) or internal.",
+                                "toolTip": "Choose whether the load balancer should be external facing or internal.",
                                 "constraints": {
                                     "allowedValues": [
                                         {

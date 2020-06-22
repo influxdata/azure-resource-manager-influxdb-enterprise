@@ -45,7 +45,7 @@
                 "No"
             ],
             "metadata": {
-                "description": "Provision a machine with Chronograf installed on it"
+                "description": "Provision a single instance with Chronograf service installed."
             }
         },
         "monitor": {
@@ -56,7 +56,7 @@
                 "No"
             ],
             "metadata": {
-                "description": "Provision a machine with InfluxDB-OSS installed on it"
+                "description": "Provision a single instance with InfluxDB-OSS service installed."
             }
         },
         "vmDataDiskSize": {
@@ -132,13 +132,13 @@
                 "Standard_D5_v2"
             ],
             "metadata": {
-                "description": "Size of the InfluxEnterprise meta nodes, 3 of these will be provisioned"
+                "description": "Size of the InfluxEnterprise meta nodes, 3 instances will be provisioned"
             }
         },
         "adminUsername": {
             "type": "string",
             "metadata": {
-                "description": "Admin username used when provisioning virtual machines"
+                "description": "Admin username used when provisioning all virtual machines"
             }
         },
         "password": {
@@ -150,13 +150,13 @@
         "influxdbUsername": {
             "type": "string",
             "metadata": {
-                "description": "Database username for admin user with ALL PRIVILEGES"
+                "description": "InfluxDB Enterpise username for admin user with ALL PRIVILEGES"
             }
         },
         "influxdbPassword": {
             "type": "securestring",
             "metadata": {
-                "description": "Database password for admin user with ALL PRIVILEGES"
+                "description": "InfluxDB Enterpise password for admin user with ALL PRIVILEGES"
             }
         },
         "location": {
