@@ -25,8 +25,13 @@ The output from the market place UI is fed directly to the ARM template. You can
     </td></tr>
 
   <tr><td>chronograf</td><td>string</td>
-    <td>Either <code>Yes</code> or <code>No</code> provision an extra machine with a public IP tha thas Chronograf installed on it.
+    <td>Either <code>Yes</code> or <code>No</code> to provision an add-on instance with a public IP that has Chronograf installed.
     This can also be used as a jumpbox to connect and manage other virtual machines on the internal network.
+    </td></tr>
+
+  <tr><td>monitor</td><td>string</td>
+    <td>Either <code>Yes</code> or <code>No</code> to provision an add-on instance with InfluxDB OSS installed for monitoring 
+    the enterprise cluster. Selecting this options will also configure and enable Telegraf services on all enterpise instances.
     </td></tr>
 
   <tr><td>vmSizeDataNodes</td><td>string</td>
