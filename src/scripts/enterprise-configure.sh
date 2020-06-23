@@ -231,7 +231,6 @@ telegraf()
       #Global Agent Configuration
           [agent]
             hostname = "${HOSTNAME}"
-
           # Input Plugins
           [[inputs.cpu]]
               percpu = true
@@ -247,7 +246,6 @@ telegraf()
           [[inputs.swap]]
           [[inputs.netstat]]
           [[inputs.processes]]
-
           # Output Plugin InfluxDB
           [[outputs.influxdb]]
             database = "telegraf"
@@ -262,10 +260,6 @@ EOF
     
     chown telegraf:telegraf "${TELEGRAF_CONFIG_FILE}"
 
-    #starting telegraf service 
-    log "[systemd] starting telegraf"
-    systemctl start telegraf
-    sleep 5
     start_service telegraf 
 }
 start_service()
@@ -340,19 +334,13 @@ fi
 
 #start telegraf service
 #------------------------
-systemd_servies
-
-process_check
-
-#start telegraf service
-#------------------------
-telegraf
 
 if [[ ${MONITOR} == "Yes" ]]; then
     log "infor: monitoring instance configured, enabling Telegraf services on host"
     telegraf
 fi
 
+#leader service to join all nodes to cluster 
 #------------------------
 if [[ ${SERVICE} == "leader" ]];then
   log "[leader_service] executing cluster join commands on leader metanode"

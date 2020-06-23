@@ -276,32 +276,6 @@
                         ]
                     },
                     {
-                        "name": "monitorSection",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Add Monitoring",
-                        "elements": [
-                            {
-                                "name": "monitor",
-                                "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Install InfluxDB service",
-                                "defaultValue": "No",
-                                "toolTip": "Yes, to provision a single InfluxDB-OSS instance for monitoring your enterpise cluster. This will also configure and enable Telegraf services on all enterpise nodes",
-                                "constraints": {
-                                    "allowedValues": [
-                                        {
-                                            "label": "Yes",
-                                            "value": "Yes"
-                                        },
-                                        {
-                                            "label": "No",
-                                            "value": "No"
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    },
-                    {
                         "name": "externalAccessSection",
                         "type": "Microsoft.Common.Section",
                         "label": "External Access",
