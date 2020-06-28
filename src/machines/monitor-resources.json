@@ -29,7 +29,7 @@
         "networkSettings": {
             "type": "object",
             "metadata": {
-                "description": "OS settings to deploy on"
+                "description": "Network settings"
             }
         },
         "osSettings": {

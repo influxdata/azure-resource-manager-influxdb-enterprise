@@ -29,13 +29,13 @@
         "osSettings": {
             "type": "object",
             "metadata": {
-                "description": "OS settings to deploy on"
+                "description": "InfluxEnterprise deployment platform settings"
             }
         },
         "networkSettings": {
             "type": "object",
             "metadata": {
-                "description": "OS settings to deploy on"
+                "description": "Network settings"
             }
         },
         "namespace": {
