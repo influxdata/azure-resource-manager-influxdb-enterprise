@@ -20,38 +20,16 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "influxTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "influxdata"
-            },
-            "metadata": {
-                "description": "Unique identifiers to allow the Azure Infrastructure to understand the origin of resources deployed to Azure. You do not need to supply a value for this."
-            }
-        },
         "namespace": {
             "type": "string",
             "metadata": {
                 "description": "The namespace for resources created by this template"
             }
         },
-        "subnet": {
+        "networkSettings": {
             "type": "object",
             "metadata": {
-                "description": "The VNET and Subnet to deploy the nodes in to"
-            }
-        },
-        "metaNodesIpPrefix": {
-            "type": "string",
-            "metadata": {
-                "description": "IP Prefix used to append index for static addresses"
-            }
-        },
-        "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_A0",
-            "metadata": {
-                "description": "Size of the InfluxEnterprise meta nodes"
+                "description": "Network settings"
             }
         },
         "osSettings": {
@@ -62,7 +40,7 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('subnet').vnet, parameters('subnet').name)]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.meta.vnet, parameters('networkSettings').subnet.meta.name)]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
              "ssh": {
@@ -83,7 +61,7 @@
             "location": "[parameters('location')]",
             "properties": {
                 "platformUpdateDomainCount": 3,
-                "platformFaultDomainCount": 3
+                "platformFaultDomainCount": "[parameters('networkSettings').platformFaultDomainCount]"
             },
             "sku": {
                 "name": "Aligned"
@@ -104,7 +82,7 @@
                         "name": "ipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Static",
-                            "privateIPAddress": "[concat(parameters('metaNodesIpPrefix'), copyindex())]",
+                            "privateIPAddress": "[concat(parameters('networkSettings').metaNodesIpPrefix, copyindex())]",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
                             }
@@ -119,7 +97,7 @@
             "name": "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
             "location": "[parameters('location')]",
             "tags": {
-                "provider": "[toUpper(parameters('influxTags').provider)]"
+                "provider": "[parameters('osSettings').influxTags.provider]"
             },
             "plan": {
                 "name": "meta",
@@ -139,7 +117,7 @@
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
                 },
                 "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
+                    "vmSize": "[parameters('osSettings').vmSizeMetaNodes]"
                 },
                 "osProfile": {
                     "computerName":  "[concat('vm', parameters('namespace'), '-', copyindex(1))]",
@@ -202,7 +180,7 @@
             "name": "[concat('vm', parameters('namespace'), '-0')]",
             "location": "[parameters('location')]",
             "tags": {
-                "provider": "[toUpper(parameters('influxTags').provider)]"
+                "provider": "[parameters('osSettings').influxTags.provider]"
             },
             "plan": {
                 "name": "meta",
@@ -220,7 +198,7 @@
                     "id": "[resourceId('Microsoft.Compute/availabilitySets', concat('avail-', parameters('namespace')))]"
                 },
                 "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
+                    "vmSize": "[parameters('osSettings').vmSizeMetaNodes]"
                 },
                 "osProfile": {
                     "computerName":  "[concat('vm', parameters('namespace'), '-0')]",
@@ -267,13 +245,13 @@
             "resources": [
                 {
                     "type": "Microsoft.Compute/virtualMachines/extensions",
-                    "name": "[concat('vm', parameters('namespace'),'-0', '/configureMaster0')]",
+                    "name": "[concat('vm', parameters('namespace'),'-0', '/configureLeader0')]",
                     "apiVersion": "2019-07-01",
                     "location": "[parameters('location')]",
                     "dependsOn": [
                         "[concat('Microsoft.Compute/virtualMachines/', 'vm', parameters('namespace'),'-0')]"
                     ],
-                    "properties": "[parameters('osSettings').extensionSettings.master]"
+                    "properties": "[parameters('osSettings').extensionSettings.leader]"
                 }
             ]
         }

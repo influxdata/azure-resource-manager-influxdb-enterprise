@@ -56,7 +56,10 @@
                         "label": "Database admin username",
                         "toolTip": "Initial username for InfluxDB admin user.",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!(?:password)$)\\w+$",
+                            "validationMessage": "Username must not be a reserved word."
+
                         }
                     },
                     {
@@ -213,24 +216,50 @@
             },
             {
                 "name": "externalAccessStep",
-                "label": "External Access & Chronograf",
+                "label": "External Access & Add-ons",
                 "subLabel": {
                     "preValidation": "Required",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "External Access & Chronograf",
+                "bladeTitle": "External Access & Add-ons",
                 "elements": [
                     {
                         "name": "chronografSection",
                         "type": "Microsoft.Common.Section",
-                        "label": "Chronograf",
+                        "label": "Add Chronograf",
                         "elements": [
                             {
                                 "name": "chronograf",
                                 "type": "Microsoft.Common.OptionsGroup",
-                                "label": "Install Chronograf?",
+                                "label": "Install Chronograf service",
                                 "defaultValue": "No",
-                                "toolTip": "Yes, to provision a single Chronograf instance.",
+                                "toolTip": "Yes, to provision a single Chronograf instance on port :8888",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "monitorSection",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Add Monitoring",
+                        "elements": [
+                            {
+                                "name": "monitor",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Install InfluxDB service",
+                                "defaultValue": "No",
+                                "toolTip": "Yes, to provision a single InfluxDB-OSS instance for monitoring your enterpise cluster. This will also configure and enable Telegraf services on all enterpise nodes",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -256,7 +285,7 @@
                                 "type": "Microsoft.Common.OptionsGroup",
                                 "label": "Load balancer type",
                                 "defaultValue": "Internal",
-                                "toolTip": "Choose whether the load balancer should be public facing (external) or internal.",
+                                "toolTip": "Choose whether the load balancer should be external facing or internal.",
                                 "constraints": {
                                     "allowedValues": [
                                         {
@@ -278,6 +307,7 @@
         "outputs": {
             "loadBalancerType": "[steps('externalAccessStep').externalAccessSection.loadBalancerType]",
             "chronograf": "[steps('externalAccessStep').chronografSection.chronograf]",
+            "monitor": "[steps('externalAccessStep').monitorSection.monitor]",
             "vmSizeDataNodes": "[steps('clusterConfig').vmSizeDataNodes]",
             "vmDataDiskSize": "[steps('clusterConfig').vmDataDiskSize]",
             "vmDataNodeCount": "[steps('clusterConfig').vmDataNodeCount]",

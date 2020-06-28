@@ -2,10 +2,16 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "namespace": {
+        "adminUsername": {
             "type": "string",
             "metadata": {
-                "description": "The namespace prefix for resources created by this template"
+                "description": "Admin username used when provisioning virtual machines"
+            }
+        },
+        "password": {
+            "type": "object",
+            "metadata": {
+                "description": "Admin password used when provisioning virtual machines"
             }
         },
         "location": {
@@ -14,16 +20,10 @@
                 "description": "Location where resources will be provisioned"
             }
         },
-        "adminUsername": {
+        "namespace": {
             "type": "string",
             "metadata": {
-                "description": "Administrator user name used when provisioning virtual machines"
-            }
-        },
-        "password": {
-            "type": "object",
-            "metadata": {
-                "description": "Administrator password used when provisioning virtual machines"
+                "description": "The namespace for resources created by this template"
             }
         },
         "networkSettings": {
@@ -40,14 +40,12 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.data.vnet, parameters('networkSettings').subnet.data.name)]",
-        "vmName": "[concat('vm', parameters('namespace'))]",
-        "publicIpName": "[concat('pip-', parameters('namespace'))]",
-        "securityGroupName": "[concat('nsg-', parameters('namespace'))]",
         "nicName": "[concat('nic-0-vm', parameters('namespace'))]",
+        "vmName": "[concat('vm', parameters('namespace'))]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('networkSettings').subnet.data.vnet, parameters('networkSettings').subnet.data.name)]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": "true",
-            "ssh": {
+             "ssh": {
                 "publicKeys": [
                     {
                         "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
@@ -59,77 +57,19 @@
     },
     "resources": [
         {
-            "apiVersion": "2019-07-01",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[variables('securityGroupName')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "SSH",
-                        "properties": {
-                            "description": "Allow inbound SSH traffic from anyone",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "[parameters('networkSettings').managementPort]",
-                            "destinationPortRange": "[parameters('networkSettings').managementPort]",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 100,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "Chronograf",
-                        "properties": {
-                            "description": "Allows inbound Chronograf HTTP traffic from anyone",
-                            "protocol": "Tcp",
-                            "sourcePortRange": "8888",
-                            "destinationPortRange": "8888",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 200,
-                            "direction": "Inbound"
-                        }
-                    }
-                ]
-            }
-        },
-        {
             "apiVersion": "2019-04-01",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('publicIpName')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "publicIPAllocationMethod": "Dynamic"
-            }
-        },
-        {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-04-01",
             "name": "[variables('nicName')]",
             "location": "[parameters('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIpName'))]",
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('securityGroupName'))]"
-            ],
             "properties": {
                 "ipConfigurations": [
                     {
                         "name": "ipconfig1",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
-                            },
+                            "privateIPAddress": "[parameters('networkSettings').dataNodesIpPrefix]",
                             "subnet": {
-                                "id": "[variables('subnetRef')]",
-                                "properties": {
-                                    "networkSecurityGroup": {
-                                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('securityGroupName'))]"
-                                    }
-                                }
+                                "id": "[variables('subnetRef')]"
                             }
                         }
                     }
@@ -180,21 +120,16 @@
             "resources": [
                 {
                     "type": "Microsoft.Compute/virtualMachines/extensions",
-                    "name": "[concat(variables('vmName'),'/installChronograf')]",
+                    "name": "[concat(variables('vmName'),'/installMonitor')]",
                     "apiVersion": "2019-07-01",
                     "location": "[parameters('location')]",
                     "dependsOn": [
                         "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
                     ],
-                    "properties": "[parameters('osSettings').extensionSettings.chronograf]"
+                    "properties": "[parameters('osSettings').extensionSettings.monitor]"
                 }
             ]
         }
     ],
-    "outputs": {
-        "resourceID": {
-            "type": "string",
-            "value": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
-        }
-    }
+    "outputs": {}
 }

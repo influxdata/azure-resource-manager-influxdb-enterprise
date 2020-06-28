@@ -25,10 +25,14 @@ The output from the market place UI is fed directly to the ARM template. You can
     </td></tr>
 
   <tr><td>chronograf</td><td>string</td>
-    <td>Either <code>Yes</code> or <code>No</code> provision an extra machine with a public IP tha thas Chronograf installed on it.
-    This can also be used as a jumpbox to connect and manage other virtual machines on the internal network.
+    <td>Either <code>Yes</code> or <code>No</code> to provision an add-on instance with the Chronograf application installed on a public IP using port <code>:8888</code>. This can also be used as a jumpbox to connect and manage other virtual machines on the internal network.
     </td></tr>
 
+  <tr><td>monitor</td><td>string</td>
+    <td>Either <code>Yes</code> or <code>No</code> to provision an add-on instance with the InfluxDB OSS service installed for monitoring 
+    the enterprise cluster. Selecting this option will also configure and enable Telegraf services on all enterpise instances.
+    </td></tr>
+    
   <tr><td>vmSizeDataNodes</td><td>string</td>
     <td>Azure VM size of the data nodes see <a href="https://github.com/influxdata/azure-resource-manager-influxdb-enterprise/blob/master/src/mainTemplate.json#L69">this list for supported sizes</a>
     </td></tr>
