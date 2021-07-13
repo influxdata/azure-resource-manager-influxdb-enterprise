@@ -142,7 +142,7 @@
             }
         },
         "password": {
-            "type": "object",
+            "type": "secureObject",
             "metadata": {
                 "description": "Password is a complex object parameter, we support both authenticating through username/pass or ssh keys."
             }
